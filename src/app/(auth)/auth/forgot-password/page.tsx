@@ -17,11 +17,11 @@ export default function ForgotPasswordPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    router.push("/verify-otp")
+    router.push("/auth/verify-otp")
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex">
 
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
@@ -72,8 +72,8 @@ export default function ForgotPasswordPage() {
       </div>
 
       {/* Right Section - Van Image */}
-      <div className="hidden lg:flex flex-1 relative">
-        <Image width={500} height={500} src="/delivery-van-parked-in-front-of-suburban-house.jpg" alt="Ez Returns Delivery Van" className="w-full h-full object-cover" />
+      <div className="hidden lg:flex flex-1 relative ">
+        <Image width={500} height={500} src="/delivery-van.png" alt="Ez Returns Delivery Van" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
     </div>

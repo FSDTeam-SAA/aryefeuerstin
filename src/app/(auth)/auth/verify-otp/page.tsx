@@ -53,7 +53,7 @@ export default function VerifyOTPPage() {
     const otpValue = otp.join("")
     console.log("Verify OTP:", otpValue)
     // Handle OTP verification logic here
-    router.push("/login")
+    router.push("/auth/new-password")
   }
 
   const handleResendOTP = () => {
@@ -62,7 +62,7 @@ export default function VerifyOTPPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex">
       {/* Left Section - Form with Logo */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
@@ -99,7 +99,7 @@ export default function VerifyOTPPage() {
                   onChange={(e) => handleChange(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className="w-12 h-12 text-center text-lg font-semibold"
+                  className="w-12 h-12 bg-[#E4F6FF] text-center text-lg font-semibold"
                 />
               ))}
             </div>
@@ -108,9 +108,9 @@ export default function VerifyOTPPage() {
               <button type="button" onClick={handleResendOTP} className="text-sm text-sky-500 hover:underline">
                 Didn&apos;t receive OTP? Resend OTP
               </button>
-            </div>
+              </div>
 
-            <Button type="submit" className="w-full bg-sky-500 hover:bg-sky-600 text-white">
+            <Button type="submit" className="w-full bg-[#31B8FA] hover:bg-[#31B8FA] text-white h-[48px]">
               Submit OTP
             </Button>
           </form>
@@ -126,7 +126,7 @@ export default function VerifyOTPPage() {
 
       {/* Right Section - Van Image */}
       <div className="hidden lg:flex flex-1 relative">
-        <Image width={500} height={500} src="/delivery-van-parked-in-front-of-suburban-house.jpg" alt="Ez Returns Delivery Van" className="w-full h-full object-cover" />
+        <Image width={500} height={500} src="/delivery-van.png" alt="Ez Returns Delivery Van" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
     </div>

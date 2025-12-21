@@ -173,7 +173,7 @@ export default function Header() {
                   
                   <div className="space-y-4">
                     <Link 
-                      href="/account" 
+                      href="/accounts" 
                       className="flex items-center gap-3 text-gray-700 font-medium hover:text-[#31B8FA]" 
                       onClick={() => setOpen(false)}
                     >

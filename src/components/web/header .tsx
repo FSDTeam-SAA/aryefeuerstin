@@ -1,7 +1,4 @@
-
-
 "use client"
-
 import { useState } from "react"
 import { ChevronDown, Menu, User, Package, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,6 +21,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
 import Link from "next/link"
+// import { useSession } from "next-auth/react"
 
 const menuItems = [
   { name: "Personal", hasDropdown: true, href: "/personal" },
@@ -34,10 +32,13 @@ const menuItems = [
 
 export default function Header() {
   const [open, setOpen] = useState(false)
+  // const sesseion=useSession()
+  // const user=sesseion
+  // console.log(user)
 
   // Sub-component for the Profile Dropdown (Desktop Only)
   const UserProfileDesktop = () => (
-    <div className="hidden md:block ml-2 border-l pl-4 border-gray-100">
+    <div className="hidden md:block ml-2  pl-4 ">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 outline-none focus-visible:ring-0">
@@ -79,17 +80,17 @@ export default function Header() {
 
   return (
     <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
-      <div className="container mx-auto px-4 py-2">
+      <div className="container mx-auto  py-2">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="shrink-0">
-            <div className="w-[100px] h-[60px] md:w-[120px] md:h-[75px]">
+            <div className="w-[100px] h-[60px] md:w-[125px] md:h-[75px]">
               <Image
                 src="/logo.png"
                 alt="Logo"
                 width={120}
                 height={75}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
             </div>
           </Link>

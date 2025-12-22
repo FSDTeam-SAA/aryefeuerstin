@@ -3,6 +3,8 @@ import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import { Poppins as PoppinsFont } from "next/font/google";
+import ReactQueryProvider from "@/components/provider/ReactQueryProvider";
+import { SessionProvider } from "@/components/provider/SessionProvider";
 
 const poppins = PoppinsFont({
   subsets: ["latin"],
@@ -28,8 +30,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.className} antialiased`}>
         <NextTopLoader color="#31B8FA" height={3} showSpinner={false} />
-        {children}
-        <Toaster position="top-right" richColors closeButton />
+        <ReactQueryProvider>
+          <SessionProvider>
+            {children}
+          </SessionProvider>
+        </ReactQueryProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

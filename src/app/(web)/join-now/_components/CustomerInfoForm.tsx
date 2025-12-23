@@ -32,6 +32,7 @@ interface CustomerInfoFormProps {
 }
 
 export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps) {
+  console.log(initialData)
   const {
     register,
     handleSubmit,

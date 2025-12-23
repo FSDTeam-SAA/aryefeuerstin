@@ -36,11 +36,11 @@ export default function Footer() {
                   About Us
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <a href="#" className="text-sm text-gray-700 hover:text-[#131313]">
                   Blogs
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
 

@@ -1,13 +1,17 @@
 // "use client"
+
 // import { useState } from "react"
-// import { ChevronDown, Menu, User, Package, LogOut } from "lucide-react"
+// import {
+//   Menu,
+//   User,
+//   Package,
+//   LogOut,
+//   RotateCcw,
+// } from "lucide-react"
 // import { Button } from "@/components/ui/button"
 // import {
 //   Sheet,
 //   SheetContent,
-//   SheetDescription,
-//   SheetHeader,
-//   SheetTitle,
 //   SheetTrigger,
 // } from "@/components/ui/sheet"
 // import {
@@ -18,74 +22,129 @@
 //   DropdownMenuSeparator,
 //   DropdownMenuTrigger,
 // } from "@/components/ui/dropdown-menu"
+// import {
+//   AlertDialog,
+//   AlertDialogAction,
+//   AlertDialogCancel,
+//   AlertDialogContent,
+//   AlertDialogDescription,
+//   AlertDialogFooter,
+//   AlertDialogHeader,
+//   AlertDialogTitle,
+// } from "@/components/ui/alert-dialog"
 // import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 // import Image from "next/image"
 // import Link from "next/link"
-// import { fa } from "zod/v4/locales"
-// // import { useSession } from "next-auth/react"
+// import { usePathname } from "next/navigation"
+// import { useSession, signOut } from "next-auth/react"
 
 // const menuItems = [
-//   { name: "Home", hasDropdown: false, href: "/" },
-//   { name: "About Us", hasDropdown: false, href: "/about-us" },
-//   { name: "Contact Us", hasDropdown: false, href: "/contact-us" },
-//   // { name: "Company", hasDropdown: true, href: "/company" },
-//   { name: "Join Now", hasDropdown: false, isButton: true, href: "/join-now" },
+//   { name: "Home", href: "/" },
+//   { name: "About Us", href: "/about-us" },
+//   { name: "Contact Us", href: "/contact-us" },
 // ]
 
 // export default function Header() {
+//   const pathname = usePathname()
+//   const { data: session } = useSession()
+//   const role = session?.user?.role // USER | DRIVER | ADMIN
 //   const [open, setOpen] = useState(false)
-//   // const sesseion=useSession()
-//   // const user=sesseion
-//   // console.log(user)
+//   const [logoutModal, setLogoutModal] = useState(false)
 
-//   // Sub-component for the Profile Dropdown (Desktop Only)
-//   const UserProfileDesktop = () => (
-//     <div className="hidden md:block ml-2  pl-4 ">
+//   const isActive = (href: string) => pathname === href
+
+//   /* ================= DESKTOP AVATAR ================= */
+//   const DesktopAvatar = () => {
+//     if (!session) return null
+
+//     // ADMIN → only avatar
+//     if (role === "ADMIN") {
+//       return (
+//         <Avatar className="h-10 w-10 border ml-4">
+//           <AvatarImage src="/avatar-placeholder.png" />
+//           <AvatarFallback className="bg-[#31B8FA] text-white">
+//             AD
+//           </AvatarFallback>
+//         </Avatar>
+//       )
+//     }
+
+//     return (
 //       <DropdownMenu>
 //         <DropdownMenuTrigger asChild>
-//           <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 outline-none focus-visible:ring-0">
-//             <Avatar className="h-10 w-10 border border-gray-200">
-//               <AvatarImage src="/avatar-placeholder.png" alt="User" />
-//               <AvatarFallback className="bg-[#31B8FA] text-white">DH</AvatarFallback>
+//           <Button variant="ghost" className="p-0 h-10 w-10 rounded-full">
+//             <Avatar className="h-10 w-10 border">
+//               <AvatarImage src="/avatar-placeholder.png" />
+//               <AvatarFallback className="bg-[#31B8FA] text-white">
+//                 {role === "DRIVER" ? "DR" : "US"}
+//               </AvatarFallback>
 //             </Avatar>
 //           </Button>
 //         </DropdownMenuTrigger>
-//         <DropdownMenuContent className="w-56" align="end" forceMount>
-//           <DropdownMenuLabel className="font-normal">
-//             <div className="flex flex-col space-y-1">
-//               <p className="text-sm font-medium leading-none">Daniel Hart</p>
-//               <p className="text-xs leading-none text-muted-foreground">daniel@example.com</p>
-//             </div>
-//           </DropdownMenuLabel>
+
+//         <DropdownMenuContent align="end" className="w-56">
+//           <DropdownMenuLabel>My Account</DropdownMenuLabel>
 //           <DropdownMenuSeparator />
+
 //           <DropdownMenuItem asChild>
-//             <Link href="/accounts" className="cursor-pointer">
-//               <User className="mr-2 h-4 w-4" />
-//               <span>Account</span>
+//             <Link href="/accounts">
+//               <User className="mr-2 h-4 w-4" /> Account
 //             </Link>
 //           </DropdownMenuItem>
-//           <DropdownMenuItem asChild>
-//             <Link href="/order-requests" className="cursor-pointer">
-//               <Package className="mr-2 h-4 w-4" />
-//               <span>Order Requests</span>
-//             </Link>
-//           </DropdownMenuItem>
+
+//           {/* USER OPTIONS */}
+//           {role === "USER" && (
+//             <>
+//               <DropdownMenuItem asChild>
+//                 <Link href="/user/order-request">
+//                   <Package className="mr-2 h-4 w-4" /> Order History
+//                 </Link>
+//               </DropdownMenuItem>
+
+//               <DropdownMenuItem asChild>
+//                 <Link href="/join-now">
+//                   <RotateCcw className="mr-2 h-4 w-4" /> Return Package
+//                 </Link>
+//               </DropdownMenuItem>
+//             </>
+//           )}
+
+//           {/* DRIVER OPTIONS */}
+//           {role === "DRIVER" && (
+//             <>
+//               <DropdownMenuItem asChild>
+//                 <Link href="/driver/order-history">
+//                   <Package className="mr-2 h-4 w-4" /> Driver Orders
+//                 </Link>
+//               </DropdownMenuItem>
+//               <DropdownMenuItem asChild>
+//                 <Link href="/driver/driver-order-request">
+//                   <Package className="mr-2 h-4 w-4" /> Order Requests
+//                 </Link>
+//               </DropdownMenuItem>
+//             </>
+//           )}
+
+       
+
 //           <DropdownMenuSeparator />
-//           <DropdownMenuItem className="text-red-600 cursor-pointer">
-//             <LogOut className="mr-2 h-4 w-4" />
-//             <span>Log out</span>
+//           <DropdownMenuItem
+//             onClick={() => setLogoutModal(true)}
+//             className="text-red-600 cursor-pointer"
+//           >
+//             <LogOut className="mr-2 h-4 w-4" /> Log out
 //           </DropdownMenuItem>
 //         </DropdownMenuContent>
 //       </DropdownMenu>
-//     </div>
-//   )
+//     )
+//   }
 
 //   return (
-//     <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
-//       <div className="container mx-auto  py-2">
-//         <div className="flex items-center justify-between">
-//           {/* Logo */}
-//           <Link href="/" className="shrink-0">
+//     <>
+//       {/* ================= HEADER ================= */}
+//       <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
+//         <div className="container mx-auto py-2 flex items-center justify-between">
+//           <Link href="/">
 //             <div className="w-[100px] h-[60px] md:w-[125px] md:h-[75px]">
 //               <Image
 //                 src="/logo.png"
@@ -97,122 +156,135 @@
 //             </div>
 //           </Link>
 
-//           {/* Desktop Navigation */}
-//           <nav className="hidden md:flex items-center gap-4 lg:gap-8">
+//           {/* DESKTOP NAV */}
+//           <nav className="hidden md:flex items-center gap-6">
 //             {menuItems.map((item) => (
-//               <div key={item.name}>
-//                 {item.isButton ? (
-//                   <Button
-//                     asChild
-//                     className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full px-8 h-[44px] transition-all"
-//                   >
-//                     <Link href={item.href}>{item.name}</Link>
-//                   </Button>
-//                 ) : (
-//                   <Link 
-//                     href={item.href}
-//                     className="flex items-center gap-1 text-base lg:text-lg font-medium text-[#131313] hover:text-[#31B8FA] transition-colors"
-//                   >
-//                     {item.name}
-//                     {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
-//                   </Link>
-//                 )}
-//               </div>
+//               <Link
+//                 key={item.name}
+//                 href={item.href}
+//                 className={`font-medium ${
+//                   isActive(item.href)
+//                     ? "text-[#31B8FA]"
+//                     : "hover:text-[#31B8FA]"
+//                 }`}
+//               >
+//                 {item.name}
+//               </Link>
 //             ))}
-//             <UserProfileDesktop />
+
+//             {/* Join Now → only when NOT logged in */}
+//             {!session && (
+//               <Button asChild className="bg-[#31B8FA] h-[50px] px-10 hover:bg-[#31B8FA]/90 rounded-full">
+//                 <Link href="/auth/login">Join Now</Link>
+//               </Button>
+//             )}
+
+//             <DesktopAvatar />
 //           </nav>
 
-//           {/* Mobile Menu Trigger */}
-//           <div className="flex items-center md:hidden">
+//           {/* MOBILE */}
+//           <div className="md:hidden">
 //             <Sheet open={open} onOpenChange={setOpen}>
 //               <SheetTrigger asChild>
-//                 <Button variant="ghost" size="icon" className="h-10 w-10">
-//                   <Menu className="w-7 h-7" />
+//                 <Button variant="ghost">
+//                   <Menu />
 //                 </Button>
 //               </SheetTrigger>
-//               <SheetContent side="right" className="w-[300px] flex flex-col">
-//                 <SheetHeader className="text-left mb-4">
-//                   <SheetTitle className="text-[#31B8FA] font-bold">Navigation</SheetTitle>
-//                   <SheetDescription>Explore our services and manage your profile</SheetDescription>
-//                 </SheetHeader>
 
-//                 <nav className="flex flex-col gap-2 flex-grow">
+//               <SheetContent side="right" className="flex flex-col">
+//                 <nav className="flex flex-col gap-4">
 //                   {menuItems.map((item) => (
-//                     <div key={item.name} className="border-b border-gray-50 last:border-none">
-//                       {item.isButton ? (
-//                         <Button
-//                           asChild
-//                           className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full w-full mt-4"
-//                           onClick={() => setOpen(false)}
-//                         >
-//                           <Link href={item.href}>{item.name}</Link>
-//                         </Button>
-//                       ) : (
-//                         <Link
-//                           href={item.href}
-//                           className="flex items-center justify-between py-4 text-lg font-semibold text-gray-800 active:text-[#31B8FA]"
-//                           onClick={() => setOpen(false)}
-//                         >
-//                           <span>{item.name}</span>
-//                           {item.hasDropdown && <ChevronDown className="w-5 h-5 opacity-40" />}
-//                         </Link>
-//                       )}
-//                     </div>
+//                     <Link
+//                       key={item.name}
+//                       href={item.href}
+//                       onClick={() => setOpen(false)}
+//                     >
+//                       {item.name}
+//                     </Link>
 //                   ))}
+
+//                   {!session && (
+//                     <Link href="/auth/login">Join Now</Link>
+//                   )}
 //                 </nav>
 
-//                 {/* Mobile Profile Section (At the bottom of Sheet) */}
-//                 <div className="mt-auto border-t pt-6 pb-4">
-//                   <div className="flex items-center gap-3 mb-6">
-//                     <Avatar className="h-12 w-12 border border-gray-100">
-//                       <AvatarImage src="/avatar-placeholder.png" alt="User" />
-//                       <AvatarFallback className="bg-[#31B8FA] text-white">DH</AvatarFallback>
-//                     </Avatar>
-//                     <div>
-//                       <p className="font-bold text-gray-900">Daniel Hart</p>
-//                       <p className="text-xs text-gray-500">daniel@example.com</p>
-//                     </div>
-//                   </div>
-                  
-//                   <div className="space-y-4">
-//                     <Link 
-//                       href="/accounts" 
-//                       className="flex items-center gap-3 text-gray-700 font-medium hover:text-[#31B8FA]" 
-//                       onClick={() => setOpen(false)}
+//                 {/* MOBILE PROFILE */}
+//                 {session && role !== "ADMIN" && (
+//                   <div className="mt-auto border-t pt-6 space-y-4">
+//                     <Link href="/accounts">Account</Link>
+
+//                     {role === "USER" && (
+//                       <>
+//                         <Link href="/user/order-request">Order History</Link>
+//                         <Link href="/return-package">Return Package</Link>
+//                       </>
+//                     )}
+
+//                     {role === "DRIVER" && (
+//                       <>
+//                         <Link href="/driver/order-history">
+//                           Driver Orders
+//                         </Link>
+//                         <Link href="/driver/order-requests">
+//                           Order Requests
+//                         </Link>
+//                       </>
+//                     )}
+
+//                     <button
+//                       onClick={() => setLogoutModal(true)}
+//                       className="text-red-500 font-bold"
 //                     >
-//                       <User className="h-5 w-5 text-gray-400" /> Account
-//                     </Link>
-//                     <Link 
-//                       href="/order-requests" 
-//                       className="flex items-center gap-3 text-gray-700 font-medium hover:text-[#31B8FA]" 
-//                       onClick={() => setOpen(false)}
-//                     >
-//                       <Package className="h-5 w-5 text-gray-400" /> Order Requests
-//                     </Link>
-//                     <button className="flex items-center gap-3 text-red-500 font-bold pt-2">
-//                       <LogOut className="h-5 w-5" /> Log out
+//                       Log out
 //                     </button>
 //                   </div>
-//                 </div>
+//                 )}
 //               </SheetContent>
 //             </Sheet>
 //           </div>
 //         </div>
-//       </div>
-//     </header>
+//       </header>
+
+//       {/* ================= LOGOUT CONFIRM MODAL ================= */}
+//       <AlertDialog open={logoutModal} onOpenChange={setLogoutModal}>
+//         <AlertDialogContent>
+//           <AlertDialogHeader>
+//             <AlertDialogTitle>
+//               Are you sure you want to logout?
+//             </AlertDialogTitle>
+//             <AlertDialogDescription>
+//               You will be logged out from your account.
+//             </AlertDialogDescription>
+//           </AlertDialogHeader>
+//           <AlertDialogFooter>
+//             <AlertDialogCancel>No</AlertDialogCancel>
+//             <AlertDialogAction onClick={() => signOut()} className="bg-red-600 hover:bg-red-700">
+//               Yes, Logout
+//             </AlertDialogAction>
+//           </AlertDialogFooter>
+//         </AlertDialogContent>
+//       </AlertDialog>
+//     </>
 //   )
 // }
+
+
 
 
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, Menu, User, Package, LogOut } from "lucide-react"
+import {
+  Menu,
+  User,
+  Package,
+  LogOut,
+  RotateCcw,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Sheet,
   SheetContent,
-
   SheetTrigger,
 } from "@/components/ui/sheet"
 import {
@@ -223,73 +295,143 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"  // ← Added this
+import { usePathname } from "next/navigation"
+import { useSession, signOut } from "next-auth/react"
 
 const menuItems = [
-  { name: "Home", hasDropdown: false, href: "/" },
-  { name: "About Us", hasDropdown: false, href: "/about-us" },
-  { name: "Contact Us", hasDropdown: false, href: "/contact-us" },
-  { name: "Join Now", hasDropdown: false, isButton: true, href: "/join-now" },
+  { name: "Home", href: "/" },
+  { name: "About Us", href: "/about-us" },
+  { name: "Contact Us", href: "/contact-us" },
 ]
 
 export default function Header() {
+  const pathname = usePathname()
+  const { data: session } = useSession()
+  const role = session?.user?.role // USER | DRIVER | ADMIN
   const [open, setOpen] = useState(false)
-  const pathname = usePathname()  // ← Get current path
+  const [logoutModal, setLogoutModal] = useState(false)
 
-  // Helper to check if a link is active
   const isActive = (href: string) => pathname === href
 
-  // Sub-component for the Profile Dropdown (Desktop Only)
-  const UserProfileDesktop = () => (
-    <div className="hidden md:block ml-2 pl-4">
+  /* ================= DESKTOP AVATAR ================= */
+  const DesktopAvatar = () => {
+    if (!session) return null
+
+    return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 outline-none focus-visible:ring-0">
-            <Avatar className="h-10 w-10 border border-gray-200">
-              <AvatarImage src="/avatar-placeholder.png" alt="User" />
-              <AvatarFallback className="bg-[#31B8FA] text-white">DH</AvatarFallback>
+          <Button variant="ghost" className="p-0 h-10 w-10 rounded-full">
+            <Avatar className="h-10 w-10 border">
+              <AvatarImage src="/avatar-placeholder.png" />
+              <AvatarFallback className="bg-[#31B8FA] text-white">
+                {role === "ADMIN" ? "AD" : role === "DRIVER" ? "DR" : "US"}
+              </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
-          <DropdownMenuLabel className="font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Daniel Hart</p>
-              <p className="text-xs leading-none text-muted-foreground">daniel@example.com</p>
-            </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/accounts" className="cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              <span>Account</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/order-requests" className="cursor-pointer">
-              <Package className="mr-2 h-4 w-4" />
-              <span>Order Requests</span>
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-red-600 cursor-pointer">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
-          </DropdownMenuItem>
+
+        <DropdownMenuContent align="end" className="w-56">
+          {/* ================= ADMIN ================= */}
+          {role === "ADMIN" && (
+            <>
+              <DropdownMenuLabel>Admin</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setLogoutModal(true)}
+                className="text-red-600 cursor-pointer"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </>
+          )}
+
+          {/* ================= USER / DRIVER ================= */}
+          {role !== "ADMIN" && (
+            <>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem asChild>
+                <Link href="/accounts">
+                  <User className="mr-2 h-4 w-4" />
+                  Account
+                </Link>
+              </DropdownMenuItem>
+
+              {/* USER */}
+              {role === "USER" && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/user/order-request">
+                      <Package className="mr-2 h-4 w-4" />
+                      Order History
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                    <Link href="/return-package">
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      Return Package
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              {/* DRIVER */}
+              {role === "DRIVER" && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/driver/order-history">
+                      <Package className="mr-2 h-4 w-4" />
+                      Driver Orders
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
+                    <Link href="/driver/driver-order-request">
+                      <Package className="mr-2 h-4 w-4" />
+                      Order Requests
+                    </Link>
+                  </DropdownMenuItem>
+                </>
+              )}
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setLogoutModal(true)}
+                className="text-red-600 cursor-pointer"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
-  )
+    )
+  }
 
   return (
-    <header className="bg-white sticky top-0 z-50 shadow-sm border-b border-gray-100">
-      <div className="container mx-auto py-2">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="shrink-0">
+    <>
+      {/* ================= HEADER ================= */}
+      <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
+        <div className="container mx-auto py-2 flex items-center justify-between">
+          {/* LOGO */}
+          <Link href="/">
             <div className="w-[100px] h-[60px] md:w-[125px] md:h-[75px]">
               <Image
                 src="/logo.png"
@@ -301,113 +443,128 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-8">
+          {/* DESKTOP NAV */}
+          <nav className="hidden md:flex items-center gap-6">
             {menuItems.map((item) => (
-              <div key={item.name}>
-                {item.isButton ? (
-                  <Button
-                    asChild
-                    className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full px-8 h-[44px] transition-all"
-                  >
-                    <Link href={item.href}>{item.name}</Link>
-                  </Button>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={`flex items-center gap-1 text-base lg:text-lg font-medium transition-colors ${
-                      isActive(item.href)
-                        ? "text-[#31B8FA]"  // Active state
-                        : "text-[#131313] hover:text-[#31B8FA]"
-                    }`}
-                  >
-                    {item.name}
-                    {item.hasDropdown && <ChevronDown className="w-4 h-4" />}
-                  </Link>
-                )}
-              </div>
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`font-medium ${
+                  isActive(item.href)
+                    ? "text-[#31B8FA]"
+                    : "hover:text-[#31B8FA]"
+                }`}
+              >
+                {item.name}
+              </Link>
             ))}
-            <UserProfileDesktop />
+
+            {/* Join Now only if NOT logged in */}
+            {!session && (
+              <Button
+                asChild
+                className="bg-[#31B8FA] h-[50px] px-10 rounded-full hover:bg-[#31B8FA]/90"
+              >
+                <Link href="/auth/login">Join Now</Link>
+              </Button>
+            )}
+
+            <DesktopAvatar />
           </nav>
 
-          {/* Mobile Menu Trigger */}
-          <div className="flex items-center md:hidden">
+          {/* ================= MOBILE ================= */}
+          <div className="md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10">
-                  <Menu className="w-7 h-7" />
+                <Button variant="ghost">
+                  <Menu />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] flex flex-col">
-               
 
-                <nav className="flex flex-col gap-2 flex-grow">
+              <SheetContent side="right" className="flex flex-col">
+                <nav className="flex flex-col gap-4">
                   {menuItems.map((item) => (
-                    <div key={item.name} className="border-b border-gray-50 last:border-none">
-                      {item.isButton ? (
-                        <Button
-                          asChild
-                          className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full w-full mt-4"
-                          onClick={() => setOpen(false)}
-                        >
-                          <Link href={item.href}>{item.name}</Link>
-                        </Button>
-                      ) : (
-                        <Link
-                          href={item.href}
-                          className={`flex items-center justify-between py-4 text-lg font-semibold transition-colors ${
-                            isActive(item.href)
-                              ? "text-[#31B8FA]"  // Active state on mobile
-                              : "text-gray-800 active:text-[#31B8FA]"
-                          }`}
-                          onClick={() => setOpen(false)}
-                        >
-                          <span>{item.name}</span>
-                          {item.hasDropdown && <ChevronDown className="w-5 h-5 opacity-40" />}
-                        </Link>
-                      )}
-                    </div>
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.name}
+                    </Link>
                   ))}
+
+                  {!session && (
+                    <Link href="/auth/login">Join Now</Link>
+                  )}
                 </nav>
 
-                {/* Mobile Profile Section (At the bottom of Sheet) */}
-                <div className="mt-auto border-t pt-6 pb-4">
-                  <div className="flex items-center gap-3 mb-6">
-                    <Avatar className="h-12 w-12 border border-gray-100">
-                      <AvatarImage src="/avatar-placeholder.png" alt="User" />
-                      <AvatarFallback className="bg-[#31B8FA] text-white">DH</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-bold text-gray-900">Daniel Hart</p>
-                      <p className="text-xs text-gray-500">daniel@example.com</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <Link 
-                      href="/accounts" 
-                      className="flex items-center gap-3 text-gray-700 font-medium hover:text-[#31B8FA]" 
-                      onClick={() => setOpen(false)}
+                {/* MOBILE PROFILE */}
+                {session && (
+                  <div className="mt-auto border-t pt-6 space-y-4">
+                    {role !== "ADMIN" && (
+                      <>
+                        <Link href="/accounts">Account</Link>
+
+                        {role === "USER" && (
+                          <>
+                            <Link href="/user/order-request">
+                              Order History
+                            </Link>
+                            <Link href="/return-package">
+                              Return Package
+                            </Link>
+                          </>
+                        )}
+
+                        {role === "DRIVER" && (
+                          <>
+                            <Link href="/driver/order-history">
+                              Driver Orders
+                            </Link>
+                            <Link href="/driver/driver-order-request">
+                              Order Requests
+                            </Link>
+                          </>
+                        )}
+                      </>
+                    )}
+
+                    <button
+                      onClick={() => setLogoutModal(true)}
+                      className="text-red-500 font-bold"
                     >
-                      <User className="h-5 w-5 text-gray-400" /> Account
-                    </Link>
-                    <Link 
-                      href="/order-requests" 
-                      className="flex items-center gap-3 text-gray-700 font-medium hover:text-[#31B8FA]" 
-                      onClick={() => setOpen(false)}
-                    >
-                      <Package className="h-5 w-5 text-gray-400" /> Order Requests
-                    </Link>
-                    <button className="flex items-center gap-3 text-red-500 font-bold pt-2">
-                      <LogOut className="h-5 w-5" /> Log out
+                      Log out
                     </button>
                   </div>
-                </div>
+                )}
               </SheetContent>
             </Sheet>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* ================= LOGOUT CONFIRM MODAL ================= */}
+      <AlertDialog open={logoutModal} onOpenChange={setLogoutModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to logout?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              You will be logged out from your account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>No</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => signOut()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Yes, Logout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

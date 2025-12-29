@@ -55,7 +55,7 @@ import Image from "next/image"
 
 export default function HeroSection() {
   return (
-    <section className="bg-[#E4F6FF] py-12 md:py-20 lg:py-24">
+    <section className="bg-[#E4F6FF] py-12 md:py-12 lg:py-14">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
@@ -79,7 +79,7 @@ export default function HeroSection() {
 
           {/* Right Image */}
           <div className="flex justify-center lg:justify-end lg:col-span-7">
-            <div className="relative w-full  aspect-[4/3]">
+            <div className="relative w-full  h-auto lg:h-[484px]">
               <Image
                 src="/image/newb12.png"
                 alt="Delivery person with packages and truck"

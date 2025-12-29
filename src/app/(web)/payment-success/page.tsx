@@ -36,9 +36,9 @@ export default function PaymentSuccessPage() {
 
         {/* Actions */}
         <div className="flex flex-col gap-3">
-          <Link href="/">
+          <Link href="/user/order-request">
             <Button className="w-full bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white h-12">
-                Go to Homepage
+               See Orders
             </Button>
           </Link>
 

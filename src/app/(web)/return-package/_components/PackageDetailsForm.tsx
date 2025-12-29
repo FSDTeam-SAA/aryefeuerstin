@@ -646,7 +646,7 @@ const packageDetailsSchema = z.object({
   productWeight: z.string().optional(),
   leaveMessage: z.boolean(),
   message: z.string().optional(),
-  physicalReturnLabelFiles: z.array(z.any()).optional(), // Will hold File objects
+  physicalReturnLabelFiles: z.array(z.any()).optional(), 
 })
 
 type PackageDetailsFormData = z.infer<typeof packageDetailsSchema>

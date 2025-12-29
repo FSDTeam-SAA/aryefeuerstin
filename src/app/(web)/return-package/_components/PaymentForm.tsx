@@ -231,8 +231,8 @@ export function SummaryReview({
           </li>
           <li>
             <b>Return Shipping Label:</b>{" "}
-            {options.returnShippingLabel.enabled
-              ? `Yes (+$${options.returnShippingLabel.fee})`
+            {options?.returnShippingLabel?.enabled
+              ? `Yes (+$${options.returnShippingLabel?.fee})`
               : "No"}
           </li>
           <li>

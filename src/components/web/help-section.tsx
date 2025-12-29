@@ -97,7 +97,7 @@ export default function HelpSection() {
           <div className="lg:col-span-5 flex justify-center lg:justify-start">
             <div className="relative w-full h-[525px]">
               <Image
-                src="/image/man.png"
+                src="/image/man2.png"
                 alt="Help illustration"
                 width={1000}
                 height={1000}

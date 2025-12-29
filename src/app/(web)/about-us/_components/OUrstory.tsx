@@ -27,9 +27,9 @@ export default function OurStory() {
 
         {/* Right Side - Image */}
         <div className="w-full">
-          <div className="relative w-full h-[260px] sm:h-[360px] md:h-[450px] lg:h-[562px] overflow-hidden rounded-2xl shadow-xl">
+          <div className="relative w-full h-[260px] sm:h-[360px] md:h-[450px] lg:h-[562px] overflow-hidden">
             <Image
-              src="/image/about3.png"
+              src="/image/aboutN3.png"
               alt="Our story"
               fill
               className="object-cover"

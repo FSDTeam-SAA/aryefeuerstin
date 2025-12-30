@@ -431,16 +431,16 @@ export default function OrderRequestsPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row justify-between gap-3">
                     <Link href={`/user/job-details/${order._id}`} className="flex-1">
-                      <Button className="w-full bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white">
+                      <Button className=" bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white">
                         See Details
                       </Button>
                     </Link>
 
                     {isCompleted && (
                       <Link href={`/user/review/${order._id}`} className="flex-1">
-                        <Button className="w-full bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white">
+                        <Button className=" bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white">
                           Write a Review
                         </Button>
                       </Link>

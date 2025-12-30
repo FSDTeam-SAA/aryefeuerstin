@@ -375,7 +375,7 @@ export default function JobDetailsPage() {
   ) || []
 
   const returnLabelImage = orderData?.options?.physicalReturnLabel?.enabled
-    ? orderData.options.physicalReturnLabel.labelFiles[0]
+    ? orderData.options.physicalReturnLabel.labelFiles?.[0]
     : null
 
   const customer = orderData?.customer

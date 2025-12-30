@@ -10,6 +10,8 @@ import {
   Package,
   LogOut,
   RotateCcw,
+  Check,
+  UserPlus,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -175,19 +177,19 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/driver/order-history">
                       <Package className="mr-2 h-4 w-4" />
-                      Driver Orders
+                      Active  Orders
                     </Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    {/* <Link href="/driver/driver-order-request">
-                      <Package className="mr-2 h-4 w-4" />
-                      Order Requests
-                    </Link> */}
+                    <Link href="/driver/driver-order-request">
+                      <Check  className="mr-2 h-4 w-4" />
+                      Completed  Orders
+                    </Link>
                   </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                     <Link href="/driver/work-sation">
-                      <Package className="mr-2 h-4 w-4" />
+                      <UserPlus  className="mr-2 h-4 w-4" />
                       Work Hour
                     </Link>
                   </DropdownMenuItem>

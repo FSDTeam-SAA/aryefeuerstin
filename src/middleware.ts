@@ -39,7 +39,8 @@ export async function middleware(req: NextRequest) {
     if (
       pathname.startsWith("/driver/order-history") ||
       pathname.startsWith("/driver/work-sation")||
-      pathname.startsWith("/driver/order-details")
+      pathname.startsWith("/driver/order-details")||
+      pathname.startsWith("/driver/driver-order-request")
     ) {
       return NextResponse.next()
     }

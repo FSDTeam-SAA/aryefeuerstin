@@ -228,8 +228,6 @@
 //   )
 // }
 
-
-
 /* eslint-disable */
 "use client"
 
@@ -345,11 +343,49 @@ export default function PackageReturnService() {
         formDataToSend.append("messageNote", updatedData.message || "")
       }
 
-      // === FIXED: Stores mapping for backend ===
+      // === FIXED & CORRECTED: Map frontend values to exact backend enum strings ===
       const storesForBackend = updatedData.stores.map((store: any) => {
+        let backendStoreValue: string
+
+        switch (store.returnStore) {
+          case "STAPLES":
+            backendStoreValue = "Staples"
+            break
+          case "KOHLS":
+            backendStoreValue = "Kohl's"
+            break
+          case "SHEIN":
+            backendStoreValue = "Shein Return"
+            break
+          case "TARGET":
+            backendStoreValue = "Target"
+            break
+          case "WALMART":
+            backendStoreValue = "Walmart"
+            break
+          case "HOME_DEPOT":
+            backendStoreValue = "Home Depot"
+            break
+          case "UPS":
+            backendStoreValue = "UPS Drop Off"
+            break
+          case "USPS":
+            backendStoreValue = "USPS Drop Off"
+            break
+          case "FEDEX":
+            backendStoreValue = "FedEx Drop Off"
+            break
+          case "OTHER":
+            backendStoreValue = "Other"
+            break
+          default:
+            backendStoreValue = "Other" // safe fallback
+        }
+
         const isOther = store.returnStore === "OTHER"
+
         return {
-          store: isOther ? "OTHER" : store.returnStore.toUpperCase(),
+          store: backendStoreValue,
           ...(isOther && store.otherStoreName
             ? { otherStoreName: store.otherStoreName.trim() }
             : {}),

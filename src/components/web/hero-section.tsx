@@ -51,9 +51,15 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react";
 import Image from "next/image"
+import Link from "next/link"
 
 export default function HeroSection() {
+  const session = useSession();
+  const role = session?.data?.user?.role
+  console.log(role)
+
   return (
     <section className="bg-[#E4F6FF] py-12 md:py-12 lg:py-14">
       <div className="container mx-auto px-4">
@@ -72,9 +78,18 @@ export default function HeroSection() {
               designed for your convenience.
             </p>
 
-            <Button className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full px-8 py-6 text-base">
-              Schedule My Return Pickup
-            </Button>
+            {
+              role === "USER" && (
+                <div className="mt-5">
+                <Link href="/return-package">
+                  <Button className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full px-8 py-6 text-base">
+                    Schedule My Return Pickup
+                  </Button>
+                </Link>
+                </div>
+              )
+            }
+          
           </div>
 
           {/* Right Image */}

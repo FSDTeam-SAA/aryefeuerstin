@@ -648,6 +648,9 @@
 //   )
 // }
 
+
+
+
 /* eslint-disable */
 "use client"
 
@@ -891,7 +894,7 @@ export function PackageDetailsForm({
                   <PackageIcon className="w-5 h-5 text-gray-600" />
                   <span className="font-medium text-gray-900">
                     {store.returnStore
-                      ? store.returnStore === "Other"
+                      ? store.returnStore === "OTHER"
                         ? `${store.otherStoreName || "Other Store"}`
                         : store.returnStore
                       : "Select return store"}
@@ -913,7 +916,7 @@ export function PackageDetailsForm({
                   value={store.returnStore}
                   onValueChange={(value) => {
                     updateStoreData(storeIndex, "returnStore", value)
-                    if (value !== "Other") {
+                    if (value !== "OTHER") {
                       updateStoreData(storeIndex, "otherStoreName", "")
                     }
                   }}
@@ -931,12 +934,12 @@ export function PackageDetailsForm({
                     <SelectItem value="UPS">UPS Drop Off</SelectItem>
                     <SelectItem value="USPS">USPS Drop Off</SelectItem>
                     <SelectItem value="FEDEX">FedEx Drop Off</SelectItem>
-                    <SelectItem value="Other">Other (Please specify)</SelectItem>
+                    <SelectItem value="OTHER">Other (Please specify)</SelectItem>
                   </SelectContent>
                 </Select>
 
                 {/* Other Store Name Input – Inside the same section */}
-                {store.returnStore === "Other" && (
+                {store.returnStore === "OTHER" && (
                   <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <Label htmlFor={`other-store-${storeIndex}`}>
                       Please specify the store name

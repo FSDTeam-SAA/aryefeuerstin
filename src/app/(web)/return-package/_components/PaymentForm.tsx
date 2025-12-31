@@ -1,4 +1,8 @@
 
+
+
+
+
 "use client"
 
 import { Button } from "@/components/ui/button"
@@ -29,6 +33,7 @@ interface PackageItem {
 
 interface Store {
   store: string
+  otherStoreName?: string  // ← Added this
   numberOfPackages: number
   packages: PackageItem[]
 }
@@ -78,7 +83,6 @@ interface SummaryReviewProps {
 
 export function SummaryReview({
   orderData,
-  
   orderId,
   totalAmount,
 }: SummaryReviewProps) {
@@ -133,16 +137,16 @@ export function SummaryReview({
 
   const isFreeOrder = totalAmount === 0
 
+  // Helper to display store name correctly
+  const getStoreDisplayName = (store: Store) => {
+    if (store.store === "Other" && store.otherStoreName) {
+      return `Other: ${store.otherStoreName}`
+    }
+    return store.store
+  }
+
   return (
     <div className="space-y-8">
-      {/* Initial Success Message */}
-      {/* {status === "success" && (
-        <div className="flex items-center gap-2 bg-green-50 text-green-700 p-4 rounded-lg">
-          <CheckCircle className="w-5 h-5" />
-          <span className="font-medium">{message}</span>
-        </div>
-      )} */}
-
       {/* Customer Information */}
       <div className="border rounded-lg p-6 bg-[#F8FAFC]">
         <h3 className="text-lg font-bold mb-4">Customer Information</h3>
@@ -167,7 +171,7 @@ export function SummaryReview({
         {stores.map((store, storeIdx) => (
           <div key={storeIdx} className="mb-8 last:mb-0">
             <h4 className="font-semibold text-lg mb-3 text-cyan-700">
-              Store {storeIdx + 1}: {store.store}
+              Store {storeIdx + 1}: {getStoreDisplayName(store)}
             </h4>
             <p className="text-sm mb-4">
               <b>Number of Packages:</b> {store.numberOfPackages}
@@ -291,7 +295,6 @@ export function SummaryReview({
 
       {/* Conditional Rendering Based on Total Amount */}
       {isFreeOrder ? (
-        /* FREE ORDER - No Payment Needed */
         <div className="text-center py-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-6">
             <CheckCircle className="w-12 h-12 text-green-600" />
@@ -302,16 +305,15 @@ export function SummaryReview({
           <p className="text-base text-gray-600 max-w-2xl mx-auto">
             Thank you for using our service. Your return request has been submitted and will be processed soon.
           </p>
-         <div className="mt-5">
+          <div className="mt-5">
             <Link href="/user/order-request">
-          <Button className="bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white px-10 h-12">
-             See Orders
-          </Button>
+              <Button className="bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white px-10 h-12">
+                See Orders
+              </Button>
             </Link>
-         </div>
+          </div>
         </div>
       ) : (
-        /* PAID ORDER - Show Total & Payment Button */
         <>
           {/* Total Amount */}
           <div className="border-2 border-[#31B8FA] rounded-xl p-6 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-lg">

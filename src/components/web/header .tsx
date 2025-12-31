@@ -1,6 +1,3 @@
-
-
-
 "use client"
 
 import { useState } from "react"
@@ -81,7 +78,7 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const [logoutModal, setLogoutModal] = useState(false)
 
-  const { data: profileData, } = useQuery({
+  const { data: profileData } = useQuery({
     queryKey: ["userProfile"],
     queryFn: () => fetchUserProfile(token),
     enabled: !!token && !!session,
@@ -90,7 +87,21 @@ export default function Header() {
   })
 
   const profileImage = profileData?.profileImage
+  const firstName = profileData?.firstName || "User"
   const hasActiveSubscription = profileData?.hasActiveSubscription ?? false
+
+  // Generate initials: First 2 letters of firstName (uppercase)
+  const getInitials = (name: string) => {
+    return name
+      .trim()
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2) || "US"
+  }
+
+  const initials = getInitials(firstName)
 
   const isActive = (href: string) => pathname === href
 
@@ -113,13 +124,13 @@ export default function Header() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="p-0 h-10 w-10 rounded-full">
-            <Avatar className="h-10 w-10 border">
-              <AvatarImage
-                src={profileImage || "/avatar-placeholder.png"}
-                alt="Profile"
-              />
-              <AvatarFallback className="bg-[#31B8FA] text-white">
-                {role === "ADMIN" ? "AD" : role === "DRIVER" ? "DR" : "US"}
+            <Avatar className="h-12 w-12 border">
+              {/* Only show image if profileImage exists and is not empty */}
+              {profileImage ? (
+                <AvatarImage src={profileImage} alt="Profile" />
+              ) : null}
+              <AvatarFallback className="bg-[#31B8FA] text-white font-medium">
+                {initials}
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -128,7 +139,7 @@ export default function Header() {
         <DropdownMenuContent align="end" className="w-56">
           {role === "ADMIN" && (
             <>
-              <DropdownMenuLabel>Admin</DropdownMenuLabel>
+              <DropdownMenuLabel>Admin Panel</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => setLogoutModal(true)}
@@ -161,7 +172,6 @@ export default function Header() {
                     </Link>
                   </DropdownMenuItem>
 
-                  {/* FIXED: Changed onSelect to onClick */}
                   <DropdownMenuItem
                     onClick={handleReturnPackageClick}
                     className="cursor-pointer"
@@ -177,20 +187,21 @@ export default function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/driver/order-history">
                       <Package className="mr-2 h-4 w-4" />
-                      Active  Orders
+                      Active Orders
                     </Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
                     <Link href="/driver/driver-order-request">
-                      <Check  className="mr-2 h-4 w-4" />
-                      Completed  Orders
+                      <Check className="mr-2 h-4 w-4" />
+                      Completed Orders
                     </Link>
                   </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+
+                  <DropdownMenuItem asChild>
                     <Link href="/driver/work-sation">
-                      <UserPlus  className="mr-2 h-4 w-4" />
-                      Work Hour
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Work Hours
                     </Link>
                   </DropdownMenuItem>
                 </>
@@ -217,7 +228,7 @@ export default function Header() {
         <div className="container mx-auto py-2 flex items-center justify-between">
           <Link href="/">
             <div className="w-[100px] h-[60px] md:w-[125px] md:h-[75px]">
-              <Image
+               <Image
                 src="/logo.png"
                 alt="Logo"
                 width={120}
@@ -227,71 +238,89 @@ export default function Header() {
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
             {menuItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`font-medium ${
+                className={`font-medium text-base transition-colors ${
                   isActive(item.href)
                     ? "text-[#31B8FA]"
-                    : "hover:text-[#31B8FA]"
-                } transition-colors`}
+                    : "text-foreground hover:text-[#31B8FA]"
+                }`}
               >
                 {item.name}
               </Link>
             ))}
 
-            {!session && (
+            {!session ? (
               <Button
                 asChild
-                className="bg-[#31B8FA] h-[50px] px-10 rounded-full hover:bg-[#31B8FA]/90"
+                size="lg"
+                className="bg-[#31B8FA] rounded-full px-12 h-[48px] hover:bg-[#31B8FA]/90"
               >
                 <Link href="/auth/login">Join Now</Link>
               </Button>
+            ) : (
+              <DesktopAvatar />
             )}
-
-            <DesktopAvatar />
           </nav>
 
+          {/* Mobile Menu Trigger */}
           <div className="md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost">
+                <Button variant="ghost" size="icon">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
 
-              <SheetContent side="right" className="flex flex-col">
-                <nav className="flex flex-col gap-4 mt-8">
-                  {menuItems.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className="text-lg font-medium"
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+              <SheetContent side="right" className="w-80">
+                <div className="flex flex-col h-full">
+                  {/* Main Navigation */}
+                  <nav className="flex flex-col gap-6 mt-10">
+                    {menuItems.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className={`text-xl font-medium transition-colors ${
+                          isActive(item.href)
+                            ? "text-[#31B8FA]"
+                            : "text-foreground hover:text-[#31B8FA]"
+                        }`}
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
 
-                  {!session && (
-                    <Link
-                      href="/auth/login"
-                      onClick={() => setOpen(false)}
-                      className="text-lg font-medium text-[#31B8FA]"
-                    >
-                      Join Now
-                    </Link>
-                  )}
-                </nav>
+                    {!session && (
+                      <Button
+                        asChild
+                        size="lg"
+                        className="bg-[#31B8FA] rounded-full mt-4"
+                        onClick={() => setOpen(false)}
+                      >
+                        <Link href="/auth/login">Join Now</Link>
+                      </Button>
+                    )}
+                  </nav>
 
-                {session && (
-                  <div className="mt-auto border-t pt-6 space-y-4">
-                    {role !== "ADMIN" && (
-                      <>
-                        <Link href="/accounts" onClick={() => setOpen(false)}>
-                          Account
+                  {/* Logged In User Section */}
+                  {session && (
+                    <div className="mt-auto border-t pt-8 space-y-5 pb-8">
+                      <div className="space-y-4">
+                        <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                          My Account
+                        </p>
+
+                        <Link
+                          href="/accounts"
+                          onClick={() => setOpen(false)}
+                          className="block text-lg font-medium hover:text-[#31B8FA] transition"
+                        >
+                          Account Settings
                         </Link>
 
                         {role === "USER" && (
@@ -299,24 +328,25 @@ export default function Header() {
                             <Link
                               href="/user/order-request"
                               onClick={() => setOpen(false)}
+                              className="block text-lg font-medium hover:text-[#31B8FA] transition"
                             >
                               Order History
                             </Link>
 
                             <button
                               onClick={handleReturnPackageClick}
-                              className={`text-left w-full ${
+                              className={`text-lg font-medium text-left w-full transition ${
                                 !hasActiveSubscription
                                   ? "text-muted-foreground"
-                                  : ""
+                                  : "hover:text-[#31B8FA]"
                               }`}
-                              disabled={!hasActiveSubscription && role === "USER"}
+                              disabled={role === "USER" && !hasActiveSubscription}
                             >
                               Return Package
-                              {!hasActiveSubscription && (
-                                <div className="text-xs text-red-500 mt-1">
-                                  Subscription required
-                                </div>
+                              {!hasActiveSubscription && role === "USER" && (
+                                <p className="text-sm text-red-500 mt-1">
+                                  Active subscription required
+                                </p>
                               )}
                             </button>
                           </>
@@ -327,43 +357,53 @@ export default function Header() {
                             <Link
                               href="/driver/order-history"
                               onClick={() => setOpen(false)}
+                              className="block text-lg font-medium hover:text-[#31B8FA] transition"
                             >
-                              Driver Orders
+                              Active Orders
                             </Link>
                             <Link
                               href="/driver/driver-order-request"
                               onClick={() => setOpen(false)}
+                              className="block text-lg font-medium hover:text-[#31B8FA] transition"
                             >
-                              Order Requests
+                              Completed Orders
+                            </Link>
+                            <Link
+                              href="/driver/work-sation"
+                              onClick={() => setOpen(false)}
+                              className="block text-lg font-medium hover:text-[#31B8FA] transition"
+                            >
+                              Work Hours
                             </Link>
                           </>
                         )}
-                      </>
-                    )}
+                      </div>
 
-                    <button
-                      onClick={() => {
-                        setLogoutModal(true)
-                        setOpen(false)
-                      }}
-                      className="text-red-500 font-bold text-left w-full"
-                    >
-                      Log out
-                    </button>
-                  </div>
-                )}
+                      <button
+                        onClick={() => {
+                          setLogoutModal(true)
+                          setOpen(false)
+                        }}
+                        className="text-lg font-medium text-red-600 hover:text-red-700 transition w-full text-left"
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  )}
+                </div>
               </SheetContent>
             </Sheet>
           </div>
         </div>
       </header>
 
+      {/* Logout Confirmation Dialog */}
       <AlertDialog open={logoutModal} onOpenChange={setLogoutModal}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
             <AlertDialogDescription>
-              You will be logged out from your account.
+              You will be signed out of your account.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

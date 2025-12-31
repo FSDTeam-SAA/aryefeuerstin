@@ -106,7 +106,7 @@
 
 "use client"
 
-import { MapPin, Package } from "lucide-react"
+import { Map, MapPin, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import Link from "next/link"
@@ -201,17 +201,18 @@ export default function OrderRequestsPage() {
                 <div className="flex justify-between">
                   <Link href={`/driver/order-details/${order._id}`}>
                     <Button className="w-[127px] bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white">
-                      See Details
+                      See Details 
                     </Button>
                   </Link>
                   
-                  {order.status === "COMPLETED" && (
-                    <Link href="/user/review">
+                
+                    <Link href="">
                       <Button className="w-[127px] bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white">
-                        Write a Review
+                      <Map/>
+                       See Route
                       </Button>
                     </Link>
-                  )}
+           
                 </div>
               </Card>
             ))}

@@ -18,7 +18,7 @@ export default function Footer() {
             </Link>
             <p className="text-sm font-normal text-[#131313] mb-2">Empowering Women, Building Trust</p>
             <p className="text-sm text-gray-700">
-              <span className="font-semibold">Email:</span> info@example.com
+              <span className="font-semibold">Email:</span> ezreturn123@gmail.com
             </p>
           </div>
 

@@ -79,12 +79,12 @@ export default function HeroSection() {
 
           {/* Right Image */}
           <div className="flex justify-center lg:justify-end lg:col-span-7">
-            <div className="relative w-full  h-auto lg:h-[484px]">
+            <div className="relative w-full  h-auto lg:h-[550px]">
               <Image
                 src="/image/newb12.png"
                 alt="Delivery person with packages and truck"
-                fill
-                priority
+                width={1000}
+                height={1000}
                 className="object-contain"
               />
             </div>

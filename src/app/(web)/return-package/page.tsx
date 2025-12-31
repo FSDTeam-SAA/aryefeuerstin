@@ -1,5 +1,5 @@
-// /*eslint-disable */
 
+// /*eslint-disable */
 // "use client"
 
 // import { useState } from "react"
@@ -9,19 +9,19 @@
 // import { StepIndicator } from "./_components/StepIndicator"
 // import { CustomerInfoForm } from "./_components/CustomerInfoForm"
 // import { PackageDetailsForm } from "./_components/PackageDetailsForm"
-// import { SummaryReview } from "./_components/PaymentForm"
+// import { SummaryReview } from "./_components/PaymentForm" // Adjust path if needed
 // import { toast } from "sonner"
 
 // type Step = 1 | 2 | 3
 
 // export default function PackageReturnService() {
-//  const session = useSession()
-//  const token= session.data?.accessToken as string | undefined
+//   const session = useSession()
+//   const token = session.data?.accessToken as string | undefined
 
 //   const [currentStep, setCurrentStep] = useState<Step>(1)
 //   const [orderId, setOrderId] = useState<string>("")
 //   const [totalAmount, setTotalAmount] = useState<number>(0)
-  
+
 //   // Store the full backend response for accurate summary display
 //   const [orderResponse, setOrderResponse] = useState<any>(null)
 
@@ -50,6 +50,7 @@
 //     productWeight: "",
 //     leaveMessage: false,
 //     message: "",
+//     physicalReturnLabelFiles: [], // New field for uploaded files
 //   })
 
 //   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -115,25 +116,25 @@
 //         formDataToSend.append("messageNote", updatedData.message || "")
 //       }
 
-//       // Stores
+//       // Stores structure for backend
 //       const storesForBackend = updatedData.stores.map((store: any) => ({
 //         store: store.returnStore.toUpperCase(),
 //         numberOfPackages: store.numberOfPackages,
 //         packages: Object.keys(store.packageNumbers || {}).map((key) => ({
 //           packageNumber: store.packageNumbers[key] || "",
-//           barcodeImages: [],
+//           barcodeImages: [], // We'll send actual files separately
 //         })),
 //       }))
 
 //       formDataToSend.append("stores", JSON.stringify(storesForBackend))
 
-//       // Handle barcode images
+//       // Handle barcode images (data URLs → blobs → files)
 //       let imageIndex = 0
 //       const imagePromises: Promise<void>[] = []
 
 //       updatedData.stores.forEach((store: any) => {
 //         Object.keys(store.packageImages || {}).forEach((pkgIdx: string) => {
-//           store.packageImages[pkgIdx].forEach((dataUrl: string) => {
+//           ;(store.packageImages[pkgIdx] || []).forEach((dataUrl: string) => {
 //             const p = fetch(dataUrl)
 //               .then((res) => res.blob())
 //               .then((blob) => {
@@ -145,6 +146,13 @@
 //           })
 //         })
 //       })
+
+//       // Handle physical return label files (actual File objects)
+//       if (updatedData.physicalReturnLabelFiles && updatedData.physicalReturnLabelFiles.length > 0) {
+//         updatedData.physicalReturnLabelFiles.forEach((item: { file: File }) => {
+//           formDataToSend.append("physicalReturnLabelFiles", item.file)
+//         })
+//       }
 
 //       await Promise.all(imagePromises)
 
@@ -168,17 +176,16 @@
 
 //       // SUCCESS: Save real data from backend
 //       setOrderId(result.data._id)
-//       setTotalAmount(result.data.pricing.totalAmount)  
-//       setOrderResponse(result.data)  
+//       setTotalAmount(result.data.pricing.totalAmount)
+//       setOrderResponse(result.data)
 //       setSubmitStatus("success")
 //       setSubmitMessage(result.message || "Return order created successfully!")
 //       setCurrentStep(3)
 //       toast.success("Return order created successfully!")
-
 //     } catch (error: any) {
 //       setSubmitStatus("error")
 //       setSubmitMessage(error.message || "Something went wrong")
-//       alert(error.message)
+//       toast.error(error.message || "Submission failed")
 //     } finally {
 //       setIsSubmitting(false)
 //     }
@@ -208,7 +215,7 @@
 //           )}
 //           {currentStep === 3 && orderResponse && (
 //             <SummaryReview
-//               orderData={orderResponse}  
+//               orderData={orderResponse}
 //               status={submitStatus}
 //               message={submitMessage}
 //               orderId={orderId}
@@ -223,10 +230,7 @@
 
 
 
-
-
-
-/*eslint-disable */
+/* eslint-disable */
 "use client"
 
 import { useState } from "react"
@@ -236,7 +240,7 @@ import { Package } from "lucide-react"
 import { StepIndicator } from "./_components/StepIndicator"
 import { CustomerInfoForm } from "./_components/CustomerInfoForm"
 import { PackageDetailsForm } from "./_components/PackageDetailsForm"
-import { SummaryReview } from "./_components/PaymentForm" // Adjust path if needed
+import { SummaryReview } from "./_components/PaymentForm"
 import { toast } from "sonner"
 
 type Step = 1 | 2 | 3
@@ -248,8 +252,6 @@ export default function PackageReturnService() {
   const [currentStep, setCurrentStep] = useState<Step>(1)
   const [orderId, setOrderId] = useState<string>("")
   const [totalAmount, setTotalAmount] = useState<number>(0)
-
-  // Store the full backend response for accurate summary display
   const [orderResponse, setOrderResponse] = useState<any>(null)
 
   const [formData, setFormData] = useState<any>({
@@ -277,7 +279,7 @@ export default function PackageReturnService() {
     productWeight: "",
     leaveMessage: false,
     message: "",
-    physicalReturnLabelFiles: [], // New field for uploaded files
+    physicalReturnLabelFiles: [],
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -343,15 +345,21 @@ export default function PackageReturnService() {
         formDataToSend.append("messageNote", updatedData.message || "")
       }
 
-      // Stores structure for backend
-      const storesForBackend = updatedData.stores.map((store: any) => ({
-        store: store.returnStore.toUpperCase(),
-        numberOfPackages: store.numberOfPackages,
-        packages: Object.keys(store.packageNumbers || {}).map((key) => ({
-          packageNumber: store.packageNumbers[key] || "",
-          barcodeImages: [], // We'll send actual files separately
-        })),
-      }))
+      // === FIXED: Stores mapping for backend ===
+      const storesForBackend = updatedData.stores.map((store: any) => {
+        const isOther = store.returnStore === "OTHER"
+        return {
+          store: isOther ? "OTHER" : store.returnStore.toUpperCase(),
+          ...(isOther && store.otherStoreName
+            ? { otherStoreName: store.otherStoreName.trim() }
+            : {}),
+          numberOfPackages: store.numberOfPackages,
+          packages: Object.keys(store.packageNumbers || {}).map((key) => ({
+            packageNumber: store.packageNumbers[key] || "",
+            barcodeImages: [], // Filled separately via file upload
+          })),
+        }
+      })
 
       formDataToSend.append("stores", JSON.stringify(storesForBackend))
 
@@ -374,7 +382,7 @@ export default function PackageReturnService() {
         })
       })
 
-      // Handle physical return label files (actual File objects)
+      // Handle physical return label files
       if (updatedData.physicalReturnLabelFiles && updatedData.physicalReturnLabelFiles.length > 0) {
         updatedData.physicalReturnLabelFiles.forEach((item: { file: File }) => {
           formDataToSend.append("physicalReturnLabelFiles", item.file)
@@ -401,7 +409,7 @@ export default function PackageReturnService() {
         throw new Error(result.message || "Submission failed")
       }
 
-      // SUCCESS: Save real data from backend
+      // SUCCESS
       setOrderId(result.data._id)
       setTotalAmount(result.data.pricing.totalAmount)
       setOrderResponse(result.data)

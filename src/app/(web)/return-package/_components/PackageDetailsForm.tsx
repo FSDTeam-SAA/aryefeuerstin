@@ -1,3 +1,4 @@
+
 // /*eslint-disable */
 // "use client"
 
@@ -14,10 +15,10 @@
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 // import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-// import { ChevronDown, Upload, Trash2, X, PackageIcon } from "lucide-react"
+// import { ChevronDown, Upload, Trash2, X, PackageIcon, FileText, Image } from "lucide-react"
 // import { cn } from "@/lib/utils"
 
-// // Zod schema for the non-store fields
+// // Updated Zod schema to include physicalReturnLabelFiles
 // const packageDetailsSchema = z.object({
 //   printShippingLabel: z.boolean(),
 //   hasReceipt: z.boolean(),
@@ -29,6 +30,7 @@
 //   productWeight: z.string().optional(),
 //   leaveMessage: z.boolean(),
 //   message: z.string().optional(),
+//   physicalReturnLabelFiles: z.array(z.any()).optional(), 
 // })
 
 // type PackageDetailsFormData = z.infer<typeof packageDetailsSchema>
@@ -57,6 +59,7 @@
 //     "store-0",
 //     "packages-0",
 //     "anotherStore",
+//     "shippingLabel",
 //   ])
 
 //   const [stores, setStores] = useState<StoreData[]>(
@@ -64,6 +67,11 @@
 //       ? initialData.stores
 //       : [{ returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} }]
 //   )
+
+//   // State for physical return label files (actual File objects + previews)
+//   const [physicalReturnLabelFiles, setPhysicalReturnLabelFiles] = useState<
+//     { file: File; preview?: string }[]
+//   >(initialData.physicalReturnLabelFiles || [])
 
 //   const {
 //     register,
@@ -87,6 +95,7 @@
 //     },
 //   })
 
+//   const printShippingLabel = watch("printShippingLabel")
 //   const hasReceipt = watch("hasReceipt")
 //   const needShippingLabel = watch("needShippingLabel")
 //   const leaveMessage = watch("leaveMessage")
@@ -119,36 +128,55 @@
 //     const files = e.target.files
 //     if (!files || files.length === 0) return
 
-//     // Only take the first file
 //     const file = files[0]
 //     const reader = new FileReader()
 //     reader.onloadend = () => {
 //       setStores((prev) => {
 //         const updated = [...prev]
-//         // Only store one image - replace if exists, add if not
 //         updated[storeIdx].packageImages[pkgIdx] = [reader.result as string]
 //         return updated
 //       })
 //     }
 //     reader.readAsDataURL(file)
-//     e.target.value = "" // reset input
+//     e.target.value = ""
 //   }
 
 //   const removeImage = (storeIdx: number, pkgIdx: number) => {
 //     setStores((prev) => {
 //       const updated = [...prev]
-//       // Clear the image array for this package
 //       updated[storeIdx].packageImages[pkgIdx] = []
 //       return updated
 //     })
 //   }
 
-//   const clearImage = (storeIdx: number, pkgIdx: number) => {
-//     removeImage(storeIdx, pkgIdx)
+//   // Handle physical return label file uploads
+//   const handlePhysicalLabelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const files = e.target.files
+//     if (!files) return
+
+//     const newFiles = Array.from(files).map((file) => {
+//       const preview = file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined
+//       return { file, preview }
+//     })
+
+//     setPhysicalReturnLabelFiles((prev) => [...prev, ...newFiles])
+//     e.target.value = ""
+//   }
+
+//   const removePhysicalLabelFile = (index: number) => {
+//     setPhysicalReturnLabelFiles((prev) => {
+//       URL.revokeObjectURL(prev[index].preview || "")
+//       return prev.filter((_, i) => i !== index)
+//     })
 //   }
 
 //   return (
-//     <form onSubmit={handleSubmit((data) => onSubmitAndProceed({ ...data, stores }))} className="space-y-6">
+//     <form
+//       onSubmit={handleSubmit((data) =>
+//         onSubmitAndProceed({ ...data, stores, physicalReturnLabelFiles })
+//       )}
+//       className="space-y-6"
+//     >
 //       <div className="mb-6">
 //         <h2 className="text-xl font-bold text-gray-900">Package Details</h2>
 //         <p className="text-sm text-gray-500 mt-1">
@@ -156,6 +184,7 @@
 //         </p>
 //       </div>
 
+//       {/* Existing Stores and Packages Code (unchanged) */}
 //       {stores.map((store, storeIndex) => (
 //         <div key={storeIndex} className="space-y-4">
 //           {storeIndex > 0 && (
@@ -206,6 +235,16 @@
 //                 <SelectContent>
 //                   <SelectItem value="AMAZON">AMAZON</SelectItem>
 //                   <SelectItem value="STAPLES">STAPLES</SelectItem>
+//                   <SelectItem value="Kohl's">Kohl's</SelectItem>
+//                   <SelectItem value="Shein Return">Shein Return</SelectItem>
+//                   <SelectItem value="Target">Target</SelectItem>
+//                   <SelectItem value="Walmart">Walmart</SelectItem>
+//                   <SelectItem value="Home Depot">Home Depot</SelectItem>
+//                   <SelectItem value="UPS Drop Off">UPS Drop Off</SelectItem>
+//                   <SelectItem value="USPS Drop Off">USPS Drop Off</SelectItem>
+//                   <SelectItem value="FEDEX">FEDEX</SelectItem>
+//                   <SelectItem value="OTHER">FedEx Drop Off</SelectItem>
+
 //                 </SelectContent>
 //               </Select>
 //             </CollapsibleContent>
@@ -292,9 +331,8 @@
 //                             onChange={(e) => handleImageChange(storeIndex, pkgIndex, e)}
 //                           />
 
-//                           {store.packageImages[pkgIndex] && store.packageImages[pkgIndex].length > 0 ? (
+//                           {store.packageImages[pkgIndex]?.length > 0 ? (
 //                             <div className="space-y-3">
-//                               {/* Single Image Preview */}
 //                               <div className="relative">
 //                                 <img
 //                                   src={store.packageImages[pkgIndex][0]}
@@ -303,15 +341,12 @@
 //                                 />
 //                                 <button
 //                                   type="button"
-//                                   onClick={() => clearImage(storeIndex, pkgIndex)}
-//                                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors"
-//                                   title="Remove image"
+//                                   onClick={() => removeImage(storeIndex, pkgIndex)}
+//                                   className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600"
 //                                 >
 //                                   <X className="w-4 h-4" />
 //                                 </button>
 //                               </div>
-
-//                               {/* Replace Image Button */}
 //                               <label
 //                                 htmlFor={`img-${storeIndex}-${pkgIndex}`}
 //                                 className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
@@ -321,10 +356,9 @@
 //                               </label>
 //                             </div>
 //                           ) : (
-//                             /* Upload Area (No Image Yet) */
 //                             <label
 //                               htmlFor={`img-${storeIndex}-${pkgIndex}`}
-//                               className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-cyan-400 transition-colors"
+//                               className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-cyan-400"
 //                             >
 //                               <Upload className="w-10 h-10 text-gray-400 mb-3" />
 //                               <p className="text-sm text-gray-600">Click to upload barcode image</p>
@@ -366,12 +400,7 @@
 //           <p className="text-sm text-gray-600 mb-3">
 //             Are you returning packages to another store?
 //           </p>
-//           <RadioGroup
-//             onValueChange={(v) => {
-//               if (v === "yes") addStore()
-//             }}
-//             defaultValue="no"
-//           >
+//           <RadioGroup onValueChange={(v) => v === "yes" && addStore()} defaultValue="no">
 //             <div className="flex items-center space-x-6">
 //               <div className="flex items-center space-x-2">
 //                 <RadioGroupItem value="yes" id="as-yes" />
@@ -386,7 +415,7 @@
 //         </CollapsibleContent>
 //       </Collapsible>
 
-//       {/* Physical Return Label */}
+//       {/* Physical Return Label - Now with File Upload */}
 //       <Collapsible
 //         open={openSections.includes("shippingLabel")}
 //         onOpenChange={() => toggleSection("shippingLabel")}
@@ -424,8 +453,77 @@
 //               </div>
 //             </div>
 //           </RadioGroup>
+
+//           {printShippingLabel && (
+//             <div className="mt-6">
+//               <Label>Upload Physical Return Label Files (PDF or Image)</Label>
+//               <div className="mt-2">
+//                 <input
+//                   type="file"
+//                   accept="image/*,.pdf"
+//                   multiple
+//                   className="hidden"
+//                   id="physical-return-labels"
+//                   onChange={handlePhysicalLabelUpload}
+//                 />
+
+//                 {physicalReturnLabelFiles.length > 0 ? (
+//                   <div className="space-y-3">
+//                     {physicalReturnLabelFiles.map((item, idx) => (
+//                       <div key={idx} className="relative flex items-center gap-3 p-3 border rounded-lg bg-white">
+//                         {item.preview ? (
+//                           <img
+//                             src={item.preview}
+//                             alt="Label preview"
+//                             className="w-24 h-24 object-contain rounded border"
+//                           />
+//                         ) : (
+//                           <div className="w-24 h-24 bg-gray-100 rounded border flex items-center justify-center">
+//                             <FileText className="w-10 h-10 text-gray-400" />
+//                           </div>
+//                         )}
+//                         <div className="flex-1">
+//                           <p className="text-sm font-medium truncate max-w-xs">{item.file.name}</p>
+//                           <p className="text-xs text-gray-500">
+//                             {(item.file.size / 1024).toFixed(1)} KB
+//                           </p>
+//                         </div>
+//                         <button
+//                           type="button"
+//                           onClick={() => removePhysicalLabelFile(idx)}
+//                           className="text-red-600 hover:bg-red-50 p-2 rounded"
+//                         >
+//                           <Trash2 className="w-5 h-5" />
+//                         </button>
+//                       </div>
+//                     ))}
+
+//                     <label
+//                       htmlFor="physical-return-labels"
+//                       className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+//                     >
+//                       <Upload className="w-4 h-4 mr-2" />
+//                       Add More Files
+//                     </label>
+//                   </div>
+//                 ) : (
+//                   <label
+//                     htmlFor="physical-return-labels"
+//                     className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-10 text-center cursor-pointer hover:border-cyan-400"
+//                   >
+//                     <Upload className="w-12 h-12 text-gray-400 mb-4" />
+//                     <p className="text-sm text-gray-600">Click to upload return label files</p>
+//                     <p className="text-xs text-gray-500 mt-1">Supports images and PDFs (multiple allowed)</p>
+//                   </label>
+//                 )}
+//               </div>
+//             </div>
+//           )}
 //         </CollapsibleContent>
 //       </Collapsible>
+
+//       {/* Other Collapsibles (Receipt, Message, etc.) remain unchanged */}
+//       {/* ... (hasReceipt, message, etc.) ... */}
 
 //       {/* Physical Receipt */}
 //       <Collapsible
@@ -450,7 +548,6 @@
 //           </div>
 //         </CollapsibleTrigger>
 //         <CollapsibleContent className="pt-4 px-2">
-
 //           <RadioGroup onValueChange={(v) => setValue("hasReceipt", v === "yes")} defaultValue="no">
 //             <div className="flex items-center space-x-6">
 //               <div className="flex items-center space-x-2">
@@ -466,7 +563,6 @@
 
 //           {hasReceipt && (
 //             <div className="mt-4">
-//               {/* <Label htmlFor="creditCardLast4">Last 4 digits of credit card used for purchase</Label> */}
 //               <Input
 //                 id="creditCardLast4"
 //                 placeholder="Enter last 4 digits of your credit card"
@@ -476,7 +572,7 @@
 //               />
 //               <div className="pt-5">
 //                 <p className="text-sm text-gray-600 font-medium mb-3">
-//                   Note: <span className="text-[#FF4928]">Additional fee: $8.00 (applies to pay-per-pickup and standard accounts)..</span>
+//                   Note: <span className="text-[#FF4928]">Additional fee: $8.00 (applies to pay-per-pickup and standard accounts).</span>
 //                 </p>
 //                 <p className="text-sm text-[#FF4928]">*Returns to stores that require a physical receipt can only be processed if the item was purchased using a credit card</p>
 //                 <p className="text-sm text-[#FF4928]">*Please provide the last four digits of the credit card used for the purchase.</p>
@@ -485,63 +581,6 @@
 //           )}
 //         </CollapsibleContent>
 //       </Collapsible>
-
-//       {/* Return Shipping Label (Dimensions) */}
-//       {/* <Collapsible
-//         open={openSections.includes("returnShipping")}
-//         onOpenChange={() => toggleSection("returnShipping")}
-//         className="bg-[#F8FAFC] p-4 rounded-lg border"
-//       >
-//         <CollapsibleTrigger className="w-full">
-//           <div className="flex items-center justify-between p-2">
-//             <div className="flex items-center space-x-2">
-//               <PackageIcon className="w-5 h-5 text-gray-600" />
-//               <span className="font-medium text-gray-900">Need a return shipping label?</span>
-//             </div>
-//             <ChevronDown
-//               className={cn(
-//                 "w-5 h-5 text-gray-400 transition-transform",
-//                 openSections.includes("returnShipping") && "rotate-180"
-//               )}
-//             />
-//           </div>
-//         </CollapsibleTrigger>
-//         <CollapsibleContent className="pt-4 px-2">
-//           <RadioGroup onValueChange={(v) => setValue("needShippingLabel", v === "yes")} defaultValue="no">
-//             <div className="flex items-center space-x-6">
-//               <div className="flex items-center space-x-2">
-//                 <RadioGroupItem value="yes" id="rsl-yes" />
-//                 <Label htmlFor="rsl-yes">Yes</Label>
-//               </div>
-//               <div className="flex items-center space-x-2">
-//                 <RadioGroupItem value="no" id="rsl-no" />
-//                 <Label htmlFor="rsl-no">No</Label>
-//               </div>
-//             </div>
-//           </RadioGroup>
-
-//           {needShippingLabel && (
-//             <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-//               <div>
-//                 <Label>Length (inches)</Label>
-//                 <Input type="number" {...register("productLength")} placeholder="30" />
-//               </div>
-//               <div>
-//                 <Label>Width (inches)</Label>
-//                 <Input type="number" {...register("productWidth")} placeholder="20" />
-//               </div>
-//               <div>
-//                 <Label>Height (inches)</Label>
-//                 <Input type="number" {...register("productHeight")} placeholder="15" />
-//               </div>
-//               <div>
-//                 <Label>Weight (lbs)</Label>
-//                 <Input type="number" {...register("productWeight")} placeholder="3" />
-//               </div>
-//             </div>
-//           )}
-//         </CollapsibleContent>
-//       </Collapsible> */}
 
 //       {/* Message Note */}
 //       <Collapsible
@@ -564,10 +603,9 @@
 //           </div>
 //         </CollapsibleTrigger>
 //         <CollapsibleContent className="pt-4 px-2">
+//           <Label>Do you want to leave a message?</Label>
 //           <RadioGroup onValueChange={(v) => setValue("leaveMessage", v === "yes")} defaultValue="no">
-//                <Label>Do you want to leave a message?</Label>
 //             <div className="flex items-center space-x-6 pt-2">
-           
 //               <div className="flex items-center space-x-2">
 //                 <RadioGroupItem value="yes" id="m-yes" />
 //                 <Label htmlFor="m-yes">Yes</Label>
@@ -588,9 +626,6 @@
 //                 className="mt-1"
 //                 {...register("message")}
 //               />
-//               {/* <p className="text-xs text-[#FF4928] mt-2">
-//                 Note : “Add extra $8 fot basic and standard package”
-//               </p> */}
 //             </div>
 //           )}
 //         </CollapsibleContent>
@@ -613,9 +648,7 @@
 //   )
 // }
 
-
-
-/*eslint-disable */
+/* eslint-disable */
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -628,13 +661,29 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
-import { ChevronDown, Upload, Trash2, X, PackageIcon, FileText, Image } from "lucide-react"
+import {
+  ChevronDown,
+  Upload,
+  Trash2,
+  X,
+  Package as PackageIcon,
+  FileText,
+} from "lucide-react"
 import { cn } from "@/lib/utils"
 
-// Updated Zod schema to include physicalReturnLabelFiles
 const packageDetailsSchema = z.object({
   printShippingLabel: z.boolean(),
   hasReceipt: z.boolean(),
@@ -646,13 +695,13 @@ const packageDetailsSchema = z.object({
   productWeight: z.string().optional(),
   leaveMessage: z.boolean(),
   message: z.string().optional(),
-  physicalReturnLabelFiles: z.array(z.any()).optional(), 
 })
 
 type PackageDetailsFormData = z.infer<typeof packageDetailsSchema>
 
 interface StoreData {
   returnStore: string
+  otherStoreName?: string
   numberOfPackages: number
   packageImages: { [key: number]: string[] }
   packageNumbers: { [key: number]: string }
@@ -680,11 +729,16 @@ export function PackageDetailsForm({
 
   const [stores, setStores] = useState<StoreData[]>(
     initialData.stores?.length > 0
-      ? initialData.stores
+      ? initialData.stores.map((s: any) => ({
+          returnStore: s.returnStore || "",
+          otherStoreName: s.otherStoreName || "",
+          numberOfPackages: s.numberOfPackages || 1,
+          packageImages: s.packageImages || {},
+          packageNumbers: s.packageNumbers || {},
+        }))
       : [{ returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} }]
   )
 
-  // State for physical return label files (actual File objects + previews)
   const [physicalReturnLabelFiles, setPhysicalReturnLabelFiles] = useState<
     { file: File; preview?: string }[]
   >(initialData.physicalReturnLabelFiles || [])
@@ -694,7 +748,6 @@ export function PackageDetailsForm({
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
   } = useForm<PackageDetailsFormData>({
     resolver: zodResolver(packageDetailsSchema),
     defaultValues: {
@@ -713,7 +766,6 @@ export function PackageDetailsForm({
 
   const printShippingLabel = watch("printShippingLabel")
   const hasReceipt = watch("hasReceipt")
-  const needShippingLabel = watch("needShippingLabel")
   const leaveMessage = watch("leaveMessage")
 
   const toggleSection = (section: string) => {
@@ -724,7 +776,10 @@ export function PackageDetailsForm({
 
   const addStore = () => {
     const newIndex = stores.length
-    setStores([...stores, { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} }])
+    setStores([
+      ...stores,
+      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },
+    ])
     setOpenSections((prev) => [...prev, `store-${newIndex}`, `packages-${newIndex}`])
   }
 
@@ -734,13 +789,19 @@ export function PackageDetailsForm({
   }
 
   const updateStoreData = (index: number, field: keyof StoreData, value: any) => {
-    const updated = [...stores]
-    // @ts-ignore
-    updated[index][field] = value
-    setStores(updated)
+    setStores((prev) => {
+      const updated = [...prev]
+      // @ts-ignore
+      updated[index][field] = value
+      return updated
+    })
   }
 
-  const handleImageChange = (storeIdx: number, pkgIdx: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (
+    storeIdx: number,
+    pkgIdx: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files
     if (!files || files.length === 0) return
 
@@ -765,15 +826,14 @@ export function PackageDetailsForm({
     })
   }
 
-  // Handle physical return label file uploads
   const handlePhysicalLabelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
 
-    const newFiles = Array.from(files).map((file) => {
-      const preview = file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined
-      return { file, preview }
-    })
+    const newFiles = Array.from(files).map((file) => ({
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+    }))
 
     setPhysicalReturnLabelFiles((prev) => [...prev, ...newFiles])
     e.target.value = ""
@@ -781,7 +841,7 @@ export function PackageDetailsForm({
 
   const removePhysicalLabelFile = (index: number) => {
     setPhysicalReturnLabelFiles((prev) => {
-      URL.revokeObjectURL(prev[index].preview || "")
+      if (prev[index]?.preview) URL.revokeObjectURL(prev[index].preview!)
       return prev.filter((_, i) => i !== index)
     })
   }
@@ -800,7 +860,6 @@ export function PackageDetailsForm({
         </p>
       </div>
 
-      {/* Existing Stores and Packages Code (unchanged) */}
       {stores.map((store, storeIndex) => (
         <div key={storeIndex} className="space-y-4">
           {storeIndex > 0 && (
@@ -820,7 +879,7 @@ export function PackageDetailsForm({
             </div>
           )}
 
-          {/* Return Store Selection */}
+          {/* Store Selection Collapsible */}
           <Collapsible
             open={openSections.includes(`store-${storeIndex}`)}
             onOpenChange={() => toggleSection(`store-${storeIndex}`)}
@@ -830,7 +889,13 @@ export function PackageDetailsForm({
               <div className="flex items-center justify-between p-2">
                 <div className="flex items-center space-x-2">
                   <PackageIcon className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium text-gray-900">Select the return store for your item</span>
+                  <span className="font-medium text-gray-900">
+                    {store.returnStore
+                      ? store.returnStore === "Other"
+                        ? `${store.otherStoreName || "Other Store"}`
+                        : store.returnStore
+                      : "Select return store"}
+                  </span>
                 </div>
                 <ChevronDown
                   className={cn(
@@ -840,23 +905,58 @@ export function PackageDetailsForm({
                 />
               </div>
             </CollapsibleTrigger>
-            <CollapsibleContent className="pt-4 px-2">
-              <Select
-                onValueChange={(value) => updateStoreData(storeIndex, "returnStore", value)}
-                value={store.returnStore}
-              >
-                <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Please select a store" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="AMAZON">AMAZON</SelectItem>
-                  <SelectItem value="STAPLES">STAPLES</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <CollapsibleContent className="pt-4 space-y-6">
+              <div>
+                <Label>Return Store</Label>
+                <Select
+                  value={store.returnStore}
+                  onValueChange={(value) => {
+                    updateStoreData(storeIndex, "returnStore", value)
+                    if (value !== "Other") {
+                      updateStoreData(storeIndex, "otherStoreName", "")
+                    }
+                  }}
+                >
+                  <SelectTrigger className="bg-white mt-1">
+                    <SelectValue placeholder="Please select a store" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="STAPLES">Staples</SelectItem>
+                    <SelectItem value="KOHLS">Kohl's</SelectItem>
+                    <SelectItem value="SHEIN">Shein Return</SelectItem>
+                    <SelectItem value="TARGET">Target</SelectItem>
+                    <SelectItem value="WALMART">Walmart</SelectItem>
+                    <SelectItem value="HOME_DEPOT">Home Depot</SelectItem>
+                    <SelectItem value="UPS">UPS Drop Off</SelectItem>
+                    <SelectItem value="USPS">USPS Drop Off</SelectItem>
+                    <SelectItem value="FEDEX">FedEx Drop Off</SelectItem>
+                    <SelectItem value="Other">Other (Please specify)</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Other Store Name Input – Inside the same section */}
+                {store.returnStore === "Other" && (
+                  <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Label htmlFor={`other-store-${storeIndex}`}>
+                      Please specify the store name
+                    </Label>
+                    <Input
+                      id={`other-store-${storeIndex}`}
+                      placeholder="e.g. Macy's, Best Buy, Nike"
+                      className="mt-1"
+                      value={store.otherStoreName || ""}
+                      onChange={(e) =>
+                        updateStoreData(storeIndex, "otherStoreName", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+              </div>
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Number of Packages + Package Details */}
+          {/* Number of Packages */}
           <Collapsible
             open={openSections.includes(`packages-${storeIndex}`)}
             onOpenChange={() => toggleSection(`packages-${storeIndex}`)}
@@ -866,7 +966,9 @@ export function PackageDetailsForm({
               <div className="flex items-center justify-between p-2">
                 <div className="flex items-center space-x-2">
                   <PackageIcon className="w-5 h-5 text-gray-600" />
-                  <span className="font-medium text-gray-900">Number of Packages</span>
+                  <span className="font-medium text-gray-900">
+                    Number of Packages ({store.numberOfPackages})
+                  </span>
                 </div>
                 <ChevronDown
                   className={cn(
@@ -876,18 +978,19 @@ export function PackageDetailsForm({
                 />
               </div>
             </CollapsibleTrigger>
+
             <CollapsibleContent className="pt-4 px-2">
               <p className="text-sm text-gray-600 mb-3">
                 How many packages are you returning to this store?
               </p>
               <Select
+                value={store.numberOfPackages.toString()}
                 onValueChange={(value) =>
                   updateStoreData(storeIndex, "numberOfPackages", parseInt(value))
                 }
-                value={store.numberOfPackages.toString()}
               >
                 <SelectTrigger className="bg-white">
-                  <SelectValue placeholder="Select number" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {[1, 2, 3, 4, 5].map((num) => (
@@ -906,9 +1009,7 @@ export function PackageDetailsForm({
                         <div className="w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-sm font-bold">
                           {pkgIndex + 1}
                         </div>
-                        <span className="font-medium text-gray-900">
-                          Package {pkgIndex + 1}
-                        </span>
+                        <span className="font-medium text-gray-900">Package {pkgIndex + 1}</span>
                       </div>
                     </div>
 
@@ -919,10 +1020,12 @@ export function PackageDetailsForm({
                           placeholder="e.g. PKG-001"
                           className="mt-1"
                           value={store.packageNumbers[pkgIndex] || ""}
-                          onChange={(e) => {
-                            const updated = { ...store.packageNumbers, [pkgIndex]: e.target.value }
-                            updateStoreData(storeIndex, "packageNumbers", updated)
-                          }}
+                          onChange={(e) =>
+                            updateStoreData(storeIndex, "packageNumbers", {
+                              ...store.packageNumbers,
+                              [pkgIndex]: e.target.value,
+                            })
+                          }
                         />
                       </div>
 
@@ -957,8 +1060,7 @@ export function PackageDetailsForm({
                                 htmlFor={`img-${storeIndex}-${pkgIndex}`}
                                 className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
                               >
-                                <Upload className="w-4 h-4 mr-2" />
-                                Replace Image
+                                <Upload className="w-4 h-4 mr-2" /> Replace Image
                               </label>
                             </div>
                           ) : (
@@ -1021,7 +1123,7 @@ export function PackageDetailsForm({
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Physical Return Label - Now with File Upload */}
+      {/* Physical Return Label */}
       <Collapsible
         open={openSections.includes("shippingLabel")}
         onOpenChange={() => toggleSection("shippingLabel")}
@@ -1045,9 +1147,15 @@ export function PackageDetailsForm({
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-4 px-2">
           <p className="text-sm text-gray-600 font-medium mb-3">
-            Note: <span className="text-[#FF4928]">Additional fee: $3.50 (applies to pay-per-package and standard accounts).</span>
+            Note:{" "}
+            <span className="text-[#FF4928]">
+              Additional fee: $3.50 (applies to pay-per-package and standard accounts).
+            </span>
           </p>
-          <RadioGroup onValueChange={(v) => setValue("printShippingLabel", v === "yes")} defaultValue="no">
+          <RadioGroup
+            onValueChange={(v) => setValue("printShippingLabel", v === "yes")}
+            defaultValue="no"
+          >
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="psl-yes" />
@@ -1076,7 +1184,10 @@ export function PackageDetailsForm({
                 {physicalReturnLabelFiles.length > 0 ? (
                   <div className="space-y-3">
                     {physicalReturnLabelFiles.map((item, idx) => (
-                      <div key={idx} className="relative flex items-center gap-3 p-3 border rounded-lg bg-white">
+                      <div
+                        key={idx}
+                        className="relative flex items-center gap-3 p-3 border rounded-lg bg-white"
+                      >
                         {item.preview ? (
                           <img
                             src={item.preview}
@@ -1108,8 +1219,7 @@ export function PackageDetailsForm({
                       htmlFor="physical-return-labels"
                       className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
                     >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Add More Files
+                      <Upload className="w-4 h-4 mr-2" /> Add More Files
                     </label>
                   </div>
                 ) : (
@@ -1119,7 +1229,9 @@ export function PackageDetailsForm({
                   >
                     <Upload className="w-12 h-12 text-gray-400 mb-4" />
                     <p className="text-sm text-gray-600">Click to upload return label files</p>
-                    <p className="text-xs text-gray-500 mt-1">Supports images and PDFs (multiple allowed)</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Supports images and PDFs (multiple allowed)
+                    </p>
                   </label>
                 )}
               </div>
@@ -1127,9 +1239,6 @@ export function PackageDetailsForm({
           )}
         </CollapsibleContent>
       </Collapsible>
-
-      {/* Other Collapsibles (Receipt, Message, etc.) remain unchanged */}
-      {/* ... (hasReceipt, message, etc.) ... */}
 
       {/* Physical Receipt */}
       <Collapsible
@@ -1154,7 +1263,10 @@ export function PackageDetailsForm({
           </div>
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-4 px-2">
-          <RadioGroup onValueChange={(v) => setValue("hasReceipt", v === "yes")} defaultValue="no">
+          <RadioGroup
+            onValueChange={(v) => setValue("hasReceipt", v === "yes")}
+            defaultValue="no"
+          >
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="r-yes" />
@@ -1170,7 +1282,6 @@ export function PackageDetailsForm({
           {hasReceipt && (
             <div className="mt-4">
               <Input
-                id="creditCardLast4"
                 placeholder="Enter last 4 digits of your credit card"
                 maxLength={4}
                 className="mt-1 bg-white w-full"
@@ -1178,17 +1289,21 @@ export function PackageDetailsForm({
               />
               <div className="pt-5">
                 <p className="text-sm text-gray-600 font-medium mb-3">
-                  Note: <span className="text-[#FF4928]">Additional fee: $8.00 (applies to pay-per-pickup and standard accounts).</span>
+                  Note:{" "}
+                  <span className="text-[#FF4928]">
+                    Additional fee: $8.00 (applies to pay-per-pickup and standard accounts).
+                  </span>
                 </p>
-                <p className="text-sm text-[#FF4928]">*Returns to stores that require a physical receipt can only be processed if the item was purchased using a credit card</p>
-                <p className="text-sm text-[#FF4928]">*Please provide the last four digits of the credit card used for the purchase.</p>
+                <p className="text-sm text-[#FF4928]">
+                  *Returns requiring a physical receipt must be purchased with a credit card.
+                </p>
               </div>
             </div>
           )}
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Message Note */}
+      {/* Message */}
       <Collapsible
         open={openSections.includes("message")}
         onOpenChange={() => toggleSection("message")}
@@ -1198,7 +1313,7 @@ export function PackageDetailsForm({
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center space-x-2">
               <PackageIcon className="w-5 h-5 text-gray-600" />
-              <span className="font-medium text-gray-900">Message System</span>
+              <span className="font-medium text-gray-900">Leave a Message (Optional)</span>
             </div>
             <ChevronDown
               className={cn(
@@ -1210,7 +1325,10 @@ export function PackageDetailsForm({
         </CollapsibleTrigger>
         <CollapsibleContent className="pt-4 px-2">
           <Label>Do you want to leave a message?</Label>
-          <RadioGroup onValueChange={(v) => setValue("leaveMessage", v === "yes")} defaultValue="no">
+          <RadioGroup
+            onValueChange={(v) => setValue("leaveMessage", v === "yes")}
+            defaultValue="no"
+          >
             <div className="flex items-center space-x-6 pt-2">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="yes" id="m-yes" />
@@ -1225,10 +1343,9 @@ export function PackageDetailsForm({
 
           {leaveMessage && (
             <div className="mt-4">
-              <p className="text-sm pb-2">Optional notes box</p>
               <Textarea
                 rows={4}
-                placeholder="Write Here"
+                placeholder="Write your message here..."
                 className="mt-1"
                 {...register("message")}
               />
@@ -1237,7 +1354,7 @@ export function PackageDetailsForm({
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Buttons */}
+      {/* Submit Buttons */}
       <div className="flex flex-col md:flex-row gap-4 justify-between pt-8 border-t">
         <Button type="button" variant="outline" onClick={onBack} disabled={isSubmitting}>
           Back
@@ -1247,7 +1364,7 @@ export function PackageDetailsForm({
           disabled={isSubmitting}
           className="bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white px-10 h-12"
         >
-          {isSubmitting ? "Submit Request..." : "Submit Request"}
+          {isSubmitting ? "Submitting Request..." : "Submit Request"}
         </Button>
       </div>
     </form>

@@ -153,7 +153,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+    <div className="lg:h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-2">
       {/* Left Image Section */}
       <div className="hidden lg:block relative">
         <Image src="/delivery-van.png" alt="Ez Returns delivery van" fill className="object-cover" priority />
@@ -167,7 +167,7 @@ export default function SignUpPage() {
             <h1 className="text-3xl font-semibold text-[#131313]">Create an account for Driver</h1>
           </div>
 
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>First Name *</Label>

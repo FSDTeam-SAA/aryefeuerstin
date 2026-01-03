@@ -92,8 +92,8 @@ export default function NewPassword() {
         </div>
 
         {/* Right Form */}
-        <div className="flex items-center justify-center bg-gray-50 px-6 py-12">
-          <div className="w-full max-w-3xl p-8 rounded-xl space-y-6">
+        <div className="flex items-center justify-center bg-gray-50 lg:px-6 py-12">
+          <div className="w-full max-w-3xl lg:p-8 p-6 rounded-xl space-y-6">
             
             {/* Header */}
             <div className="text-center space-y-1">

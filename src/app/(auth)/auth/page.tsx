@@ -26,7 +26,7 @@ export default function Home() {
                 </div>
 
                 {/* Logo */}
-                <div className="mb-8 md:mb-12 w-[345px] h-[440px]">
+                <div className="mb-8 md:mb-12 w-[345px] lg:h-[440px] h-[340px]">
                     <Image src="/logo.png" alt="Logo" width={1000} height={1000} className="w-full h-full object-cover" />
                 </div>
 

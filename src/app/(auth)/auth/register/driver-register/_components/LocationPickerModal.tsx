@@ -186,39 +186,40 @@ export default function LocationPickerModal({
           }}
         >
           {/* Search Box and My Location Button */}
-          <div className="absolute top-3 left-3 z-10 flex gap-2">
-            <StandaloneSearchBox
-              onLoad={(ref) => setSearchBox(ref)}
-              onPlacesChanged={handlePlacesChanged}
-            >
-              <input
-                type="text"
-                placeholder="Search for address..."
-                className="w-72 h-10 px-3 rounded border border-gray-300 shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                style={{
-                  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-                }}
-              />
-            </StandaloneSearchBox>
+         <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-10 flex flex-col sm:flex-row gap-2 w-full max-w-md px-3">
+  <StandaloneSearchBox
+    onLoad={(ref) => setSearchBox(ref)}
+    onPlacesChanged={handlePlacesChanged}
+  >
+    <input
+      type="text"
+      placeholder="Search for address..."
+      className="w-full h-10 px-3 rounded border border-gray-300 shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      style={{
+        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+      }}
+    />
+  </StandaloneSearchBox>
 
-            {/* My Location Button */}
-            <button
-              type="button"
-              onClick={handleGetMyLocation}
-              disabled={isGettingLocation}
-              className="h-10 px-4 rounded bg-white border border-gray-300 shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-              }}
-            >
-              {isGettingLocation ? (
-                <Loader2 className="animate-spin text-blue-500" size={18} />
-              ) : (
-                <MapPin className="text-blue-500" size={18} />
-              )}
-              <span className="text-sm font-medium text-gray-700">My Location</span>
-            </button>
-          </div>
+  {/* My Location Button */}
+  <button
+    type="button"
+    onClick={handleGetMyLocation}
+    disabled={isGettingLocation}
+    className="w-full h-10 px-3 rounded bg-white border border-gray-300 shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+    style={{
+      boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+    }}
+  >
+    {isGettingLocation ? (
+      <Loader2 className="animate-spin text-blue-500" size={18} />
+    ) : (
+      <MapPin className="text-blue-500" size={18} />
+    )}
+    <span className="text-sm font-medium text-gray-700">My Location</span>
+  </button>
+</div>
+
 
           {/* Marker */}
           <Marker position={position} />

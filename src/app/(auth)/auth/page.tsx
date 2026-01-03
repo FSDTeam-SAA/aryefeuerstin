@@ -37,8 +37,19 @@ export default function Home() {
 
                     <Button
                         asChild
+                        variant="outline"
                         size="lg"
-                        className="min-w-[180px] bg-[#31B8FA] px-6 h-[48px] text-sm font-medium text-white hover:bg-[#31B8FA]/90 sm:min-w-[200px] sm:px-8 sm:text-base"
+                        className="min-w-[180px] bg-[#31B8FA] px-6 h-[48px] text-sm font-medium text-white hover:bg-[#31B8FA]/90 sm:min-w-[200px] sm:px-8 sm:text-base   "
+                    >
+                        <Link href="/auth/register/user-register">
+                            User Registration
+                        </Link>
+                    </Button>
+
+                    <Button
+                        asChild
+                        size="lg"
+                        className="min-w-[180px] border-2 border-[#31B8FA] bg-transparent px-6 h-[48px] text-sm font-medium text-white hover:bg-transparent  hover:text-white sm:min-w-[200px] sm:px-8 sm:text-base"
                     >
                         <Link href="/auth/register/driver-register">
                             Driver Registration
@@ -46,16 +57,7 @@ export default function Home() {
                     </Button>
 
 
-                    <Button
-                        asChild
-                        variant="outline"
-                        size="lg"
-                        className="min-w-[180px] border-2 border-[#31B8FA] bg-transparent px-6 h-[48px] text-sm font-medium text-white hover:bg-transparent  hover:text-white sm:min-w-[200px] sm:px-8 sm:text-base"
-                    >
-                        <Link href="/auth/register/user-register">
-                            User Registration
-                        </Link>
-                    </Button>
+                    
                 </div>
             </div>
         </div>

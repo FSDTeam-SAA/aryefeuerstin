@@ -13,14 +13,13 @@ interface DataProps {
 interface LocationPickerModalProps {
   onSelect: (val: DataProps) => void;
   onClose?: () => void;
-  initialLocation?: DataProps | null; // ← Add this prop
+  initialLocation?: DataProps | null;
 }
 
 const libraries: ("places")[] = ["places"];
 
 export default function LocationPickerModal({
   onSelect,
- 
   initialLocation,
 }: LocationPickerModalProps) {
   const { isLoaded } = useLoadScript({
@@ -40,7 +39,6 @@ export default function LocationPickerModal({
   const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
-  // Sync position and tempLocation when initialLocation changes (e.g., reopening modal)
   useEffect(() => {
     if (initialLocation) {
       setPosition({ lat: initialLocation.lat, lng: initialLocation.lng });
@@ -160,7 +158,7 @@ export default function LocationPickerModal({
         },
         (error) => {
           setIsGettingLocation(false);
-          alert("Unable to retrieve your location. "+error.message);
+          alert("Unable to retrieve your location. " + error.message);
         }
       );
     } else {
@@ -191,7 +189,8 @@ export default function LocationPickerModal({
             zoomControl: true,
           }}
         >
-          <div className="absolute top-3 left-3 z-10 flex gap-2">
+          {/* Responsive Search Box + My Location Button */}
+          <div className="absolute top-3 left-3 z-10 flex flex-col sm:flex-row gap-2 w-[calc(100%-1rem)] sm:w-auto">
             <StandaloneSearchBox
               onLoad={(ref) => setSearchBox(ref)}
               onPlacesChanged={handlePlacesChanged}
@@ -199,7 +198,7 @@ export default function LocationPickerModal({
               <input
                 type="text"
                 placeholder="Search for address..."
-                className="w-72 h-10 px-3 rounded border border-gray-300 shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full sm:w-72 h-10 px-3 rounded border border-gray-300 shadow-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}
               />
             </StandaloneSearchBox>
@@ -208,7 +207,7 @@ export default function LocationPickerModal({
               type="button"
               onClick={handleGetMyLocation}
               disabled={isGettingLocation}
-              className="h-10 px-4 rounded bg-white border border-gray-300 shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto h-10 px-4 rounded bg-white border border-gray-300 shadow-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}
             >
               {isGettingLocation ? (

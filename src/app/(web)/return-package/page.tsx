@@ -229,6 +229,7 @@ export default function PackageReturnService() {
       toast.error(error.message || "Submission failed")
     } finally {
       setIsSubmitting(false)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 

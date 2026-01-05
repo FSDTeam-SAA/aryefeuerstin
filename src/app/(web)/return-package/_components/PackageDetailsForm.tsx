@@ -128,7 +128,7 @@ export function PackageDetailsForm({
     const newIndex = stores.length
     setStores([
       ...stores,
-      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },
+      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },  
     ])
     setOpenSections((prev) => [...prev, `store-${newIndex}`, `packages-${newIndex}`])
   }

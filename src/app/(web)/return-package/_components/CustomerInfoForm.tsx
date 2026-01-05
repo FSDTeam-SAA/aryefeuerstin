@@ -81,6 +81,7 @@ export function CustomerInfoForm({
 
   const onSubmit: SubmitHandler<CustomerInfoFormData> = (data) => {
     onNext(data)
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleMapSelect = ({ address, lat, lng }: { address: string; lat: number; lng: number }) => {

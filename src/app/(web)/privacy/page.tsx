@@ -144,8 +144,8 @@ export default function PrivacyPage() {
             <p className="mt-3 leading-relaxed text-sm sm:text-base">To exercise these rights,</p>
             <p className="leading-relaxed text-sm sm:text-base">
               contact us at{" "}
-              <a href="mailto:info@wellnessmadeclear.com" className="text-blue-600 hover:underline">
-                info@wellnessmadeclear.com
+              <a href="mailto:ezreturn123@gmail.com" className="text-blue-600 hover:underline">
+                ezreturn123@gmail.com
               </a>
             </p>
           </section>
@@ -166,8 +166,8 @@ export default function PrivacyPage() {
             <div className="space-y-1 text-sm sm:text-base">
               <p className="leading-relaxed">
                 📧 Email:{" "}
-                <a href="mailto:info@wellnessmadeclear.com" className="text-blue-600 hover:underline">
-                  info@wellnessmadeclear.com
+                <a href="mailto:ezreturn123@gmail.com" className="text-blue-600 hover:underline">
+                  ezreturn123@gmail.com
                 </a>
               </p>
               <p className="leading-relaxed">Mailing Address: 14021 Haylam Drive, Suite #2651, Chino Hills, CA 91709</p>

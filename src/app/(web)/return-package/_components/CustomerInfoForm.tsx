@@ -143,39 +143,8 @@ export function CustomerInfoForm({
           </div>
         </div>
 
-        {/* Pickup Address */}
-        <div className="space-y-2">
-          <Label htmlFor="pickupAddress">Pickup Address</Label>
-          <div className="relative">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              id="pickupAddress"
-              placeholder="Click to select on map..."
-              className={`${inputClass} pl-10 cursor-pointer bg-gray-50`}
-              {...register("pickupAddress")}
-              readOnly
-              onClick={() => setShowMap(true)}
-            />
-          </div>
-          {errors.pickupAddress && <p className="text-sm text-red-500">{errors.pickupAddress.message}</p>}
-        </div>
-
         {/* Phone & Email */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                id="phoneNumber"
-                placeholder="+876 1327951614"
-                className={`${inputClass} pl-10`}
-                {...register("phoneNumber")}
-              />
-            </div>
-            {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <div className="relative">
@@ -190,6 +159,36 @@ export function CustomerInfoForm({
             </div>
             {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                id="phoneNumber"
+                placeholder="+876 1327951614"
+                className={`${inputClass} pl-10`}
+                {...register("phoneNumber")}
+              />
+            </div>
+            {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>}
+          </div>
+        </div>
+
+            {/* Pickup Address */}
+        <div className="space-y-2">
+          <Label htmlFor="pickupAddress">Pickup Address</Label>
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              id="pickupAddress"
+              placeholder="Click to select on map..."
+              className={`${inputClass} pl-10 cursor-pointer bg-gray-50`}
+              {...register("pickupAddress")}
+              readOnly
+              onClick={() => setShowMap(true)}
+            />
+          </div>
+          {errors.pickupAddress && <p className="text-sm text-red-500">{errors.pickupAddress.message}</p>}
         </div>
 
         {/* Unit / Apt */}
@@ -215,16 +214,15 @@ export function CustomerInfoForm({
             {errors.street && <p className="text-sm text-red-500">{errors.street.message}</p>}
           </div>
 
-           <div className="space-y-2">
-            <Label htmlFor="zipCode">Zip code</Label>
-            <Input id="zipCode" placeholder="10001" className={inputClass} {...register("zipCode")} />
-            {errors.zipCode && <p className="text-sm text-red-500">{errors.zipCode.message}</p>}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
             <Input id="city" placeholder="New York" className={inputClass} {...register("city")} />
             {errors.city && <p className="text-sm text-red-500">{errors.city.message}</p>}
+          </div>
+              <div className="space-y-2">
+            <Label htmlFor="zipCode">Zip code</Label>
+            <Input id="zipCode" placeholder="10001" className={inputClass} {...register("zipCode")} />
+            {errors.zipCode && <p className="text-sm text-red-500">{errors.zipCode.message}</p>}
           </div>
         </div>
 

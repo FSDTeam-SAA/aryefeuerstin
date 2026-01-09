@@ -272,9 +272,9 @@ export function PackageDetailsForm({
                     <SelectItem value="KOHLS">Kohl's</SelectItem>
                     <SelectItem value="SHEIN">Shein Return</SelectItem>
                     <SelectItem value="TARGET">Target</SelectItem>
+                    {/* <SelectItem value="WALMART">Walmart</SelectItem> */}
                     <SelectItem value="WALMART">Walmart</SelectItem>
-                    <SelectItem value="WALMART">Walmart</SelectItem>
-                    <SelectItem value="WHOLE FOODS MARKET">WHOLE FOODS MARKET</SelectItem>
+                    <SelectItem value="WHOLE FOODS MARKET">Whole Foods Market</SelectItem>
                     <SelectItem value="UPS">UPS Drop Off</SelectItem>
                     <SelectItem value="USPS">USPS Drop Off</SelectItem>
                     <SelectItem value="FEDEX">FedEx Drop Off</SelectItem>

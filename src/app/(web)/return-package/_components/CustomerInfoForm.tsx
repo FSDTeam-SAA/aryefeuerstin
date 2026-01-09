@@ -191,7 +191,18 @@ export function CustomerInfoForm({
           {errors.pickupAddress && <p className="text-sm text-red-500">{errors.pickupAddress.message}</p>}
         </div>
 
-        {/* Unit / Apt */}
+       
+
+         <div className="space-y-2">
+            <Label htmlFor="street">Street</Label>
+            <Input id="street" placeholder="Main Street" className={inputClass} {...register("street")} />
+            {errors.street && <p className="text-sm text-red-500">{errors.street.message}</p>}
+          </div>
+
+        {/* Address Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+         
+          {/* Unit / Apt */}
         <div className="space-y-2">
           <Label htmlFor="unit">Unit </Label>
           <div className="relative">
@@ -204,15 +215,6 @@ export function CustomerInfoForm({
             />
           </div>
         </div>
-
-        {/* Address Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-         
-          <div className="space-y-2">
-            <Label htmlFor="street">Street</Label>
-            <Input id="street" placeholder="Main Street" className={inputClass} {...register("street")} />
-            {errors.street && <p className="text-sm text-red-500">{errors.street.message}</p>}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>

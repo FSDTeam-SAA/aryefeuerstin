@@ -237,7 +237,7 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-1.5 block text-sm sm:text-base">Pickup Address <span className="text-[#8C311E]">*</span></Label>
+                  <Label className="mb-1.5 block text-sm sm:text-base">Address <span className="text-[#8C311E]">*</span></Label>
                   <Input 
                     name="pickupAddress" 
                     value={formData.pickupAddress} 

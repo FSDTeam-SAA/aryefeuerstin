@@ -362,8 +362,8 @@ export function PackageDetailsForm({
 
                     <div className="space-y-4">
                       <div>
-                        <Label>Package Number / Tracking Number</Label>
-                        <Input
+                        {/* <Label>Package Number / Tracking Number</Label> */}
+                        {/* <Input
                           placeholder="e.g. PKG-001"
                           className="mt-1"
                           value={store.packageNumbers[pkgIndex] || ""}
@@ -373,7 +373,7 @@ export function PackageDetailsForm({
                               [pkgIndex]: e.target.value,
                             })
                           }
-                        />
+                        /> */}
                       </div>
 
                       <div>

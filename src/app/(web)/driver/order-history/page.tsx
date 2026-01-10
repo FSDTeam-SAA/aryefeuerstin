@@ -25,8 +25,8 @@ interface OrderAssignment {
   _id: string
   status: string
   customer: {
-    firstName: string
-    lastName: string
+    fullName: string
+    // lastName: string
     pickupLocation: {
       address: string
     }
@@ -202,7 +202,7 @@ export default function OrderRequestsPage() {
                           Job #{order._id.slice(-4).toUpperCase()}
                         </p>
                         <h3 className="text-lg font-semibold text-gray-900">
-                          {order.customer.firstName} {order.customer.lastName}
+                          {order.customer.fullName}
                         </h3>
                       </div>
                     </div>

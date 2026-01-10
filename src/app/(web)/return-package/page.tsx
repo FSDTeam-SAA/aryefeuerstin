@@ -1,7 +1,3 @@
-
-
-
-
 /* eslint-disable */
 "use client"
 
@@ -27,12 +23,12 @@ export default function PackageReturnService() {
   const [orderResponse, setOrderResponse] = useState<any>(null)
 
   const [formData, setFormData] = useState<any>({
-    firstName: "",
-    lastName: "",
+    fullName: "",
     phoneNumber: "",
     email: "",
     zipCode: "",
     street: "",
+    state: "",
     city: "",
     unit: "", // ← NEW: Added unit field
     pickupAddress: "",
@@ -83,13 +79,14 @@ export default function PackageReturnService() {
       const formDataToSend = new FormData()
 
       // Customer info
-      formDataToSend.append("firstName", updatedData.firstName)
-      formDataToSend.append("lastName", updatedData.lastName)
+      formDataToSend.append("fullName", updatedData.fullName)
+      // formDataToSend.append("lastName", updatedData.lastName)
       formDataToSend.append("phone", updatedData.phoneNumber)
       formDataToSend.append("email", updatedData.email)
       formDataToSend.append("unit", updatedData.unit || "") // ← NEW: Send unit to backend
       formDataToSend.append("zipCode", updatedData.zipCode || "")
       formDataToSend.append("street", updatedData.street || "")
+      formDataToSend.append("state", updatedData.state || "")
       formDataToSend.append("city", updatedData.city || "")
       formDataToSend.append("pickupInstructions", updatedData.pickupInstructions || "")
       formDataToSend.append("address", fullAddress)

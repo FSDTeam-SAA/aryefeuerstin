@@ -699,8 +699,15 @@ interface Customer {
   firstName: string
   lastName: string
   phone: string
+  email?: string
   address?: { street: string; city: string; zipCode: string }
   pickupLocation?: { address: string }
+  pickupInstructions?: string
+}
+
+interface MessageOption {
+  enabled: boolean
+  note: string
 }
 
 interface ReturnOrderData {
@@ -714,9 +721,11 @@ interface ReturnOrderData {
   }[]
   options: {
     physicalReturnLabel: { enabled: boolean; labelFiles: string[] }
+    message?: MessageOption
   }
   _id: string
   paymentStatus: string
+  status: string
 }
 
 const fetchReturnOrder = async (orderId: string, token: string): Promise<ReturnOrderData> => {
@@ -724,6 +733,7 @@ const fetchReturnOrder = async (orderId: string, token: string): Promise<ReturnO
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   })
   const result = await res.json()
+  if (!result.data) throw new Error("Failed to load order")
   return result.data
 }
 
@@ -757,25 +767,38 @@ export default function JobDetailsPage() {
   // --- PDF GENERATOR FOR ANY PRINTER ---
   const handlePrintAsPDF = async (pkg: PackageInfo | 'return-label') => {
     setIsGenerating(true)
-    const toastId = toast.loading("Generating Label PDF...")
+    const toastId = toast.loading("Generating high-quality label...")
+
+    let targetPkg: PackageInfo
 
     // Set active package
     if (pkg === 'return-label') {
-      setActivePkg({ id: 'Shipping Label', store: 'Return Label', barcodeImage: returnLabelImage || '' })
+      if (!returnLabelImage) {
+        toast.error("Return label not available", { id: toastId })
+        setIsGenerating(false)
+        return
+      }
+      targetPkg = { id: 'Shipping Label', store: 'Return Label', barcodeImage: returnLabelImage }
     } else {
-      setActivePkg(pkg)
+      if (!pkg.barcodeImage) {
+        toast.error("No barcode available", { id: toastId })
+        setIsGenerating(false)
+        return
+      }
+      targetPkg = pkg
     }
 
     setTimeout(async () => {
       try {
         const element = pdfTemplateRef.current
-        if (!element) return
+        if (!element) throw new Error("Template not found")
 
         const canvas = await html2canvas(element, {
           scale: 3,
           useCORS: true,
           backgroundColor: "#ffffff",
-          logging: false
+          logging: false,
+          allowTaint: false,
         })
 
         const imgData = canvas.toDataURL("image/png")
@@ -801,19 +824,26 @@ export default function JobDetailsPage() {
 
         if (printWindow) {
           printWindow.onload = () => {
-            printWindow.print()
-            URL.revokeObjectURL(url)
+            setTimeout(() => printWindow.print(), 800)
           }
+          setTimeout(() => {
+            if (!printWindow.closed) printWindow.print()
+          }, 2000)
+          toast.success("Print dialog opened!", { id: toastId })
+        } else {
+          pdf.save(`Label_${targetPkg.id.replace(/\s/g, '_')}.pdf`)
+          toast.success("PDF downloaded – open and print", { id: toastId })
         }
 
         toast.success("Ready to print", { id: toastId })
       } catch (err) {
         console.error(err)
-        toast.error("PDF generation failed.", { id: toastId })
+        toast.error("Failed to generate PDF", { id: toastId })
       } finally {
         setIsGenerating(false)
+        setActivePkg(null)
       }
-    }, 800)
+    }, 1000)
   }
 
   const handleCopy = (text: string, label: string) => {
@@ -823,10 +853,6 @@ export default function JobDetailsPage() {
 
   if (isLoading || sessionStatus === "loading") return <JobDetailsSkeleton />
   if (!orderData) return null
-
-  const customer = orderData.customer
-  const fullName = `${customer.firstName} ${customer.lastName}`.trim()
-  const address = customer.pickupLocation?.address || "N/A"
 
   return (
     <>
@@ -902,17 +928,64 @@ export default function JobDetailsPage() {
                       <span className="text-sm font-medium text-gray-600">{customer.phone}</span>
                     </div>
                     <button
-                      onClick={() => handleCopy(customer.phone, "Phone number")}
-                      className="flex w-fit items-center gap-1.5 rounded-md border border-sky-400 bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-tight text-sky-500 hover:bg-sky-50 transition-colors"
+                      onClick={() => handleCopy(address, "Address")}
+                      className="ml-4 flex items-center gap-1.5 rounded-md border border-sky-400 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight text-sky-500 hover:bg-sky-50 transition-colors"
                     >
-                      <Copy className="h-3 w-3" /> (copy)
+                      <Copy className="h-3 w-3" /> Copy
                     </button>
                   </div>
-                )}
+
+                  {customer?.phone && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Phone className="h-4 w-4 shrink-0 text-gray-400" />
+                        <span className="text-sm font-medium text-gray-600">{customer.phone}</span>
+                      </div>
+                      <button
+                        onClick={() => handleCopy(customer.phone, "Phone number")}
+                        className="ml-4 flex items-center gap-1.5 rounded-md border border-sky-400 bg-white px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight text-sky-500 hover:bg-sky-50 transition-colors"
+                      >
+                        <Copy className="h-3 w-3" /> Copy
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right: Instructions & Message */}
+                <div className="space-y-5">
+                  {pickupInstructions && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileText className="h-4 w-4 text-gray-400" />
+                        <span className="text-xs font-bold uppercase text-gray-500">Pickup Instructions</span>
+                      </div>
+                      <p className="text-sm text-gray-700 bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+                        {pickupInstructions}
+                      </p>
+                    </div>
+                  )}
+
+                  {customerMessage && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <MessageSquare className="h-4 w-4 text-gray-400" />
+                        <span className="text-xs font-bold uppercase text-gray-500">Customer Message</span>
+                      </div>
+                      <p className="text-sm text-gray-700 bg-blue-50 px-4 py-3 rounded-lg border border-blue-200">
+                        {customerMessage}
+                      </p>
+                    </div>
+                  )}
+
+                  {!pickupInstructions && !customerMessage && (
+                    <p className="text-sm text-gray-400 italic">No additional instructions or messages.</p>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
 
+          {/* RETURN LABEL */}
           {returnLabelImage && (
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
@@ -935,9 +1008,10 @@ export default function JobDetailsPage() {
             </div>
           )}
 
+          {/* PACKAGES */}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-sm font-bold uppercase text-gray-500">Packages ({allPackages.length})</h2>
-            {allPackages.length > 0 && (
+            {allPackages.length > 0 && allPackages[0].barcodeImage && (
               <Button onClick={() => handlePrintAsPDF(allPackages[0])} disabled={isGenerating} variant="outline" size="sm">
                 <Printer className="h-4 w-4 mr-2" /> Print PDF
               </Button>
@@ -964,6 +1038,9 @@ export default function JobDetailsPage() {
                 >
                   {pkg.barcodeImage ? (
                     <Image
+                      src={pkg.barcodeImage}
+                      crossOrigin="anonymous"
+                      alt="barcode"
                       width={1000}
                       height={1000}
                       src={pkg.barcodeImage}
@@ -975,7 +1052,8 @@ export default function JobDetailsPage() {
                     <div className="h-12 w-48 bg-gray-200 rounded border-dashed border-2" />
                   )}
                   <span className="text-[10px] font-bold uppercase text-gray-400 mt-2 group-hover:text-sky-600 flex items-center gap-1">
-                    <Printer className="h-3 w-3" /> {isGenerating && activePkg?.id === pkg.id ? 'Creating...' : 'Print Label PDF'}
+                    <Printer className="h-3 w-3" />
+                    {isGenerating && activePkg?.id === pkg.id ? 'Creating...' : 'Print Label PDF'}
                   </span>
                 </button>
               </Card>

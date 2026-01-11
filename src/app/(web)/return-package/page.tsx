@@ -1,3 +1,7 @@
+
+
+
+
 /* eslint-disable */
 "use client"
 
@@ -30,6 +34,7 @@ export default function PackageReturnService() {
     zipCode: "",
     street: "",
     city: "",
+    unit: "", // ← NEW: Added unit field
     pickupAddress: "",
     pickupInstructions: "",
     lat: undefined,
@@ -73,7 +78,7 @@ export default function PackageReturnService() {
 
     try {
       const fullAddress =
-        updatedData.pickupAddress || `${updatedData.street}, ${updatedData.city}, USA`
+        updatedData.pickupAddress || `${updatedData.street}${updatedData.unit ? ` ${updatedData.unit}` : ""}, ${updatedData.city}, USA`
 
       const formDataToSend = new FormData()
 
@@ -82,6 +87,7 @@ export default function PackageReturnService() {
       formDataToSend.append("lastName", updatedData.lastName)
       formDataToSend.append("phone", updatedData.phoneNumber)
       formDataToSend.append("email", updatedData.email)
+      formDataToSend.append("unit", updatedData.unit || "") // ← NEW: Send unit to backend
       formDataToSend.append("zipCode", updatedData.zipCode || "")
       formDataToSend.append("street", updatedData.street || "")
       formDataToSend.append("city", updatedData.city || "")
@@ -113,7 +119,7 @@ export default function PackageReturnService() {
         formDataToSend.append("messageNote", updatedData.message || "")
       }
 
-      // === FIXED & CORRECTED: Map frontend values to exact backend enum strings ===
+      // === Stores mapping (unchanged) ===
       const storesForBackend = updatedData.stores.map((store: any) => {
         let backendStoreValue: string
 
@@ -133,6 +139,9 @@ export default function PackageReturnService() {
           case "WALMART":
             backendStoreValue = "Walmart"
             break
+          case "WHOLE FOODS MARKET":
+            backendStoreValue = "WHOLE FOODS MARKET"
+            break
           case "HOME_DEPOT":
             backendStoreValue = "Home Depot"
             break
@@ -149,7 +158,7 @@ export default function PackageReturnService() {
             backendStoreValue = "Other"
             break
           default:
-            backendStoreValue = "Other" // safe fallback
+            backendStoreValue = "Other"
         }
 
         const isOther = store.returnStore === "OTHER"
@@ -162,14 +171,14 @@ export default function PackageReturnService() {
           numberOfPackages: store.numberOfPackages,
           packages: Object.keys(store.packageNumbers || {}).map((key) => ({
             packageNumber: store.packageNumbers[key] || "",
-            barcodeImages: [], // Filled separately via file upload
+            barcodeImages: [],
           })),
         }
       })
 
       formDataToSend.append("stores", JSON.stringify(storesForBackend))
 
-      // Handle barcode images (data URLs → blobs → files)
+      // Handle barcode images
       let imageIndex = 0
       const imagePromises: Promise<void>[] = []
 
@@ -229,6 +238,7 @@ export default function PackageReturnService() {
       toast.error(error.message || "Submission failed")
     } finally {
       setIsSubmitting(false)
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 

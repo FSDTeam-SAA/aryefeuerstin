@@ -164,7 +164,7 @@ export default function SignUpPage() {
             <div className="flex items-start gap-2 text-sm">
               <Checkbox id="terms" required />
               <label htmlFor="terms" className="text-gray-600">
-                I agree to the <Link href="/terms" className="text-[#8C311E] underline">terms & conditions</Link>
+                I agree to the <Link href="/terms-condition" className="text-[#8C311E] underline">terms & conditions</Link>
               </label>
             </div>
 

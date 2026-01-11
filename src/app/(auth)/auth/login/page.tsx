@@ -136,7 +136,7 @@ export default function SignInPage() {
                       {" "}
                       to the{" "}
                       <Link
-                        href="/terms"
+                        href="/terms-condition"
                         className="text-[#8C311E] hover:underline"
                       >
                         terms & conditions

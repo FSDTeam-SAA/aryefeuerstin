@@ -151,8 +151,8 @@ export default function TermsPage() {
             <div className="space-y-1 text-sm sm:text-base">
               <p className="leading-relaxed">
                 📧{" "}
-                <a href="mailto:info@wellnessmadeclear.com" className="text-blue-600 hover:underline">
-                  info@wellnessmadeclear.com
+                <a href="mailto:ezreturn123@gmail.com" className="text-blue-600 hover:underline">
+                  ezreturn123@gmail.com
                 </a>
               </p>
               <p className="leading-relaxed">📍 Mailing Address: 14021 Haylam Drive #2651, Chino Hills, CA 91709</p>

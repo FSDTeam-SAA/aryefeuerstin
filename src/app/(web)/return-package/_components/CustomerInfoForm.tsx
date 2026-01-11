@@ -1,3 +1,7 @@
+
+
+
+
 "use client"
 
 import { useForm, SubmitHandler } from "react-hook-form"
@@ -8,10 +12,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { User, MapPin, Phone, Mail } from "lucide-react"
+import { User, MapPin, Phone, Mail, Home } from "lucide-react" // Added Home icon
 import { useState } from "react"
 
-// Dynamic import to prevent SSR issues with Google Maps
 import dynamic from "next/dynamic"
 
 const MapPicker = dynamic(() => import("./Mappiker"), {
@@ -36,6 +39,7 @@ const customerInfoSchema = z.object({
   zipCode: z.string().min(3, "Zip code is required"),
   street: z.string().min(3, "Street is required"),
   city: z.string().min(2, "City is required"),
+  unit: z.string().optional(), // ← NEW: Unit/Apt/Suite
   pickupInstructions: z.string().optional(),
   rushService: z.boolean(),
   lat: z.number().optional(),
@@ -65,6 +69,7 @@ export function CustomerInfoForm({
     resolver: zodResolver(customerInfoSchema),
     defaultValues: {
       rushService: false,
+      unit: "", // default for new field
       ...initialData,
     },
   })
@@ -74,13 +79,13 @@ export function CustomerInfoForm({
   const lat = watch("lat")
   const lng = watch("lng")
 
-  // Current selected location to pass to modal (for re-opening with existing pin)
   const currentLocation = pickupAddress && lat && lng
     ? { address: pickupAddress, lat, lng }
     : null
 
   const onSubmit: SubmitHandler<CustomerInfoFormData> = (data) => {
     onNext(data)
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
   const handleMapSelect = ({ address, lat, lng }: { address: string; lat: number; lng: number }) => {
@@ -138,7 +143,38 @@ export function CustomerInfoForm({
           </div>
         </div>
 
-        {/* Pickup Address */}
+        {/* Phone & Email */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="john@example.com"
+                className={`${inputClass} pl-10`}
+                {...register("email")}
+              />
+            </div>
+            {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                id="phoneNumber"
+                placeholder="+876 1327951614"
+                className={`${inputClass} pl-10`}
+                {...register("phoneNumber")}
+              />
+            </div>
+            {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>}
+          </div>
+        </div>
+
+            {/* Pickup Address */}
         <div className="space-y-2">
           <Label htmlFor="pickupAddress">Pickup Address</Label>
           <div className="relative">
@@ -155,56 +191,40 @@ export function CustomerInfoForm({
           {errors.pickupAddress && <p className="text-sm text-red-500">{errors.pickupAddress.message}</p>}
         </div>
 
-        {/* Phone & Email */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                id="phoneNumber"
-                placeholder="+876 1327951614"
-                className={`${inputClass} pl-10`}
-                {...register("phoneNumber")}
-              />
-            </div>
-            {errors.phoneNumber && <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>}
-          </div>
+       
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="john@example.com"
-                className={`${inputClass} pl-10`}
-                {...register("email")}
-              />
-            </div>
-            {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
-          </div>
-        </div>
-
-        {/* Address Details */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="zipCode">Zip code</Label>
-            <Input id="zipCode" placeholder="10001" className={inputClass} {...register("zipCode")} />
-            {errors.zipCode && <p className="text-sm text-red-500">{errors.zipCode.message}</p>}
-          </div>
-
-          <div className="space-y-2">
+         <div className="space-y-2">
             <Label htmlFor="street">Street</Label>
             <Input id="street" placeholder="Main Street" className={inputClass} {...register("street")} />
             {errors.street && <p className="text-sm text-red-500">{errors.street.message}</p>}
           </div>
 
+        {/* Address Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+         
+          {/* Unit / Apt */}
+        <div className="space-y-2">
+          <Label htmlFor="unit">Unit </Label>
+          <div className="relative">
+            <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Input
+              id="unit"
+              placeholder="Apt 5B, Suite 300, etc."
+              className={`${inputClass} pl-10`}
+              {...register("unit")}
+            />
+          </div>
+        </div>
+
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
             <Input id="city" placeholder="New York" className={inputClass} {...register("city")} />
             {errors.city && <p className="text-sm text-red-500">{errors.city.message}</p>}
+          </div>
+              <div className="space-y-2">
+            <Label htmlFor="zipCode">Zip code</Label>
+            <Input id="zipCode" placeholder="10001" className={inputClass} {...register("zipCode")} />
+            {errors.zipCode && <p className="text-sm text-red-500">{errors.zipCode.message}</p>}
           </div>
         </div>
 

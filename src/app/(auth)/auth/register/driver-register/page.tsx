@@ -328,7 +328,7 @@ export default function SignUpPage() {
               <Checkbox id="terms" checked={termsAccepted} onCheckedChange={(checked) => setTermsAccepted(checked as boolean)} />
               <label htmlFor="terms" className="text-gray-600">
                 I agree to the{" "}
-                <Link href="/terms" className="text-[#8C311E] underline">
+                <Link href="/terms-condition" className="text-[#8C311E] underline">
                   terms & conditions
                 </Link>
               </label>

@@ -128,7 +128,7 @@ export function PackageDetailsForm({
     const newIndex = stores.length
     setStores([
       ...stores,
-      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },
+      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },  
     ])
     setOpenSections((prev) => [...prev, `store-${newIndex}`, `packages-${newIndex}`])
   }
@@ -272,8 +272,9 @@ export function PackageDetailsForm({
                     <SelectItem value="KOHLS">Kohl's</SelectItem>
                     <SelectItem value="SHEIN">Shein Return</SelectItem>
                     <SelectItem value="TARGET">Target</SelectItem>
+                    {/* <SelectItem value="WALMART">Walmart</SelectItem> */}
                     <SelectItem value="WALMART">Walmart</SelectItem>
-                    <SelectItem value="HOME_DEPOT">Home Depot</SelectItem>
+                    <SelectItem value="WHOLE FOODS MARKET">Whole Foods Market</SelectItem>
                     <SelectItem value="UPS">UPS Drop Off</SelectItem>
                     <SelectItem value="USPS">USPS Drop Off</SelectItem>
                     <SelectItem value="FEDEX">FedEx Drop Off</SelectItem>

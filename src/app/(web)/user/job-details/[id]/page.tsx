@@ -317,7 +317,7 @@ export default function JobDetailsPage() {
               <p className="text-4xl font-bold text-gray-800 mt-10">
                 Store: {activePkg?.store || "N/A"}
               </p>
-              <p className="text-4xl font-black text-gray-900 mt-8 tracking-wide">
+              <p className="text-4xl font-black text-gray-900 mt-8 pb-4 tracking-wide">
                 PACKAGE # {activePkg?.id || "N/A"}
               </p>
             </div>

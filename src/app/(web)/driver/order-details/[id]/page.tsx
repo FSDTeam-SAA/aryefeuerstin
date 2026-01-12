@@ -390,14 +390,14 @@ export default function JobDetailsPage() {
         >
           <div className="border-2 border-black flex flex-col items-center justify-between h-full min-h-[1500px] py-12">
             {/* Header */}
-            <div className="text-center">
+          <div className="text-center">
               <h1 className="text-7xl font-black uppercase tracking-wider text-gray-900">
                 PACKAGE LABEL
               </h1>
               <p className="text-4xl font-bold text-gray-800 mt-10">
                 Store: {activePkg?.store || "N/A"}
               </p>
-              <p className="text-4xl font-black text-gray-900 mt-8 tracking-wide">
+              <p className="text-4xl font-black text-gray-900 mt-8 pb-4 tracking-wide">
                 PACKAGE # {activePkg?.id || "N/A"}
               </p>
             </div>

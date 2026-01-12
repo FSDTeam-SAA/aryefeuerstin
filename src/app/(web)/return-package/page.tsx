@@ -6,10 +6,13 @@ import { useSession } from "next-auth/react"
 import { Package } from "lucide-react"
 
 import { StepIndicator } from "./_components/StepIndicator"
-import { CustomerInfoForm } from "./_components/CustomerInfoForm"
-import { PackageDetailsForm } from "./_components/PackageDetailsForm"
+// import { CustomerInfoForm } from "./_components/CustomerInfoForm"
+// import { PackageDetailsForm } from "./_components/PackageDetailsForm"
 import { SummaryReview } from "./_components/PaymentForm"
 import { toast } from "sonner"
+import { PackageDetailsForm } from "./_components/PackageDetailsForm"
+import { CustomerInfoForm } from "./_components/CustomerInfoForm"
+// import { PackageDetailsForm } from "./_components/CustomerInfoForm"
 
 type Step = 1 | 2 | 3
 
@@ -117,61 +120,123 @@ export default function PackageReturnService() {
       }
 
       // === Stores mapping (unchanged) ===
-      const storesForBackend = updatedData.stores.map((store: any) => {
-        let backendStoreValue: string
+      // const storesForBackend = updatedData.stores.map((store: any) => {
+      //   let backendStoreValue: string
 
-        switch (store.returnStore) {
-          case "STAPLES":
-            backendStoreValue = "Staples"
-            break
-          case "KOHLS":
-            backendStoreValue = "Kohl's"
-            break
-          case "SHEIN":
-            backendStoreValue = "Shein Return"
-            break
-          case "TARGET":
-            backendStoreValue = "Target"
-            break
-          case "WALMART":
-            backendStoreValue = "Walmart"
-            break
-          case "WHOLE FOODS MARKET":
-            backendStoreValue = "WHOLE FOODS MARKET"
-            break
-          case "HOME_DEPOT":
-            backendStoreValue = "Home Depot"
-            break
-          case "UPS":
-            backendStoreValue = "UPS Drop Off"
-            break
-          case "USPS":
-            backendStoreValue = "USPS Drop Off"
-            break
-          case "FEDEX":
-            backendStoreValue = "FedEx Drop Off"
-            break
-          case "OTHER":
-            backendStoreValue = "Other"
-            break
-          default:
-            backendStoreValue = "Other"
-        }
+      //   switch (store.returnStore) {
+      //     case "STAPLES":
+      //       backendStoreValue = "Staples"
+      //       break
+      //     case "KOHLS":
+      //       backendStoreValue = "Kohl's"
+      //       break
+      //     case "SHEIN":
+      //       backendStoreValue = "Shein Return"
+      //       break
+      //     case "TARGET":
+      //       backendStoreValue = "Target"
+      //       break
+      //     case "WALMART":
+      //       backendStoreValue = "Walmart"
+      //       break
+      //     case "WHOLE FOODS MARKET":
+      //       backendStoreValue = "WHOLE FOODS MARKET"
+      //       break
+      //     case "HOME_DEPOT":
+      //       backendStoreValue = "Home Depot"
+      //       break
+      //     case "UPS":
+      //       backendStoreValue = "UPS Drop Off"
+      //       break
+      //     case "USPS":
+      //       backendStoreValue = "USPS Drop Off"
+      //       break
+      //     case "FEDEX":
+      //       backendStoreValue = "FedEx Drop Off"
+      //       break
+      //     case "OTHER":
+      //       backendStoreValue = "Other"
+      //       break
+      //     default:
+      //       backendStoreValue = "Other"
+      //   }
 
-        const isOther = store.returnStore === "OTHER"
+      //   const isOther = store.returnStore === "OTHER"
 
-        return {
-          store: backendStoreValue,
-          ...(isOther && store.otherStoreName
-            ? { otherStoreName: store.otherStoreName.trim() }
-            : {}),
-          numberOfPackages: store.numberOfPackages,
-          packages: Object.keys(store.packageNumbers || {}).map((key) => ({
-            packageNumber: store.packageNumbers[key] || "",
-            barcodeImages: [],
-          })),
-        }
-      })
+      //   return {
+      //     store: backendStoreValue,
+      //     ...(isOther && store.otherStoreName
+      //       ? { otherStoreName: store.otherStoreName.trim() }
+      //       : {}),
+      //     numberOfPackages: store.numberOfPackages,
+      //     packages: Object.keys(store.packageNumbers || {}).map((key) => ({
+      //       packageNumber: store.packageNumbers[key] || "",
+      //       barcodeImages: [],
+      //     })),
+      //   }
+      // })
+
+
+      // === Stores mapping ===
+const storesForBackend = updatedData.stores.map((store: any) => {
+  let backendStoreValue: string;
+
+  switch (store.returnStore) {
+    case "STAPLES":
+      backendStoreValue = "Staples";
+      break;
+    case "KOHLS":
+      backendStoreValue = "Kohl's";
+      break;
+    case "SHEIN":
+      backendStoreValue = "Shein Return";
+      break;
+    case "TARGET":
+      backendStoreValue = "Target";
+      break;
+    case "WALMART":
+      backendStoreValue = "Walmart";
+      break;
+    case "WHOLE FOODS MARKET":
+      backendStoreValue = "Whole Foods Market";
+      break;
+    case "UPS":
+      backendStoreValue = "UPS Drop Off";
+      break;
+    case "USPS":
+      backendStoreValue = "USPS Drop Off";
+      break;
+    case "FEDEX":
+      backendStoreValue = "FedEx Drop Off";
+      break;
+    case "OTHER":
+      backendStoreValue = "Other";
+      break;
+    default:
+      backendStoreValue = "Other";
+  }
+
+  const isOther = store.returnStore === "OTHER";
+
+  // ── Important fix starts here ────────────────────────────────
+  const numberOfPackages = Number(store.numberOfPackages) || 1;
+
+  // Create proper number of package entries even if packageNumbers is empty
+  const packages = Array.from({ length: numberOfPackages }, (_, idx) => ({
+    packageNumber: store.packageNumbers?.[idx] || "", // still use if exists
+    barcodeImages: [], // will be filled later if images exist
+  }));
+  // ──────────────────────────────────────────────────────────────
+
+  return {
+    store: backendStoreValue,
+    ...(isOther && store.otherStoreName?.trim()
+      ? { otherStoreName: store.otherStoreName.trim() }
+      : {}),
+    numberOfPackages,
+    packages,
+  };
+});
 
       formDataToSend.append("stores", JSON.stringify(storesForBackend))
 

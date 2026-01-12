@@ -14,8 +14,8 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 
 interface Customer {
-  firstName: string
-  lastName: string
+  fullName: string
+  // lastName: string
   phone: string
   email: string
   address: {
@@ -151,7 +151,7 @@ export function SummaryReview({
       <div className="border rounded-lg p-6 bg-[#F8FAFC]">
         <h3 className="text-lg font-bold mb-4">Customer Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <p><b>Name:</b> {customer.firstName} {customer.lastName}</p>
+          <p><b>Name:</b> {customer.fullName}</p>
           <p><b>Phone:</b> {customer.phone}</p>
           <p><b>Email:</b> {customer.email}</p>
           <p className="md:col-span-3">

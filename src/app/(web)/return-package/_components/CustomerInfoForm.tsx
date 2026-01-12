@@ -8,9 +8,8 @@
 // import { Label } from "@/components/ui/label";
 // import { Textarea } from "@/components/ui/textarea";
 // import { Checkbox } from "@/components/ui/checkbox";
-// import { User, MapPin, Phone, Mail, Home } from "lucide-react"; // Added Home icon
+// import { User, MapPin, Phone, Mail, Home, MapPinned } from "lucide-react"; 
 // import { useState } from "react";
-
 // import dynamic from "next/dynamic";
 
 // const MapPicker = dynamic(() => import("./Mappiker"), {
@@ -25,7 +24,6 @@
 //   ),
 // });
 
-// /* -------------------- ZOD SCHEMA -------------------- */
 // const customerInfoSchema = z.object({
 //   fullName: z.string().min(2, "First name must be at least 2 characters"),
 //   pickupAddress: z.string().min(5, "Pickup address is required"),
@@ -35,7 +33,7 @@
 //   street: z.string().min(3, "Street is required"),
 //   state: z.string().min(2, "State is required"),
 //   city: z.string().min(2, "City is required"),
-//   unit: z.string().optional(), // ← NEW: Unit/Apt/Suite
+//   unit: z.string().optional(),
 //   pickupInstructions: z.string().optional(),
 //   rushService: z.boolean(),
 //   lat: z.number().optional(),
@@ -49,26 +47,21 @@
 //   onNext: (data: CustomerInfoFormData) => void;
 // }
 
-// export function CustomerInfoForm({
-//   initialData,
-//   onNext,
-// }: CustomerInfoFormProps) {
+// export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps) {
 //   const [showMap, setShowMap] = useState(false);
+//   const [showLocationModal, setShowLocationModal] = useState(false);
+//   const [userLocation, setUserLocation] = useState<{ address: string; lat: number; lng: number } | null>(null);
+//   const [locationError, setLocationError] = useState<string>("");
 
-//   const {
-//     register,
-//     handleSubmit,
-//     formState: { errors },
-//     setValue,
-//     watch,
-//   } = useForm<CustomerInfoFormData>({
-//     resolver: zodResolver(customerInfoSchema),
-//     defaultValues: {
-//       rushService: false,
-//       unit: "", // default for new field
-//       ...initialData,
-//     },
-//   });
+//   const { register, handleSubmit, formState: { errors }, setValue, watch } =
+//     useForm<CustomerInfoFormData>({
+//       resolver: zodResolver(customerInfoSchema),
+//       defaultValues: {
+//         rushService: false,
+//         unit: "",
+//         ...initialData,
+//       },
+//     });
 
 //   const rushService = watch("rushService");
 //   const pickupAddress = watch("pickupAddress");
@@ -79,23 +72,146 @@
 //     pickupAddress && lat && lng ? { address: pickupAddress, lat, lng } : null;
 
 //   const onSubmit: SubmitHandler<CustomerInfoFormData> = (data) => {
-//     onNext(data);
+//     const payload: CustomerInfoFormData = {
+//       fullName: data.fullName.trim(),
+//       email: data.email.trim(),
+//       phoneNumber: data.phoneNumber.trim(),
+//       pickupAddress: data.pickupAddress.trim(),
+//       street: data.street.trim(),
+//       unit: data.unit?.trim() || "",
+//       city: data.city.trim(),
+//       state: data.state.trim(),
+//       zipCode: data.zipCode.trim(),
+//       pickupInstructions: data.pickupInstructions?.trim() || "",
+//       rushService: Boolean(data.rushService),
+//       lat: data.lat ?? undefined,
+//       lng: data.lng ?? undefined,
+//     };
+
+//     onNext(payload);
 //     window.scrollTo({ top: 0, behavior: "smooth" });
 //   };
 
-//   const handleMapSelect = ({
-//     address,
-//     lat,
-//     lng,
-//   }: {
-//     address: string;
-//     lat: number;
-//     lng: number;
-//   }) => {
+//   const handleMapSelect = ({ address, lat, lng }: { address: string; lat: number; lng: number }) => {
 //     setValue("pickupAddress", address);
 //     setValue("lat", lat);
 //     setValue("lng", lng);
 //     setShowMap(false);
+//   };
+
+//   // Handle opening map with location permission
+//   const handleOpenMap = () => {
+//     setShowLocationModal(true);
+//   };
+
+//   // Handle allow location
+//   const handleAllowLocation = () => {
+//     if ("geolocation" in navigator) {
+//       // Function to process location
+//       const processLocation = (position: GeolocationPosition) => {
+//         const { latitude, longitude } = position.coords;
+        
+//         // Check if Google Maps is loaded
+//         if (typeof google === 'undefined' || !google.maps) {
+//           // If Google Maps not loaded, use coordinates as address
+//           const address = `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+//           setUserLocation({ 
+//             address: address,
+//             lat: latitude, 
+//             lng: longitude 
+//           });
+//           setLocationError("");
+//           setShowLocationModal(false);
+//           setShowMap(true);
+//           return;
+//         }
+
+//         // Get address from coordinates using reverse geocoding
+//         const geocoder = new google.maps.Geocoder();
+//         geocoder.geocode(
+//           { location: { lat: latitude, lng: longitude } },
+//           (results, status) => {
+//             let address = "My Current Location";
+            
+//             if (status === "OK" && results?.[0]) {
+//               // Remove plus code if present at the start
+//               address = results[0].formatted_address.replace(/^[A-Z0-9+]+,\s*/, "");
+//             } else {
+//               // If geocoding fails, still use the location with coordinates
+//               address = `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+//             }
+
+//             setUserLocation({ 
+//               address: address,
+//               lat: latitude, 
+//               lng: longitude 
+//             });
+//             setLocationError("");
+//             setShowLocationModal(false);
+//             setShowMap(true);
+//           }
+//         );
+//       };
+
+//       // Try to get location with multiple fallback attempts
+//       const attemptGeolocation = (attemptNumber: number = 1) => {
+//         const configs = [
+//           // Attempt 1: Network-based, moderate timeout
+//           { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 },
+//           // Attempt 2: Network-based, longer timeout, accept older cache
+//           { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 },
+//           // Attempt 3: Low accuracy, very long timeout, accept very old cache
+//           { enableHighAccuracy: false, timeout: 30000, maximumAge: 300000 },
+//         ];
+
+//         const config = configs[attemptNumber - 1] || configs[configs.length - 1];
+
+//         navigator.geolocation.getCurrentPosition(
+//           processLocation,
+//           (error) => {
+//             // If permission denied, show error immediately
+//             if (error.code === error.PERMISSION_DENIED) {
+//               setLocationError("Location access denied. Please enable location permission in your browser.");
+//               setTimeout(() => {
+//                 setShowLocationModal(false);
+//                 setShowMap(true);
+//               }, 3000);
+//               return;
+//             }
+
+//             // If not the last attempt, try again with next config
+//             if (attemptNumber < configs.length) {
+//               console.log(`Location attempt ${attemptNumber} failed, trying again...`);
+//               attemptGeolocation(attemptNumber + 1);
+//             } else {
+//               // All attempts failed
+//               setLocationError("Unable to get your location after multiple attempts. Please check your device's location settings.");
+//               setTimeout(() => {
+//                 setShowLocationModal(false);
+//                 setShowMap(true);
+//               }, 3000);
+//             }
+//           },
+//           config
+//         );
+//       };
+
+//       // Start first attempt
+//       attemptGeolocation(1);
+//     } else {
+//       setLocationError("Geolocation is not supported by your browser.");
+//       setTimeout(() => {
+//         setShowLocationModal(false);
+//         setShowMap(true);
+//       }, 2000);
+//     }
+//   };
+
+//   // Handle skip location
+//   const handleSkipLocation = () => {
+//     setUserLocation(null);
+//     setShowLocationModal(false);
+//     setShowMap(true);
 //   };
 
 //   const inputClass =
@@ -103,7 +219,7 @@
 
 //   return (
 //     <>
-//       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+//       <div onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 //         {/* Header */}
 //         <div className="flex items-center justify-between mb-6">
 //           <div>
@@ -119,7 +235,7 @@
 //         {/* Name Fields */}
 //         <div className="">
 //           <div className="space-y-2">
-//             <Label htmlFor="firstName">Full Name</Label>
+//             <Label htmlFor="fullName">Full Name</Label>
 //             <div className="relative">
 //               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
 //               <Input
@@ -165,9 +281,7 @@
 //               />
 //             </div>
 //             {errors.phoneNumber && (
-//               <p className="text-sm text-red-500">
-//                 {errors.phoneNumber.message}
-//               </p>
+//               <p className="text-sm text-red-500">{errors.phoneNumber.message}</p>
 //             )}
 //           </div>
 //         </div>
@@ -183,18 +297,16 @@
 //               className={`${inputClass} pl-10 cursor-pointer bg-gray-50`}
 //               {...register("pickupAddress")}
 //               readOnly
-//               onClick={() => setShowMap(true)}
+//               onClick={handleOpenMap}
 //             />
 //           </div>
 //           {errors.pickupAddress && (
-//             <p className="text-sm text-red-500">
-//               {errors.pickupAddress.message}
-//             </p>
+//             <p className="text-sm text-red-500">{errors.pickupAddress.message}</p>
 //           )}
 //         </div>
 
-//         <div className="flex gap-4">
-//           {/* Street Address */}
+//         {/* Street & Unit */}
+//         <div className="lg:flex gap-4 space-y-6 lg:space-y-0">
 //           <div className="flex-1 space-y-2">
 //             <Label htmlFor="street">Street Address</Label>
 //             <Input
@@ -207,8 +319,6 @@
 //               <p className="text-sm text-red-500">{errors.street.message}</p>
 //             )}
 //           </div>
-
-//           {/* Unit / Apt */}
 //           <div className="flex-1 space-y-2">
 //             <Label htmlFor="unit">Unit Number</Label>
 //             <div className="relative">
@@ -239,7 +349,7 @@
 //           </div>
 
 //           <div className="space-y-2">
-//             <Label htmlFor="city">State</Label>
+//             <Label htmlFor="state">State</Label>
 //             <Input
 //               id="state"
 //               placeholder="Florida"
@@ -263,7 +373,6 @@
 //               <p className="text-sm text-red-500">{errors.zipCode.message}</p>
 //             )}
 //           </div>
-          
 //         </div>
 
 //         {/* Pickup Instructions */}
@@ -305,13 +414,55 @@
 //         {/* Submit */}
 //         <div className="flex justify-center lg:justify-end pt-4">
 //           <Button
-//             type="submit"
+//             onClick={handleSubmit(onSubmit)}
 //             className="bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white px-8 h-[48px]"
 //           >
 //             Continue to Package Details
 //           </Button>
 //         </div>
-//       </form>
+//       </div>
+
+//       {/* Location Permission Modal */}
+//       {showLocationModal && (
+//         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+//           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+//             <div className="flex flex-col items-center text-center">
+//               <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mb-4">
+//                 <MapPinned className="w-8 h-8 text-cyan-500" />
+//               </div>
+              
+//               <h3 className="text-xl font-semibold text-gray-900 mb-2">
+//                 Access Your Location
+//               </h3>
+              
+//               <p className="text-gray-600 mb-6">
+//                 Allow access to your location to automatically show your current position on the map and make selecting your pickup address easier.
+//               </p>
+
+//               {locationError && (
+//                 <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+//                   <p className="text-sm text-red-600">{locationError}</p>
+//                 </div>
+//               )}
+
+//               <div className="flex flex-col sm:flex-row gap-3 w-full">
+//                 <Button
+//                   onClick={handleAllowLocation}
+//                   className="flex-1 bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white h-11"
+//                 >
+//                   Allow Location
+//                 </Button>
+//                 <Button
+//                   onClick={handleSkipLocation}
+//                   className="flex-1 border border-gray-300 text-black hover:bg-gray-50 bg-white h-11"
+//                 >
+//                   Skip
+//                 </Button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
 
 //       {/* Map Picker Modal */}
 //       {showMap && (
@@ -330,7 +481,7 @@
 //               <MapPicker
 //                 onSelect={handleMapSelect}
 //                 onClose={() => setShowMap(false)}
-//                 initialLocation={currentLocation}
+//                 initialLocation={currentLocation || userLocation}
 //               />
 //             </div>
 //           </div>
@@ -339,6 +490,7 @@
 //     </>
 //   );
 // }
+
 
 
 
@@ -353,8 +505,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, MapPin, Phone, Mail, Home } from "lucide-react"; 
-import { useState } from "react";
+import { User, MapPin, Phone, Mail, Home, MapPinned } from "lucide-react"; 
+import { useState, useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
 
 const MapPicker = dynamic(() => import("./Mappiker"), {
@@ -394,15 +546,18 @@ interface CustomerInfoFormProps {
 
 export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps) {
   const [showMap, setShowMap] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ address: string; lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string>("");
 
   const { register, handleSubmit, formState: { errors }, setValue, watch } =
     useForm<CustomerInfoFormData>({
       resolver: zodResolver(customerInfoSchema),
-      defaultValues: {
+      defaultValues: useMemo(() => ({
         rushService: false,
         unit: "",
         ...initialData,
-      },
+      }), [initialData]),
     });
 
   const rushService = watch("rushService");
@@ -410,11 +565,12 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
   const lat = watch("lat");
   const lng = watch("lng");
 
-  const currentLocation =
-    pickupAddress && lat && lng ? { address: pickupAddress, lat, lng } : null;
+  const currentLocation = useMemo(() => 
+    pickupAddress && lat && lng ? { address: pickupAddress, lat, lng } : null,
+    [pickupAddress, lat, lng]
+  );
 
-  // ✅ Fixed payload
-  const onSubmit: SubmitHandler<CustomerInfoFormData> = (data) => {
+  const onSubmit: SubmitHandler<CustomerInfoFormData> = useCallback((data) => {
     const payload: CustomerInfoFormData = {
       fullName: data.fullName.trim(),
       email: data.email.trim(),
@@ -433,22 +589,119 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
 
     onNext(payload);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  }, [onNext]);
 
-  const handleMapSelect = ({ address, lat, lng }: { address: string; lat: number; lng: number }) => {
+  const handleMapSelect = useCallback(({ address, lat, lng }: { address: string; lat: number; lng: number }) => {
     setValue("pickupAddress", address);
     setValue("lat", lat);
     setValue("lng", lng);
     setShowMap(false);
-  };
+  }, [setValue]);
+
+  const handleOpenMap = useCallback(() => {
+    setShowLocationModal(true);
+  }, []);
+
+  const handleAllowLocation = useCallback(() => {
+    if ("geolocation" in navigator) {
+      const processLocation = (position: GeolocationPosition) => {
+        const { latitude, longitude } = position.coords;
+        
+        if (typeof google === 'undefined' || !google.maps) {
+          const address = `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+          setUserLocation({ 
+            address: address,
+            lat: latitude, 
+            lng: longitude 
+          });
+          setLocationError("");
+          setShowLocationModal(false);
+          setShowMap(true);
+          return;
+        }
+
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode(
+          { location: { lat: latitude, lng: longitude } },
+          (results, status) => {
+            let address = "My Current Location";
+            
+            if (status === "OK" && results?.[0]) {
+              address = results[0].formatted_address.replace(/^[A-Z0-9+]+,\s*/, "");
+            } else {
+              address = `Location (${latitude.toFixed(4)}, ${longitude.toFixed(4)})`;
+            }
+
+            setUserLocation({ 
+              address: address,
+              lat: latitude, 
+              lng: longitude 
+            });
+            setLocationError("");
+            setShowLocationModal(false);
+            setShowMap(true);
+          }
+        );
+      };
+
+      const attemptGeolocation = (attemptNumber: number = 1) => {
+        const configs = [
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 30000 },
+          { enableHighAccuracy: false, timeout: 20000, maximumAge: 60000 },
+          { enableHighAccuracy: false, timeout: 30000, maximumAge: 300000 },
+        ];
+
+        const config = configs[attemptNumber - 1] || configs[configs.length - 1];
+
+        navigator.geolocation.getCurrentPosition(
+          processLocation,
+          (error) => {
+            if (error.code === error.PERMISSION_DENIED) {
+              setLocationError("Location access denied. Please enable location permission in your browser.");
+              setTimeout(() => {
+                setShowLocationModal(false);
+                setShowMap(true);
+              }, 3000);
+              return;
+            }
+
+            if (attemptNumber < configs.length) {
+              console.log(`Location attempt ${attemptNumber} failed, trying again...`);
+              attemptGeolocation(attemptNumber + 1);
+            } else {
+              setLocationError("Unable to get your location after multiple attempts. Please check your device's location settings.");
+              setTimeout(() => {
+                setShowLocationModal(false);
+                setShowMap(true);
+              }, 3000);
+            }
+          },
+          config
+        );
+      };
+
+      attemptGeolocation(1);
+    } else {
+      setLocationError("Geolocation is not supported by your browser.");
+      setTimeout(() => {
+        setShowLocationModal(false);
+        setShowMap(true);
+      }, 2000);
+    }
+  }, []);
+
+  const handleSkipLocation = useCallback(() => {
+    setUserLocation(null);
+    setShowLocationModal(false);
+    setShowMap(true);
+  }, []);
 
   const inputClass =
     "border border-[#C0C3C1] h-[50px] rounded-[8px] focus-visible:ring-cyan-400";
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Header */}
+      <div onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-2xl font-semibold text-[#181818]">
@@ -460,7 +713,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           </div>
         </div>
 
-        {/* Name Fields */}
         <div className="">
           <div className="space-y-2">
             <Label htmlFor="fullName">Full Name</Label>
@@ -479,7 +731,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           </div>
         </div>
 
-        {/* Phone & Email */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
@@ -514,7 +765,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           </div>
         </div>
 
-        {/* Pickup Address */}
         <div className="space-y-2">
           <Label htmlFor="pickupAddress">Pickup Address</Label>
           <div className="relative">
@@ -525,7 +775,7 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
               className={`${inputClass} pl-10 cursor-pointer bg-gray-50`}
               {...register("pickupAddress")}
               readOnly
-              onClick={() => setShowMap(true)}
+              onClick={handleOpenMap}
             />
           </div>
           {errors.pickupAddress && (
@@ -533,7 +783,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           )}
         </div>
 
-        {/* Street & Unit */}
         <div className="lg:flex gap-4 space-y-6 lg:space-y-0">
           <div className="flex-1 space-y-2">
             <Label htmlFor="street">Street Address</Label>
@@ -561,7 +810,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           </div>
         </div>
 
-        {/* Address Details */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
@@ -603,7 +851,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           </div>
         </div>
 
-        {/* Pickup Instructions */}
         <div className="space-y-2">
           <Label htmlFor="pickupInstructions">Pick-up instructions</Label>
           <Textarea
@@ -614,7 +861,6 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           />
         </div>
 
-        {/* Rush Service */}
         <div className="bg-[#E4F6FF] rounded-lg p-4">
           <div className="flex items-center md:items-start space-x-4">
             <Checkbox
@@ -639,18 +885,57 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
           </div>
         </div>
 
-        {/* Submit */}
         <div className="flex justify-center lg:justify-end pt-4">
           <Button
-            type="submit"
+            onClick={handleSubmit(onSubmit)}
             className="bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white px-8 h-[48px]"
           >
             Continue to Package Details
           </Button>
         </div>
-      </form>
+      </div>
 
-      {/* Map Picker Modal */}
+      {showLocationModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mb-4">
+                <MapPinned className="w-8 h-8 text-cyan-500" />
+              </div>
+              
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Access Your Location
+              </h3>
+              
+              <p className="text-gray-600 mb-6">
+                Allow access to your location to automatically show your current position on the map and make selecting your pickup address easier.
+              </p>
+
+              {locationError && (
+                <div className="w-full bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-red-600">{locationError}</p>
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Button
+                  onClick={handleAllowLocation}
+                  className="flex-1 bg-[#31B8FA] hover:bg-[#31B8FA]/95 text-white h-11"
+                >
+                  Allow Location
+                </Button>
+                <Button
+                  onClick={handleSkipLocation}
+                  className="flex-1 border border-gray-300 text-black hover:bg-gray-50 bg-white h-11"
+                >
+                  Skip
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showMap && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -667,7 +952,7 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
               <MapPicker
                 onSelect={handleMapSelect}
                 onClose={() => setShowMap(false)}
-                initialLocation={currentLocation}
+                initialLocation={currentLocation || userLocation}
               />
             </div>
           </div>

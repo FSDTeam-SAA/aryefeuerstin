@@ -6,8 +6,6 @@ import { useSession } from "next-auth/react"
 import { Package } from "lucide-react"
 
 import { StepIndicator } from "./_components/StepIndicator"
-// import { CustomerInfoForm } from "./_components/CustomerInfoForm"
-// import { PackageDetailsForm } from "./_components/PackageDetailsForm"
 import { SummaryReview } from "./_components/PaymentForm"
 import { toast } from "sonner"
 import { PackageDetailsForm } from "./_components/PackageDetailsForm"

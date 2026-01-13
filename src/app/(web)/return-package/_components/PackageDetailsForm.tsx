@@ -361,9 +361,9 @@ export function PackageDetailsForm({
                     <div className="space-y-4">
                       {/* Fixed: Package number field is now visible and optional */}
                       <div>
-                        <Label>Package Number / Tracking Number (optional)</Label>
+                        <Label>Package Name</Label>
                         <Input
-                          placeholder="e.g. PKG-001 or tracking number"
+                          placeholder="Enter package name "
                           className="mt-1"
                           value={store.packageNumbers?.[pkgIndex] || ""}
                           onChange={(e) =>

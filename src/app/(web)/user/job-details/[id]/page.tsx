@@ -4,7 +4,7 @@ import { useState, useRef } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useQuery } from "@tanstack/react-query"
-import { Copy, MapPin, Phone, Printer, Package, FileText, MessageSquare } from "lucide-react"
+import { Copy, MapPin, Phone, Printer, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -207,6 +207,10 @@ export default function JobDetailsPage() {
 
         const imgData = canvas.toDataURL("image/jpeg", 0.95) // JPEG for smaller size + great quality
 
+        // Detect printer type by width (adaptive)
+        // Small printer ~80mm, otherwise default A4
+        const isThermal = window.innerWidth <= 500 // example: small screen = small printer
+        const pdfFormat = isThermal ? [80, (canvas.height * 80) / canvas.width] : "a4"
         const pdf = new jsPDF({
           orientation: "portrait",
           unit: "mm",
@@ -269,6 +273,8 @@ export default function JobDetailsPage() {
           pdf.save(`Label_${targetPkg.id.replace(/\s+/g, "_")}.pdf`)
           toast.success("PDF downloaded – open and print", { id: toastId })
         }
+
+        toast.success("Ready to print", { id: toastId })
       } catch (err) {
         console.error("PDF Generation Error:", err)
         toast.error("Failed to generate label", { id: toastId })
@@ -620,11 +626,10 @@ export default function JobDetailsPage() {
 
 function JobDetailsSkeleton() {
   return (
-    <div className="p-10 space-y-8 max-w-5xl mx-auto">
-      <Skeleton className="h-12 w-64" />
-      <Skeleton className="h-48 w-full" />
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-32 w-full" />
+    <div className="p-10 space-y-4">
+      <Skeleton className="h-10 max-w-7xl mx-auto" />
+      <Skeleton className="h-40 max-w-7xl mx-auto" />
+      <Skeleton className="h-20 max-w-7xl mx-auto" />
     </div>
   )
 }

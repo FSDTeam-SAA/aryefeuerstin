@@ -11,8 +11,8 @@ import { useSession } from "next-auth/react";
 type Order = {
   _id: string;
   customer: {
-    firstName: string;
-    lastName: string;
+    fullName: string;
+    // lastName: string;
     pickupLocation?: {
       address: string;
     };
@@ -148,7 +148,7 @@ export default function OrderRequestsPage() {
             </Card>
           ) : (
             orders.map((order) => {
-              const fullName = `${order.customer.firstName} ${order.customer.lastName}`;
+              const fullName = `${order.customer.fullName}`;
 
               const address =
                 order.customer?.pickupLocation?.address ||

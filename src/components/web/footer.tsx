@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="text-center lg:text-left">
             <Link href="/" className="inline-block">
-              <div className="w-[100px] h-[80px] mx-auto lg:mx-0 mb-4">
+              <div className="w-[100px] h-[80px] mx-auto lg:mx-0 mb-1">
                 <Image
                   src="/logo.png"
                   alt="Logo"
@@ -22,9 +22,9 @@ export default function Footer() {
                 />
               </div>
             </Link>
-            <p className="text-sm font-normal text-[#131313] mb-2">
+            {/* <p className="text-sm font-normal text-[#131313] mb-2">
               Empowering Women, Building Trust
-            </p>
+            </p> */}
             <p className="text-sm text-gray-700">
               <span className="font-semibold">Email:</span>{" "}
               ezreturn123@gmail.com

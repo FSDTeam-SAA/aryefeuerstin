@@ -128,7 +128,7 @@ export function PackageDetailsForm({
     const newIndex = stores.length
     setStores([
       ...stores,
-      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },  
+      { returnStore: "", numberOfPackages: 1, packageImages: {}, packageNumbers: {} },
     ])
     setOpenSections((prev) => [...prev, `store-${newIndex}`, `packages-${newIndex}`])
   }
@@ -240,7 +240,7 @@ export function PackageDetailsForm({
                 <div className="flex items-center space-x-2">
                   <PackageIcon className="w-5 h-5 text-gray-600" />
                   <span className="font-medium text-gray-900">
-                 Select the return store for your item
+                    Select the return store for your item
                   </span>
                 </div>
                 <ChevronDown
@@ -272,7 +272,6 @@ export function PackageDetailsForm({
                     <SelectItem value="KOHLS">Kohl's</SelectItem>
                     <SelectItem value="SHEIN">Shein Return</SelectItem>
                     <SelectItem value="TARGET">Target</SelectItem>
-                    {/* <SelectItem value="WALMART">Walmart</SelectItem> */}
                     <SelectItem value="WALMART">Walmart</SelectItem>
                     <SelectItem value="WHOLE FOODS MARKET">Whole Foods Market</SelectItem>
                     <SelectItem value="UPS">UPS Drop Off</SelectItem>
@@ -282,7 +281,6 @@ export function PackageDetailsForm({
                   </SelectContent>
                 </Select>
 
-                {/* Other Store Name Input – Inside the same section */}
                 {store.returnStore === "OTHER" && (
                   <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
                     <Label htmlFor={`other-store-${storeIndex}`}>
@@ -361,12 +359,13 @@ export function PackageDetailsForm({
                     </div>
 
                     <div className="space-y-4">
+                      {/* Fixed: Package number field is now visible and optional */}
                       <div>
-                        <Label>Package Number / Tracking Number</Label>
+                        <Label>Package Number / Tracking Number (optional)</Label>
                         <Input
-                          placeholder="e.g. PKG-001"
+                          placeholder="e.g. PKG-001 or tracking number"
                           className="mt-1"
-                          value={store.packageNumbers[pkgIndex] || ""}
+                          value={store.packageNumbers?.[pkgIndex] || ""}
                           onChange={(e) =>
                             updateStoreData(storeIndex, "packageNumbers", {
                               ...store.packageNumbers,
@@ -387,7 +386,7 @@ export function PackageDetailsForm({
                             onChange={(e) => handleImageChange(storeIndex, pkgIndex, e)}
                           />
 
-                          {store.packageImages[pkgIndex]?.length > 0 ? (
+                          {store.packageImages?.[pkgIndex]?.length > 0 ? (
                             <div className="space-y-3">
                               <div className="relative">
                                 <img
@@ -492,6 +491,7 @@ export function PackageDetailsForm({
             />
           </div>
         </CollapsibleTrigger>
+
         <CollapsibleContent className="pt-4 px-2">
           <p className="text-sm text-gray-600 font-medium mb-3">
             Note:{" "}

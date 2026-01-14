@@ -1,27 +1,27 @@
 /* eslint-disable */
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSession } from "next-auth/react"
-import { Package } from "lucide-react"
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { Package } from "lucide-react";
 
-import { StepIndicator } from "./_components/StepIndicator"
-import { SummaryReview } from "./_components/PaymentForm"
-import { toast } from "sonner"
-import { PackageDetailsForm } from "./_components/PackageDetailsForm"
-import { CustomerInfoForm } from "./_components/CustomerInfoForm"
+import { StepIndicator } from "./_components/StepIndicator";
+import { SummaryReview } from "./_components/PaymentForm";
+import { toast } from "sonner";
+import { PackageDetailsForm } from "./_components/PackageDetailsForm";
+import { CustomerInfoForm } from "./_components/CustomerInfoForm";
 // import { PackageDetailsForm } from "./_components/CustomerInfoForm"
 
-type Step = 1 | 2 | 3
+type Step = 1 | 2 | 3;
 
 export default function PackageReturnService() {
-  const session = useSession()
-  const token = session.data?.accessToken as string | undefined
+  const session = useSession();
+  const token = session.data?.accessToken as string | undefined;
 
-  const [currentStep, setCurrentStep] = useState<Step>(1)
-  const [orderId, setOrderId] = useState<string>("")
-  const [totalAmount, setTotalAmount] = useState<number>(0)
-  const [orderResponse, setOrderResponse] = useState<any>(null)
+  const [currentStep, setCurrentStep] = useState<Step>(1);
+  const [orderId, setOrderId] = useState<string>("");
+  const [totalAmount, setTotalAmount] = useState<number>(0);
+  const [orderResponse, setOrderResponse] = useState<any>(null);
 
   const [formData, setFormData] = useState<any>({
     fullName: "",
@@ -50,71 +50,88 @@ export default function PackageReturnService() {
     leaveMessage: false,
     message: "",
     physicalReturnLabelFiles: [],
-  })
+  });
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
-  const [submitMessage, setSubmitMessage] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
+  const [submitMessage, setSubmitMessage] = useState("");
 
   const handleNext = (stepData: any) => {
-    setFormData((prev: any) => ({ ...prev, ...stepData }))
-    if (currentStep < 3) setCurrentStep((prev) => (prev + 1) as Step)
-  }
+    setFormData((prev: any) => ({ ...prev, ...stepData }));
+    if (currentStep < 3) setCurrentStep((prev) => (prev + 1) as Step);
+  };
 
   const handleBack = () => {
-    if (currentStep > 1) setCurrentStep((prev) => (prev - 1) as Step)
-  }
+    if (currentStep > 1) setCurrentStep((prev) => (prev - 1) as Step);
+  };
 
   const handleSubmitAndProceed = async (finalStepData: any) => {
-    const updatedData = { ...formData, ...finalStepData }
-    setFormData(updatedData)
+    const updatedData = { ...formData, ...finalStepData };
+    setFormData(updatedData);
 
-    setIsSubmitting(true)
-    setSubmitStatus("idle")
-    setSubmitMessage("")
+    setIsSubmitting(true);
+    setSubmitStatus("idle");
+    setSubmitMessage("");
 
     try {
       const fullAddress =
-        updatedData.pickupAddress || `${updatedData.street}${updatedData.unit ? ` ${updatedData.unit}` : ""}, ${updatedData.city}, USA`
+        updatedData.pickupAddress ||
+        `${updatedData.street}${
+          updatedData.unit ? ` ${updatedData.unit}` : ""
+        }, ${updatedData.city}, USA`;
 
-      const formDataToSend = new FormData()
+      const formDataToSend = new FormData();
 
       // Customer info
-      formDataToSend.append("fullName", updatedData.fullName)
+      formDataToSend.append("fullName", updatedData.fullName);
       // formDataToSend.append("lastName", updatedData.lastName)
-      formDataToSend.append("phone", updatedData.phoneNumber)
-      formDataToSend.append("email", updatedData.email)
-      formDataToSend.append("unit", updatedData.unit || "") // ← NEW: Send unit to backend
-      formDataToSend.append("zipCode", updatedData.zipCode || "")
-      formDataToSend.append("street", updatedData.street || "")
-      formDataToSend.append("state", updatedData.state || "")
-      formDataToSend.append("city", updatedData.city || "")
-      formDataToSend.append("pickupInstructions", updatedData.pickupInstructions || "")
-      formDataToSend.append("address", fullAddress)
-      formDataToSend.append("lat", updatedData.lat?.toString() || "")
-      formDataToSend.append("lng", updatedData.lng?.toString() || "")
+      formDataToSend.append("phone", updatedData.phoneNumber);
+      formDataToSend.append("email", updatedData.email);
+      formDataToSend.append("unit", updatedData.unit || ""); // ← NEW: Send unit to backend
+      formDataToSend.append("zipCode", updatedData.zipCode || "");
+      formDataToSend.append("street", updatedData.street || "");
+      formDataToSend.append("state", updatedData.state || "");
+      formDataToSend.append("city", updatedData.city || "");
+      formDataToSend.append(
+        "pickupInstructions",
+        updatedData.pickupInstructions || ""
+      );
+      formDataToSend.append("address", fullAddress);
+      formDataToSend.append("lat", updatedData.lat?.toString() || "");
+      formDataToSend.append("lng", updatedData.lng?.toString() || "");
 
       // Options
-      formDataToSend.append("rushService", String(updatedData.rushService))
-      formDataToSend.append("physicalReturnLabel", String(updatedData.printShippingLabel))
-      formDataToSend.append("physicalReceipt", String(updatedData.hasReceipt))
-      formDataToSend.append("returnShippingLabel", String(updatedData.needShippingLabel))
-      formDataToSend.append("leaveMessage", String(updatedData.leaveMessage))
+      formDataToSend.append("rushService", String(updatedData.rushService));
+      formDataToSend.append(
+        "physicalReturnLabel",
+        String(updatedData.printShippingLabel)
+      );
+      formDataToSend.append("physicalReceipt", String(updatedData.hasReceipt));
+      formDataToSend.append(
+        "returnShippingLabel",
+        String(updatedData.needShippingLabel)
+      );
+      formDataToSend.append("leaveMessage", String(updatedData.leaveMessage));
 
       if (updatedData.hasReceipt) {
-        formDataToSend.append("creditCardLast4", updatedData.creditCardLast4 || "")
+        formDataToSend.append(
+          "creditCardLast4",
+          updatedData.creditCardLast4 || ""
+        );
       }
 
       if (updatedData.needShippingLabel) {
-        formDataToSend.append("pickupAndReturnAddress", fullAddress)
-        formDataToSend.append("productLength", updatedData.productLength || "")
-        formDataToSend.append("productWidth", updatedData.productWidth || "")
-        formDataToSend.append("productHeight", updatedData.productHeight || "")
-        formDataToSend.append("productWeight", updatedData.productWeight || "")
+        formDataToSend.append("pickupAndReturnAddress", fullAddress);
+        formDataToSend.append("productLength", updatedData.productLength || "");
+        formDataToSend.append("productWidth", updatedData.productWidth || "");
+        formDataToSend.append("productHeight", updatedData.productHeight || "");
+        formDataToSend.append("productWeight", updatedData.productWeight || "");
       }
 
       if (updatedData.leaveMessage) {
-        formDataToSend.append("messageNote", updatedData.message || "")
+        formDataToSend.append("messageNote", updatedData.message || "");
       }
 
       // === Stores mapping (unchanged) ===
@@ -174,97 +191,101 @@ export default function PackageReturnService() {
       //   }
       // })
 
-
       // === Stores mapping ===
-const storesForBackend = updatedData.stores.map((store: any) => {
-  let backendStoreValue: string;
+      const storesForBackend = updatedData.stores.map((store: any) => {
+        let backendStoreValue: string;
 
-  switch (store.returnStore) {
-    case "STAPLES":
-      backendStoreValue = "Staples";
-      break;
-    case "KOHLS":
-      backendStoreValue = "Kohl's";
-      break;
-    case "SHEIN":
-      backendStoreValue = "Shein Return";
-      break;
-    case "TARGET":
-      backendStoreValue = "Target";
-      break;
-    case "WALMART":
-      backendStoreValue = "Walmart";
-      break;
-    case "WHOLE FOODS MARKET":
-      backendStoreValue = "Whole Foods Market";
-      break;
-    case "UPS":
-      backendStoreValue = "UPS Drop Off";
-      break;
-    case "USPS":
-      backendStoreValue = "USPS Drop Off";
-      break;
-    case "FEDEX":
-      backendStoreValue = "FedEx Drop Off";
-      break;
-    case "OTHER":
-      backendStoreValue = "Other";
-      break;
-    default:
-      backendStoreValue = "Other";
-  }
+        switch (store.returnStore) {
+          case "STAPLES":
+            backendStoreValue = "Staples";
+            break;
+          case "KOHLS":
+            backendStoreValue = "Kohl's";
+            break;
+          case "SHEIN":
+            backendStoreValue = "Shein Return";
+            break;
+          case "TARGET":
+            backendStoreValue = "Target";
+            break;
+          case "WALMART":
+            backendStoreValue = "Walmart";
+            break;
+          case "WHOLE FOODS MARKET":
+            backendStoreValue = "Whole Foods Market";
+            break;
+          case "UPS":
+            backendStoreValue = "UPS Drop Off";
+            break;
+          case "USPS":
+            backendStoreValue = "USPS Drop Off";
+            break;
+          case "FEDEX":
+            backendStoreValue = "FedEx Drop Off";
+            break;
+          case "OTHER":
+            backendStoreValue = "Other";
+            break;
+          default:
+            backendStoreValue = "Other";
+        }
 
-  const isOther = store.returnStore === "OTHER";
+        const isOther = store.returnStore === "OTHER";
 
-  // ── Important fix starts here ────────────────────────────────
-  const numberOfPackages = Number(store.numberOfPackages) || 1;
+        // ── Important fix starts here ────────────────────────────────
+        const numberOfPackages = Number(store.numberOfPackages) || 1;
 
-  // Create proper number of package entries even if packageNumbers is empty
-  const packages = Array.from({ length: numberOfPackages }, (_, idx) => ({
-    packageNumber: store.packageNumbers?.[idx] || "", // still use if exists
-    barcodeImages: [], // will be filled later if images exist
-  }));
-  // ──────────────────────────────────────────────────────────────
+        // Create proper number of package entries even if packageNumbers is empty
+        const packages = Array.from({ length: numberOfPackages }, (_, idx) => ({
+          packageNumber: String(idx + 1), // ✅ "1", "2", "3" ...
+          barcodeImages: [],
+        }));
+        // ──────────────────────────────────────────────────────────────
 
-  return {
-    store: backendStoreValue,
-    ...(isOther && store.otherStoreName?.trim()
-      ? { otherStoreName: store.otherStoreName.trim() }
-      : {}),
-    numberOfPackages,
-    packages,
-  };
-});
+        return {
+          store: backendStoreValue,
+          ...(isOther && store.otherStoreName?.trim()
+            ? { otherStoreName: store.otherStoreName.trim() }
+            : {}),
+          numberOfPackages,
+          packages,
+        };
+      });
 
-      formDataToSend.append("stores", JSON.stringify(storesForBackend))
+      formDataToSend.append("stores", JSON.stringify(storesForBackend));
 
       // Handle barcode images
-      let imageIndex = 0
-      const imagePromises: Promise<void>[] = []
+      let imageIndex = 0;
+      const imagePromises: Promise<void>[] = [];
 
       updatedData.stores.forEach((store: any) => {
         Object.keys(store.packageImages || {}).forEach((pkgIdx: string) => {
-          ;(store.packageImages[pkgIdx] || []).forEach((dataUrl: string) => {
+          (store.packageImages[pkgIdx] || []).forEach((dataUrl: string) => {
             const p = fetch(dataUrl)
               .then((res) => res.blob())
               .then((blob) => {
-                const file = new File([blob], `barcode_${imageIndex}.jpg`, { type: "image/jpeg" })
-                formDataToSend.append("barcodeImages", file)
-                imageIndex++
-              })
-            imagePromises.push(p)
-          })
-        })
-      })
+                const file = new File([blob], `barcode_${imageIndex}.jpg`, {
+                  type: "image/jpeg",
+                });
+                formDataToSend.append("barcodeImages", file);
+                imageIndex++;
+              });
+            imagePromises.push(p);
+          });
+        });
+      });
 
       // Handle physical return label files
-      if (updatedData.physicalReturnLabelFiles && updatedData.physicalReturnLabelFiles.length > 0) {
+      if (
+        updatedData.physicalReturnLabelFiles &&
+        updatedData.physicalReturnLabelFiles.length > 0
+      ) {
         updatedData.physicalReturnLabelFiles.forEach((item: { file: File }) => {
-          formDataToSend.append("physicalReturnLabelFiles", item.file)
-        })
+          formDataToSend.append("physicalReturnLabelFiles", item.file);
+        });
       }
 
-      await Promise.all(imagePromises)
+      await Promise.all(imagePromises);
 
       // API Call
       const response = await fetch(
@@ -276,31 +297,31 @@ const storesForBackend = updatedData.stores.map((store: any) => {
           },
           body: formDataToSend,
         }
-      )
+      );
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Submission failed")
+        throw new Error(result.message || "Submission failed");
       }
 
       // SUCCESS
-      setOrderId(result.data._id)
-      setTotalAmount(result.data.pricing.totalAmount)
-      setOrderResponse(result.data)
-      setSubmitStatus("success")
-      setSubmitMessage(result.message || "Return order created successfully!")
-      setCurrentStep(3)
-      toast.success("Return order created successfully!")
+      setOrderId(result.data._id);
+      setTotalAmount(result.data.pricing.totalAmount);
+      setOrderResponse(result.data);
+      setSubmitStatus("success");
+      setSubmitMessage(result.message || "Return order created successfully!");
+      setCurrentStep(3);
+      toast.success("Return order created successfully!");
     } catch (error: any) {
-      setSubmitStatus("error")
-      setSubmitMessage(error.message || "Something went wrong")
-      toast.error(error.message || "Submission failed")
+      setSubmitStatus("error");
+      setSubmitMessage(error.message || "Something went wrong");
+      toast.error(error.message || "Submission failed");
     } finally {
-      setIsSubmitting(false)
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      setIsSubmitting(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 lg:px-4">
@@ -309,13 +330,17 @@ const storesForBackend = updatedData.stores.map((store: any) => {
           <div className="inline-flex w-16 h-16 bg-[#31B8FA] rounded-full items-center justify-center mb-4">
             <Package className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-bold">Customer Package Return Service</h1>
+          <h1 className="text-2xl font-bold">
+            Customer Package Return Service
+          </h1>
         </div>
 
         <StepIndicator currentStep={currentStep} />
 
         <div className="bg-white lg:p-6 p-3 mt-8 rounded-lg shadow">
-          {currentStep === 1 && <CustomerInfoForm initialData={formData} onNext={handleNext} />}
+          {currentStep === 1 && (
+            <CustomerInfoForm initialData={formData} onNext={handleNext} />
+          )}
           {currentStep === 2 && (
             <PackageDetailsForm
               initialData={formData}
@@ -336,5 +361,5 @@ const storesForBackend = updatedData.stores.map((store: any) => {
         </div>
       </div>
     </div>
-  )
+  );
 }

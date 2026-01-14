@@ -1041,7 +1041,7 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
             <Label htmlFor="city">City</Label>
             <Input
               id="city"
-              placeholder="New York"
+              placeholder="Monre"
               className={inputClass}
               {...register("city")}
             />
@@ -1054,7 +1054,7 @@ export function CustomerInfoForm({ initialData, onNext }: CustomerInfoFormProps)
             <Label htmlFor="state">State</Label>
             <Input
               id="state"
-              placeholder="Florida"
+              placeholder="New York"
               className={inputClass}
               {...register("state")}
             />

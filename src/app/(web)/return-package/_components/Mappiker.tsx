@@ -265,3 +265,212 @@ export default function LocationPickerModal({
     </div>
   );
 }
+
+
+
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import {
+//   GoogleMap,
+//   Marker,
+//   useLoadScript,
+//   StandaloneSearchBox,
+// } from "@react-google-maps/api";
+// import { Loader2, MapPin } from "lucide-react";
+// import { toast } from "sonner";
+// import { getBestAddress } from "@/lib/getBestAddress";
+
+// interface DataProps {
+//   address: string;
+//   lat: number;
+//   lng: number;
+// }
+
+// interface LocationPickerModalProps {
+//   onSelect: (val: DataProps) => void;
+//   onClose?: () => void;
+//   initialLocation?: DataProps | null;
+// }
+
+// const libraries: ("places")[] = ["places"];
+
+// const DEFAULT_LOCATION = {
+//   lat: 40.7128,
+//   lng: -74.006,
+// };
+
+// export default function LocationPickerModal({
+//   onSelect,
+//   initialLocation,
+// }: LocationPickerModalProps) {
+//   const { isLoaded } = useLoadScript({
+//     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+//     libraries,
+//   });
+
+//   const [position, setPosition] = useState(DEFAULT_LOCATION);
+//   const [tempLocation, setTempLocation] = useState<DataProps | null>(null);
+//   const [searchBox, setSearchBox] =
+//     useState<google.maps.places.SearchBox | null>(null);
+//   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+//   useEffect(() => {
+//     if (initialLocation) {
+//       setPosition({ lat: initialLocation.lat, lng: initialLocation.lng });
+//       setTempLocation(initialLocation);
+//     }
+//   }, [initialLocation]);
+
+//   /* ---------- Search ---------- */
+//   const handlePlacesChanged = () => {
+//     if (!searchBox) return;
+
+//     const places = searchBox.getPlaces();
+//     if (!places?.[0]?.geometry?.location) return;
+
+//     const lat = places[0].geometry.location.lat();
+//     const lng = places[0].geometry.location.lng();
+
+//     const locationData = {
+//       address:
+//         places[0].formatted_address ||
+//         places[0].name ||
+//         "Selected Location",
+//       lat,
+//       lng,
+//     };
+
+//     setPosition({ lat, lng });
+//     setTempLocation(locationData);
+//     onSelect(locationData);
+//   };
+
+//   /* ---------- Map Click ---------- */
+//   const handleMapClick = (event: google.maps.MapMouseEvent) => {
+//     if (!event.latLng) return;
+
+//     const lat = event.latLng.lat();
+//     const lng = event.latLng.lng();
+
+//     setPosition({ lat, lng });
+
+//     const geocoder = new google.maps.Geocoder();
+//     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+//       let address = "Selected Location";
+
+//       if (status === "OK" && results?.length) {
+//         address = getBestAddress(results).replace(/^[A-Z0-9+]+,\s*/, "");
+//       }
+
+//       const locationData = { address, lat, lng };
+//       setTempLocation(locationData);
+//       onSelect(locationData);
+//     });
+//   };
+
+//   /* ---------- My Location ---------- */
+//   const handleGetMyLocation = () => {
+//     if (!navigator.geolocation) {
+//       toast.error("Geolocation not supported.");
+//       return;
+//     }
+
+//     setIsGettingLocation(true);
+
+//     navigator.geolocation.getCurrentPosition(
+//       (pos) => {
+//         const lat = pos.coords.latitude;
+//         const lng = pos.coords.longitude;
+
+//         setPosition({ lat, lng });
+
+//         const geocoder = new google.maps.Geocoder();
+//         geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+//           setIsGettingLocation(false);
+
+//           let address = "My Location";
+
+//           if (status === "OK" && results?.length) {
+//             address = getBestAddress(results).replace(/^[A-Z0-9+]+,\s*/, "");
+//           } else {
+//             address = `Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+//           }
+
+//           const locationData = { address, lat, lng };
+//           setTempLocation(locationData);
+//           onSelect(locationData);
+
+//           toast.success("Location selected");
+//         });
+//       },
+//       () => {
+//         setIsGettingLocation(false);
+//         toast.error("Unable to get location");
+//       }
+//     );
+//   };
+
+//   if (!isLoaded) {
+//     return (
+//       <div className="h-[500px] flex items-center justify-center">
+//         <Loader2 className="animate-spin" />
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="space-y-3">
+//       <div className="h-[500px] border rounded-md overflow-hidden relative">
+//         <GoogleMap
+//           center={position}
+//           zoom={14}
+//           mapContainerStyle={{ height: "100%", width: "100%" }}
+//           onClick={handleMapClick}
+//           options={{
+//             streetViewControl: false,
+//             mapTypeControl: false,
+//             fullscreenControl: false,
+//           }}
+//         >
+//           <div className="absolute top-3 left-3 z-10 flex gap-2">
+//             <StandaloneSearchBox
+//               onLoad={(ref) => setSearchBox(ref)}
+//               onPlacesChanged={handlePlacesChanged}
+//             >
+//               <input
+//                 type="text"
+//                 placeholder="Search address"
+//                 className="h-10 px-3 rounded border shadow bg-white"
+//               />
+//             </StandaloneSearchBox>
+
+//             <button
+//               onClick={handleGetMyLocation}
+//               disabled={isGettingLocation}
+//               className="h-10 px-4 bg-white border rounded flex items-center gap-2"
+//             >
+//               {isGettingLocation ? (
+//                 <Loader2 className="animate-spin" size={16} />
+//               ) : (
+//                 <MapPin size={16} />
+//               )}
+//               My Location
+//             </button>
+//           </div>
+
+//           <Marker position={position} />
+//         </GoogleMap>
+//       </div>
+
+//       {tempLocation && (
+//         <div className="p-3 border rounded bg-gray-50">
+//           <p className="font-medium">{tempLocation.address}</p>
+//           <p className="text-xs text-gray-500">
+//             {tempLocation.lat.toFixed(4)}, {tempLocation.lng.toFixed(4)}
+//           </p>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }

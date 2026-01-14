@@ -149,12 +149,12 @@ export default function SubscriptionPackages() {
                   <div className="p-6 flex-1 flex flex-col justify-center">
                     <div className="flex justify-center mb-6 text-center">
                       <div>
-                        <h4 className="text-[32px] font-semibold text-[#131313] mb-1">
-                          ${pkg.price}
+                        <h4 className="text-[28px] font-semibold text-[#131313] mb-1">
+                          {/* ${pkg.price} */} {pkg.name}
                         </h4>
-                        <p className="text-base text-[#424242]">
+                        {/* <p className="text-base text-[#424242]">
                           {pkg.name}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
 

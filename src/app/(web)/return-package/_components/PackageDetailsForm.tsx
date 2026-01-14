@@ -360,7 +360,7 @@ export function PackageDetailsForm({
 
                     <div className="space-y-4">
                       {/* Fixed: Package number field is now visible and optional */}
-                      <div>
+                      {/* <div>
                         <Label>Package Number</Label>
                         <Input
                           placeholder="Enter package number "
@@ -373,7 +373,7 @@ export function PackageDetailsForm({
                             })
                           }
                         />
-                      </div>
+                      </div> */}
 
                       <div>
                         <Label>Barcode / Label Images (optional)</Label>

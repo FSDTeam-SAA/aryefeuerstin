@@ -152,7 +152,7 @@ export default function OrderRequestsPage() {
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="mx-auto max-w-4xl">
         <h1 className="text-2xl font-semibold text-[#181818] mb-14 text-center">
-          {isLoading ? "Checking deliveries..." : `You have ${orders.length} active deliveries today`}
+          {isLoading ? "Checking deliveries..." : `You have ${orders.length} active deliveries`}
         </h1>
 
         {!isLoading && orders.length > 0 && (

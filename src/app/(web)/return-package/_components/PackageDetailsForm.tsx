@@ -469,123 +469,139 @@ export function PackageDetailsForm({
         </CollapsibleContent>
       </Collapsible>
 
-      {/* Physical Return Label */}
-      <Collapsible
-        open={openSections.includes("shippingLabel")}
-        onOpenChange={() => toggleSection("shippingLabel")}
-        className="bg-[#F8FAFC] p-4 rounded-lg border"
-      >
-        <CollapsibleTrigger className="w-full">
-          <div className="flex items-center justify-between p-2">
-            <div className="flex items-center space-x-2">
-              <PackageIcon className="w-5 h-5 text-gray-600" />
-              <span className="font-medium text-gray-900">
-                Does your package require a physical return label?
-              </span>
-            </div>
-            <ChevronDown
-              className={cn(
-                "w-5 h-5 text-gray-400 transition-transform",
-                openSections.includes("shippingLabel") && "rotate-180"
-              )}
-            />
-          </div>
-        </CollapsibleTrigger>
+     {/* Physical Return Label */}
+<Collapsible
+  open={openSections.includes("shippingLabel")}
+  onOpenChange={() => toggleSection("shippingLabel")}
+  className="bg-[#F8FAFC] p-4 rounded-lg border"
+>
+  <CollapsibleTrigger className="w-full">
+    <div className="flex items-center justify-between p-2">
+      <div className="flex items-center space-x-2">
+        <PackageIcon className="w-5 h-5 text-gray-600" />
+        <span className="font-medium text-gray-900">
+          Does your package require a physical return label?
+        </span>
+      </div>
+      <ChevronDown
+        className={cn(
+          "w-5 h-5 text-gray-400 transition-transform",
+          openSections.includes("shippingLabel") && "rotate-180"
+        )}
+      />
+    </div>
+  </CollapsibleTrigger>
 
-        <CollapsibleContent className="pt-4 px-2">
-          <p className="text-sm text-gray-600 font-medium mb-3">
-            Note:{" "}
-            <span className="text-[#FF4928]">
-              Additional fee: $3.50 (applies to pay-per-package and standard accounts).
-            </span>
-          </p>
-          <RadioGroup
-            onValueChange={(v) => setValue("printShippingLabel", v === "yes")}
-            defaultValue="no"
-          >
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="yes" id="psl-yes" />
-                <Label htmlFor="psl-yes">Yes</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no" id="psl-no" />
-                <Label htmlFor="psl-no">No</Label>
-              </div>
-            </div>
-          </RadioGroup>
+  <CollapsibleContent className="pt-4 px-2 sm:px-4">
+    <p className="text-sm text-gray-600 font-medium mb-4">
+      Note:{" "}
+      <span className="text-[#FF4928]">
+        Additional fee: $3.50 (applies to pay-per-package and standard accounts).
+      </span>
+    </p>
 
-          {printShippingLabel && (
-            <div className="mt-6">
-              <Label>Upload Physical Return Label Files (PDF or Image)</Label>
-              <div className="mt-2">
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  multiple
-                  className="hidden"
-                  id="physical-return-labels"
-                  onChange={handlePhysicalLabelUpload}
-                />
+    <RadioGroup
+      onValueChange={(v) => setValue("printShippingLabel", v === "yes")}
+      defaultValue="no"
+    >
+      <div className="flex flex-wrap items-center gap-6 mb-4">
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="yes" id="psl-yes" />
+          <Label htmlFor="psl-yes">Yes</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="no" id="psl-no" />
+          <Label htmlFor="psl-no">No</Label>
+        </div>
+      </div>
+    </RadioGroup>
 
-                {physicalReturnLabelFiles.length > 0 ? (
-                  <div className="space-y-3">
-                    {physicalReturnLabelFiles.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="relative flex items-center gap-3 p-3 border rounded-lg bg-white"
-                      >
-                        {item.preview ? (
-                          <img
-                            src={item.preview}
-                            alt="Label preview"
-                            className="w-24 h-24 object-contain rounded border"
-                          />
-                        ) : (
-                          <div className="w-24 h-24 bg-gray-100 rounded border flex items-center justify-center">
-                            <FileText className="w-10 h-10 text-gray-400" />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          <p className="text-sm font-medium truncate max-w-xs">{item.file.name}</p>
-                          <p className="text-xs text-gray-500">
-                            {(item.file.size / 1024).toFixed(1)} KB
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removePhysicalLabelFile(idx)}
-                          className="text-red-600 hover:bg-red-50 p-2 rounded"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
-                    ))}
+    {printShippingLabel && (
+      <div className="mt-6 space-y-5">
+        <Label>Upload Physical Return Label Files (PDF or Image)</Label>
 
-                    <label
-                      htmlFor="physical-return-labels"
-                      className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                    >
-                      <Upload className="w-4 h-4 mr-2" /> Add More Files
-                    </label>
-                  </div>
-                ) : (
-                  <label
-                    htmlFor="physical-return-labels"
-                    className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-10 text-center cursor-pointer hover:border-cyan-400"
-                  >
-                    <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                    <p className="text-sm text-gray-600">Click to upload return label files</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Supports images and PDFs (multiple allowed)
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          multiple
+          className="hidden"
+          id="physical-return-labels"
+          onChange={handlePhysicalLabelUpload}
+        />
+
+        {physicalReturnLabelFiles.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {physicalReturnLabelFiles.map((item, idx) => (
+              <div
+                key={idx}
+                className="relative group border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow transition-all duration-200"
+              >
+                {/* Preview Area */}
+                <div className="aspect-[4/5] sm:aspect-[3/4] bg-gray-50 relative">
+                  {item.preview ? (
+                    // Image preview
+                    <img
+                      src={item.preview}
+                      alt="Label preview"
+                      className="absolute inset-0 w-full h-full object-contain p-4"
+                    />
+                  ) : (
+                    // PDF placeholder
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                      <FileText className="w-14 h-14 text-blue-500 mb-3" />
+                      <p className="text-sm font-medium text-gray-700">PDF Document</p>
+                      <p className="text-xs text-gray-500 mt-1">Preview not available</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* File info & remove button */}
+                <div className="p-3 flex items-center justify-between bg-gray-50 border-t">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{item.file.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {(item.file.size / 1024).toFixed(1)} KB •{" "}
+                      {item.file.type.includes("pdf") ? "PDF" : "Image"}
                     </p>
-                  </label>
-                )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => removePhysicalLabelFile(idx)}
+                    className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors ml-2 flex-shrink-0"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </CollapsibleContent>
-      </Collapsible>
+            ))}
+
+            {/* Add more button */}
+            <label
+              htmlFor="physical-return-labels"
+              className="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-colors min-h-[220px]"
+            >
+              <Upload className="w-10 h-10 text-gray-400 mb-3" />
+              <p className="text-sm font-medium text-gray-700">Add more files</p>
+              <p className="text-xs text-gray-500 mt-1">PDF or Image</p>
+            </label>
+          </div>
+        ) : (
+          <label
+            htmlFor="physical-return-labels"
+            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-colors min-h-[280px]"
+          >
+            <Upload className="w-14 h-14 text-gray-400 mb-4" />
+            <p className="text-base font-medium text-gray-700">Click to upload return label files</p>
+            <p className="text-sm text-gray-500 mt-3">
+              Supports JPG, PNG, PDF (multiple files allowed)
+            </p>
+          </label>
+        )}
+      </div>
+    )}
+  </CollapsibleContent>
+</Collapsible>
 
       {/* Physical Receipt */}
       <Collapsible

@@ -487,7 +487,7 @@ export default function LocationPickerModal({
               />
             </StandaloneSearchBox>
 
-            <button
+            {/* <button
               onClick={handleGetMyLocation}
               disabled={isGettingLocation}
               className="h-10 px-3 rounded bg-white border shadow-md flex items-center gap-2 disabled:opacity-50"
@@ -498,7 +498,7 @@ export default function LocationPickerModal({
                 <MapPin size={18} />
               )}
               <span className="text-sm">My Location</span>
-            </button>
+            </button> */}
           </div>
 
           <Marker position={position} />

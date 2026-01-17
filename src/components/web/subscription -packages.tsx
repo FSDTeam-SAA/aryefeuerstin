@@ -169,10 +169,10 @@ export default function SubscriptionPackages() {
                   <div
                     key={pkg._id}
                     className={`
-                      border-2 ${colors.border} 
-                      rounded-xl overflow-hidden 
-                      flex flex-col 
-                      shadow-sm hover:shadow-md 
+                      border-2 ${colors.border}
+                      rounded-xl overflow-hidden
+                      flex flex-col
+                      shadow-sm hover:shadow-md
                       transition-shadow duration-300
                       bg-white
                       w-full max-w-[340px] mx-auto
@@ -198,7 +198,9 @@ export default function SubscriptionPackages() {
                             key={i}
                             className="text-[15px] flex items-start gap-2.5 leading-relaxed"
                           >
-                            <span className="text-yellow-500 text-lg mt-0.5">⭐</span>
+                            <span className="text-yellow-500 text-lg mt-0.5">
+                              ⭐
+                            </span>
                             <span>{feature}</span>
                           </li>
                         ))}
@@ -213,13 +215,13 @@ export default function SubscriptionPackages() {
                         }}
                         className={`
                           mt-auto
-                          h-[52px] 
+                          h-[52px]
                           text-base font-medium
                           rounded-lg
                           w-full
                           ${
                             isLastPackage
-                              ? "bg-gray-400 hover:bg-gray-400 cursor-not-allowed"
+                              ? "bg-orange-500 hover:bg-orange-500 cursor-not-allowed"
                               : colors.button
                           }
                         `}

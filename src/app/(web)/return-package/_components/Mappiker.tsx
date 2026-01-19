@@ -13,6 +13,7 @@ interface DataProps {
   address: string;
   lat: number;
   lng: number;
+  addressComponents?: Record<string, string>;
 }
 
 interface LocationPickerModalProps {
@@ -23,7 +24,6 @@ interface LocationPickerModalProps {
 
 const libraries: ("places")[] = ["places"];
 
-// Default location - USA (New York)
 const DEFAULT_LOCATION = {
   lat: 40.7128,
   lng: -74.006,
@@ -40,11 +40,8 @@ export default function LocationPickerModal({
 
   const [position, setPosition] = useState(DEFAULT_LOCATION);
   const [tempLocation, setTempLocation] = useState<DataProps | null>(null);
+  const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
 
-  const [searchBox, setSearchBox] =
-    useState<google.maps.places.SearchBox | null>(null);
-
-  /* ---------- Initial location ---------- */
   useEffect(() => {
     if (initialLocation) {
       setPosition({ lat: initialLocation.lat, lng: initialLocation.lng });
@@ -54,57 +51,85 @@ export default function LocationPickerModal({
     }
   }, [initialLocation]);
 
-  /* ---------- Search place ---------- */
+  // Helper to extract address components safely
+  const extractComponents = (components: google.maps.GeocoderAddressComponent[] | undefined) => {
+    if (!components || !Array.isArray(components)) return {};
+
+    const result: Record<string, string> = {};
+
+    components.forEach((comp) => {
+      if (comp.types?.length) {
+        const type = comp.types[0]; // primary type
+        result[type] = comp.long_name;
+      }
+    });
+
+    return result;
+  };
+
+  const handleSelect = (
+    lat: number,
+    lng: number,
+    address: string = "Selected Location",
+    components: Record<string, string> = {}
+  ) => {
+    const data: DataProps = {
+      address,
+      lat,
+      lng,
+      addressComponents: Object.keys(components).length > 0 ? components : undefined,
+    };
+    setPosition({ lat, lng });
+    setTempLocation(data);
+    onSelect(data);
+  };
+
   const handlePlacesChanged = () => {
     if (!searchBox) return;
 
     const places = searchBox.getPlaces();
-    if (!places || !places[0]?.geometry?.location) return;
+    if (!places?.length || !places[0]?.geometry?.location) {
+      console.warn("No valid place selected");
+      return;
+    }
 
-    const lat = places[0].geometry.location.lat();
-    const lng = places[0].geometry.location.lng();
+    const place = places[0];
+    if (!place.geometry?.location) return;
 
-    const locationData = {
-      address:
-        places[0].formatted_address ||
-        places[0].name ||
-        "Selected Location",
-      lat,
-      lng,
-    };
+    const lat = place.geometry.location.lat();
+    const lng = place.geometry.location.lng();
+    const address = place.formatted_address || place.name || "Selected Location";
 
-    setPosition({ lat, lng });
-    setTempLocation(locationData);
-    onSelect(locationData);
+    const components = place.address_components
+      ? extractComponents(place.address_components)
+      : {};
+
+    handleSelect(lat, lng, address, components);
   };
 
-  /* ---------- Map click ---------- */
   const handleMapClick = (event: google.maps.MapMouseEvent) => {
     if (!event.latLng) return;
 
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
-    setPosition({ lat, lng });
-
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ location: { lat, lng } }, (results, status) => {
       let address = "Selected Location";
+      let components: Record<string, string> = {};
 
-      if (status === "OK" && results?.[0]) {
-        address = results[0].formatted_address.replace(
-          /^[A-Z0-9+]+,\s*/,
-          ""
-        );
+      if (status === "OK" && results?.length && results[0]) {
+        const firstResult = results[0];
+        address = firstResult.formatted_address || address;
+        components = extractComponents(firstResult.address_components);
+      } else {
+        console.warn("Geocoding failed:", status);
       }
 
-      const locationData = { address, lat, lng };
-      setTempLocation(locationData);
-      onSelect(locationData);
+      handleSelect(lat, lng, address, components);
     });
   };
 
-  /* ---------- Loader ---------- */
   if (!isLoaded) {
     return (
       <div className="h-[500px] w-full flex items-center justify-center bg-gray-100 rounded-lg">
@@ -128,7 +153,6 @@ export default function LocationPickerModal({
             zoomControl: true,
           }}
         >
-          {/* Search box only */}
           <div className="absolute top-3 left-3 z-10 w-[calc(100%-1rem)] sm:w-auto">
             <StandaloneSearchBox
               onLoad={(ref) => setSearchBox(ref)}
@@ -149,12 +173,9 @@ export default function LocationPickerModal({
       {tempLocation && (
         <div className="bg-gray-50 p-3 rounded-lg border">
           <p className="text-sm text-gray-600">Selected Location:</p>
-          <p className="font-medium text-gray-900">
-            {tempLocation.address}
-          </p>
+          <p className="font-medium text-gray-900">{tempLocation.address}</p>
           <p className="text-xs text-gray-500 mt-1">
-            Coordinates: {tempLocation.lat.toFixed(4)},{" "}
-            {tempLocation.lng.toFixed(4)}
+            Coordinates: {tempLocation.lat.toFixed(4)}, {tempLocation.lng.toFixed(4)}
           </p>
         </div>
       )}

@@ -239,7 +239,7 @@ export default function SubscriptionPackages() {
                           "Request Now"
                         ) : (
                           `Join Now - $${pkg.price}/${
-                            pkg.billingCycle === "monthly" ? "mo" : "pr"
+                            pkg.billingCycle === "monthly" ? "mo" : "-"
                           }`
                         )}
                       </Button>
@@ -250,7 +250,7 @@ export default function SubscriptionPackages() {
             )}
           </div>
         </div>
-      </section>
+      </section> 
 
       <LoginRequiredModal
         open={loginModalOpen}

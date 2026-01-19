@@ -2,7 +2,7 @@
 import HelpSection from "@/components/web/help-section";
 import HeroSection from "@/components/web/hero-section";
 import PhysicalReturnInfo from "@/components/web/physical-return-info";
-import SubcriptionAndderiver from "@/components/web/SubcriptionAndderiver";
+// import SubcriptionAndderiver from "@/components/web/SubcriptionAndderiver";
 import TestimonialsSection from "@/components/web/testirnonials-section";
 
 
@@ -13,7 +13,7 @@ export default function Page() {
      
       <main>
         <HeroSection />
-        <SubcriptionAndderiver/>
+        {/* <SubcriptionAndderiver/> */}
         <PhysicalReturnInfo />
         <HelpSection />
         <TestimonialsSection />

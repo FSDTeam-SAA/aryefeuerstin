@@ -269,7 +269,7 @@ export function SummaryReview({
           <li>
             <b>Physical Return Label:</b>{" "}
             {options.physicalReturnLabel.enabled
-              ? `Yes (+$${options.physicalReturnLabel.fee || 3.5})`
+              ? `Yes (+$${options.physicalReturnLabel.fee || 0})`
               : "No"}
           </li>
           <li>

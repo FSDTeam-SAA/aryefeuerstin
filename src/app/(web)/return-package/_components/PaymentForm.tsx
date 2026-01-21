@@ -1,84 +1,79 @@
+"use client";
 
-
-
-
-
-"use client"
-
-import { Button } from "@/components/ui/button"
-import { CheckCircle, FileText, Image as ImageIcon } from "lucide-react"
-import { useSession } from "next-auth/react"
-import { useMutation } from "@tanstack/react-query"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { CheckCircle, FileText, Image as ImageIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Customer {
-  fullName: string
+  fullName: string;
   // lastName: string
-  phone: string
-  email: string
+  phone: string;
+  email: string;
   address: {
-    street: string
-    city: string
-    zipCode: string
-  }
-  pickupInstructions?: string
+    street: string;
+    city: string;
+    zipCode: string;
+  };
+  pickupInstructions?: string;
 }
 
 interface PackageItem {
-  packageNumber: string
-  barcodeImages: string[]
+  packageNumber: string;
+  barcodeImages: string[];
 }
 
 interface Store {
-  store: string
-  otherStoreName?: string  // ← Added this
-  numberOfPackages: number
-  packages: PackageItem[]
+  store: string;
+  otherStoreName?: string; // ← Added this
+  numberOfPackages: number;
+  packages: PackageItem[];
 }
 
 interface RushService {
-  enabled: boolean
-  fee: number
+  enabled: boolean;
+  fee: number;
 }
 
 interface OptionItem {
-  enabled: boolean
-  fee?: number
-  creditCardLast4?: string
-  note?: string
+  enabled: boolean;
+  fee?: number;
+  creditCardLast4?: string;
+  note?: string;
 }
 
 interface Options {
-  physicalReturnLabel: OptionItem
-  physicalReceipt: OptionItem
-  returnShippingLabel: OptionItem
-  message: OptionItem & { note?: string }
+  physicalReturnLabel: OptionItem;
+  physicalReceipt: OptionItem;
+  returnShippingLabel: OptionItem;
+  message: OptionItem & { note?: string };
 }
 
 interface Pricing {
-  baseAmount: number
-  extraFees: number
-  totalAmount: number
+  baseAmount: number;
+  extraFees: number;
+  totalAmount: number;
 }
 
 interface OrderData {
-  customer: Customer
-  rushService: RushService
-  stores: Store[]
-  options: Options
-  pricing: Pricing
-  _id: string
-  physicalReturnLabelFiles?: string[]
+  customer: Customer;
+  rushService: RushService;
+  stores: Store[];
+  options: Options;
+  pricing: Pricing;
+  _id: string;
+  physicalReturnLabelFiles?: string[];
 }
 
 interface SummaryReviewProps {
-  orderData: OrderData
-  status: "idle" | "success" | "error"
-  message: string
-  orderId: string
-  totalAmount: number
+  orderData: OrderData;
+  status: "idle" | "success" | "error";
+  message: string;
+  orderId: string;
+  totalAmount: number;
 }
 
 export function SummaryReview({
@@ -86,13 +81,13 @@ export function SummaryReview({
   orderId,
   totalAmount,
 }: SummaryReviewProps) {
-  const { data: session } = useSession()
-  const token = session?.accessToken as string | undefined
-  const router = useRouter()
+  const { data: session } = useSession();
+  const token = session?.accessToken as string | undefined;
+  const router = useRouter();
 
   const checkoutMutation = useMutation({
     mutationFn: async () => {
-      if (!orderId) throw new Error("No order ID available")
+      if (!orderId) throw new Error("No order ID available");
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/payment/checkout/return-order`,
@@ -103,47 +98,86 @@ export function SummaryReview({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ returnOrderId: orderId }),
-        }
-      )
+        },
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Failed to create checkout session")
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || "Failed to create checkout session",
+        );
       }
 
-      return response.json()
+      return response.json();
     },
     onSuccess: (data) => {
       if (data?.status && data?.data?.checkoutUrl) {
-        router.push(data.data.checkoutUrl)
+        router.push(data.data.checkoutUrl);
       } else {
-        console.error("Invalid checkout response:", data)
+        console.error("Invalid checkout response:", data);
       }
     },
     onError: (error) => {
-      console.error("Checkout error:", error)
+      console.error("Checkout error:", error);
     },
-  })
+  });
 
   const handlePayment = () => {
-    checkoutMutation.mutate()
-  }
+    checkoutMutation.mutate();
+  };
 
-  const { customer, stores, rushService, options, physicalReturnLabelFiles = [] } = orderData
-  const { address } = customer
+  const TOKEN = session?.accessToken as string | undefined;
 
-  const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url)
-  const isPdfFile = (url: string) => /\.pdf$/i.test(url)
+  const { data: userData } = useQuery({
+    queryKey: ["userProfile"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/me`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`, // যদি token লাগে
+          },
+        },
+      );
 
-  const isFreeOrder = totalAmount === 0
+      if (!res.ok) {
+        throw new Error("Failed to fetch user profile");
+      }
+
+      return res.json(); // 👉 backend response return করবে
+    },
+  });
+
+  const entitlements =
+    userData?.data?.user?.subscription?.planId?.entitlements || {};
+
+  const isFreePhysicalLabel = entitlements.freePhysicalReturnLabel === true;
+  const isFreePhysicalReceipt = entitlements.freePhysicalReceipt === true;
+
+  const {
+    customer,
+    stores,
+    rushService,
+    options,
+    physicalReturnLabelFiles = [],
+  } = orderData;
+  const { address } = customer;
+
+  const isImageFile = (url: string) =>
+    /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(url);
+  const isPdfFile = (url: string) => /\.pdf$/i.test(url);
+
+  const isFreeOrder = totalAmount === 0;
 
   // Helper to display store name correctly
   const getStoreDisplayName = (store: Store) => {
     if (store.store === "Other" && store.otherStoreName) {
-      return `Other: ${store.otherStoreName}`
+      return `Other: ${store.otherStoreName}`;
     }
-    return store.store
-  }
+    return store.store;
+  };
 
   return (
     <div className="space-y-8">
@@ -151,9 +185,15 @@ export function SummaryReview({
       <div className="border rounded-lg p-6 bg-[#F8FAFC]">
         <h3 className="text-lg font-bold mb-4">Customer Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <p><b>Name:</b> {customer.fullName}</p>
-          <p><b>Phone:</b> {customer.phone}</p>
-          <p><b>Email:</b> {customer.email}</p>
+          <p>
+            <b>Name:</b> {customer.fullName}
+          </p>
+          <p>
+            <b>Phone:</b> {customer.phone}
+          </p>
+          <p>
+            <b>Email:</b> {customer.email}
+          </p>
           <p className="md:col-span-3">
             <b>Address:</b> {address.street}, {address.city}, {address.zipCode}
           </p>
@@ -209,80 +249,115 @@ export function SummaryReview({
       </div>
 
       {/* Physical Return Label Files */}
-      {options.physicalReturnLabel.enabled && physicalReturnLabelFiles.length > 0 && (
-        <div className="border rounded-lg p-6 bg-[#F8FAFC]">
-          <h3 className="text-lg font-bold mb-4">Physical Return Label Files</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {physicalReturnLabelFiles.map((fileUrl, idx) => {
-              const fileName = fileUrl.split("/").pop() || `label-${idx + 1}`
+      {options.physicalReturnLabel.enabled &&
+        physicalReturnLabelFiles.length > 0 && (
+          <div className="border rounded-lg p-6 bg-[#F8FAFC]">
+            <h3 className="text-lg font-bold mb-4">
+              Physical Return Label Files
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {physicalReturnLabelFiles.map((fileUrl, idx) => {
+                const fileName = fileUrl.split("/").pop() || `label-${idx + 1}`;
 
-              return (
-                <div
-                  key={idx}
-                  className="bg-white rounded-lg border shadow-sm overflow-hidden flex flex-col"
-                >
-                  {isImageFile(fileUrl) ? (
-                    <div className="relative h-48 bg-gray-50">
-                      <Image
-                        src={fileUrl}
-                        alt={`Physical return label ${idx + 1}`}
-                        fill
-                        className="object-contain p-3"
-                      />
-                    </div>
-                  ) : isPdfFile(fileUrl) ? (
-                    <div className="h-48 bg-red-50 flex items-center justify-center flex-col gap-2">
-                      <FileText className="w-16 h-16 text-red-600" />
-                      <span className="text-xs text-gray-600 px-2">PDF File</span>
-                    </div>
-                  ) : (
-                    <div className="h-48 bg-gray-100 flex items-center justify-center">
-                      <ImageIcon className="w-16 h-16 text-gray-400" />
-                    </div>
-                  )}
+                return (
+                  <div
+                    key={idx}
+                    className="bg-white rounded-lg border shadow-sm overflow-hidden flex flex-col"
+                  >
+                    {isImageFile(fileUrl) ? (
+                      <div className="relative h-48 bg-gray-50">
+                        <Image
+                          src={fileUrl}
+                          alt={`Physical return label ${idx + 1}`}
+                          fill
+                          className="object-contain p-3"
+                        />
+                      </div>
+                    ) : isPdfFile(fileUrl) ? (
+                      <div className="h-48 bg-red-50 flex items-center justify-center flex-col gap-2">
+                        <FileText className="w-16 h-16 text-red-600" />
+                        <span className="text-xs text-gray-600 px-2">
+                          PDF File
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="h-48 bg-gray-100 flex items-center justify-center">
+                        <ImageIcon className="w-16 h-16 text-gray-400" />
+                      </div>
+                    )}
 
-                  <div className="p-3 border-t bg-gray-50">
-                    <p className="text-xs font-medium text-gray-700 truncate">
-                      {fileName}
-                    </p>
-                    <a
-                      href={fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-cyan-600 hover:underline mt-1 inline-block"
-                    >
-                      View / Download
-                    </a>
+                    <div className="p-3 border-t bg-gray-50">
+                      <p className="text-xs font-medium text-gray-700 truncate">
+                        {fileName}
+                      </p>
+                      <a
+                        href={fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-cyan-600 hover:underline mt-1 inline-block"
+                      >
+                        View / Download
+                      </a>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Additional Options */}
       <div className="border rounded-lg p-6 bg-[#F8FAFC]">
         <h3 className="text-lg font-bold mb-4">Additional Options</h3>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <li><b>Rush Service:</b> {rushService.enabled ? `Yes (+$${rushService.fee})` : "No"}</li>
           <li>
-            <b>Physical Return Label:</b>{" "}
-            {options.physicalReturnLabel.enabled
-              ? `Yes (+$${options.physicalReturnLabel.fee || 3.5})`
-              : "No"}
+            <b>Rush Service:</b>{" "}
+            {rushService.enabled ? `Yes (+$${rushService.fee})` : "No"}
           </li>
+
           <li>
-            <b>Physical Receipt:</b>{" "}
-            {options.physicalReceipt.enabled
-              ? `Yes (+$${options.physicalReceipt.fee || 8}) - Last 4: ${options.physicalReceipt.creditCardLast4}`
-              : "No"}
-          </li>
+  <b>Physical Return Label:</b>{" "}
+  {options.physicalReturnLabel.enabled ? (
+    <>
+      Yes{" "}
+      {!isFreePhysicalLabel ? (
+        <span className="text-green-600 font-medium">(Free with plan)</span>
+      ) : (
+        <span className="text-amber-700">(+${options.physicalReturnLabel.fee || 3.5})</span>
+      )}
+    </>
+  ) : (
+    "No"
+  )}
+</li>
+
+<li>
+  <b>Physical Receipt:</b>{" "}
+  {options.physicalReceipt.enabled ? (
+    <>
+      Yes{" "}
+      {!isFreePhysicalReceipt ? (
+        <span className="text-green-600 font-medium">(Free with plan)</span>
+      ) : (
+        <span className="text-amber-700">
+          (+${options.physicalReceipt.fee || 8}) - Last 4: {options.physicalReceipt.creditCardLast4 || "N/A"}
+        </span>
+      )}
+    </>
+  ) : (
+    "No"
+  )}
+</li>
+
           <li>
             <b>Return Shipping Label:</b>{" "}
-            {options?.returnShippingLabel?.enabled ? `Yes (+$${options?.returnShippingLabel?.fee})` : "No"}
+            {options?.returnShippingLabel?.enabled
+              ? `Yes (+$${options?.returnShippingLabel?.fee})`
+              : "No"}
           </li>
-          <li><b>Leave Message:</b> {options.message.enabled ? "Yes" : "No"}</li>
+          <li>
+            <b>Leave Message:</b> {options.message.enabled ? "Yes" : "No"}
+          </li>
         </ul>
 
         {options.message.enabled && options.message.note && (
@@ -303,7 +378,8 @@ export function SummaryReview({
             Return Order Created Successfully!
           </h2>
           <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            Thank you for using our service. Your return request has been submitted and will be processed soon.
+            Thank you for using our service. Your return request has been
+            submitted and will be processed soon.
           </p>
           <div className="mt-5">
             <Link href="/user/order-request">
@@ -334,7 +410,9 @@ export function SummaryReview({
               disabled={checkoutMutation.isPending || !token}
               className="bg-[#31B8FA] hover:bg-[#31B8FA]/90 text-white font-medium px-16 py-8 text-xl rounded-xl shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {checkoutMutation.isPending ? "Processing Payment..." : "Proceed to Payment"}
+              {checkoutMutation.isPending
+                ? "Processing Payment..."
+                : "Proceed to Payment"}
             </Button>
           </div>
         </>
@@ -350,5 +428,5 @@ export function SummaryReview({
         </div>
       )}
     </div>
-  )
+  );
 }

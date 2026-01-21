@@ -720,9 +720,6 @@
 //   );
 // }
 
-
-
-
 "use client";
 
 import { useState, useRef } from "react";
@@ -738,6 +735,7 @@ import {
   CheckCircle,
   FileText,
   MessageSquare,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -795,6 +793,10 @@ interface ReturnOrderData {
       labelFiles: string[];
     };
     message?: MessageOption;
+    physicalReceipt?: {
+      enabled: boolean;
+      creditCardLast4: string;
+    };
   };
 }
 
@@ -802,13 +804,13 @@ interface ReturnOrderData {
 
 const fetchReturnOrder = async (
   orderId: string,
-  token: string
+  token: string,
 ): Promise<ReturnOrderData> => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/return-order/see-details/${orderId}`,
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   );
   const result = await res.json();
   if (!res.ok || !result.status)
@@ -834,7 +836,7 @@ const updateOrderStatus = async ({
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ status }),
-    }
+    },
   );
   const result = await res.json();
   if (!res.ok || !result.status)
@@ -873,7 +875,7 @@ export default function JobDetailsPage() {
     onSuccess: (updated) => {
       queryClient.setQueryData<ReturnOrderData>(
         ["returnOrder", orderId],
-        (old) => (old ? { ...old, status: updated.status } : old)
+        (old) => (old ? { ...old, status: updated.status } : old),
       );
       toast.success("Status updated");
     },
@@ -887,7 +889,7 @@ export default function JobDetailsPage() {
         id: pkg.packageNumber,
         store: store.store,
         barcodeImage: pkg.barcodeImages?.[0] || "",
-      }))
+      })),
     ) || [];
 
   const returnLabelFile = orderData?.options?.physicalReturnLabel?.enabled
@@ -919,7 +921,7 @@ export default function JobDetailsPage() {
 
   /* ================= PDF PRINT LOGIC ================= */
   const handlePrintAsPDF = async (
-    pkg: { id: string; store: string; barcodeImage: string } | "return-label"
+    pkg: { id: string; store: string; barcodeImage: string } | "return-label",
   ) => {
     setIsGenerating(true);
     const toastId = toast.loading("Generating high-quality label...");
@@ -949,7 +951,7 @@ export default function JobDetailsPage() {
     setActivePkg(targetPkg);
 
     // Ensure image is fully loaded before generating PDF
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     try {
       const element = pdfTemplateRef.current;
@@ -969,7 +971,7 @@ export default function JobDetailsPage() {
       }
 
       const canvas = await html2canvas(element, {
-        scale: 3.7795,           // ≈96dpi → good for most thermal printers
+        scale: 3.7795, // ≈96dpi → good for most thermal printers
         useCORS: true,
         allowTaint: false,
         backgroundColor: "#ffffff",
@@ -983,7 +985,7 @@ export default function JobDetailsPage() {
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: [101.6, 152.4],     // ← Real 4×6 inches in mm
+        format: [101.6, 152.4], // ← Real 4×6 inches in mm
         compress: true,
       });
 
@@ -998,7 +1000,7 @@ export default function JobDetailsPage() {
         pdfWidth,
         pdfHeight,
         undefined,
-        "FAST"
+        "FAST",
       );
 
       const blob = pdf.output("blob");
@@ -1095,8 +1097,8 @@ export default function JobDetailsPage() {
           ref={pdfTemplateRef}
           className="bg-white"
           style={{
-            width: "1219px",        // 4" × ~305dpi
-            height: "1829px",       // 6" × ~305dpi
+            width: "1219px", // 4" × ~305dpi
+            height: "1829px", // 6" × ~305dpi
             padding: "70px 50px",
           }}
         >
@@ -1244,6 +1246,72 @@ export default function JobDetailsPage() {
                       </p>
                     </div>
                   )}
+
+                  {/* Right Column: Pickup Instructions & Message & Credit Card */}
+                  <div className="space-y-5">
+                    {pickupInstructions && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <FileText className="h-4 w-4 text-gray-400" />
+                          <span className="text-xs font-bold uppercase text-gray-500">
+                            Pickup Instructions
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+                          {pickupInstructions}
+                        </p>
+                      </div>
+                    )}
+
+                    {customerMessage && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <MessageSquare className="h-4 w-4 text-gray-400" />
+                          <span className="text-xs font-bold uppercase text-gray-500">
+                            Customer Message
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-700 bg-blue-50 px-4 py-3 rounded-lg border border-blue-200">
+                          {customerMessage}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* এখানে নতুন যোগ করা */}
+                    {orderData?.options?.physicalReceipt?.enabled &&
+                      orderData.options.physicalReceipt.creditCardLast4 && (
+                        <div className="mt-5">
+                          <div className="flex items-center gap-3 text-sm">
+                            <CreditCard className="h-4 w-4 text-gray-500" />
+                            <span className="text-gray-600 font-medium">
+                              Card Last 4 Digits
+                            </span>
+                          </div>
+                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
+                            <span className="text-base tracking-wider">
+                              •••• •••• ••••
+                            </span>
+                            <span className="text-emerald-800">
+                              {
+                                orderData.options.physicalReceipt
+                                  .creditCardLast4
+                              }
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-xs text-gray-500 italic">
+                            Used for physical receipt verification
+                          </p>
+                        </div>
+                      )}
+
+                    {!pickupInstructions &&
+                      !customerMessage &&
+                      !orderData?.options?.physicalReceipt?.enabled && (
+                        <p className="text-sm text-gray-400 italic">
+                          No additional instructions or messages.
+                        </p>
+                      )}
+                  </div>
 
                   {!pickupInstructions && !customerMessage && (
                     <p className="text-sm text-gray-400 italic">

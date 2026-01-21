@@ -35,6 +35,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 const packageDetailsSchema = z.object({
   printShippingLabel: z.boolean(),
@@ -124,6 +126,7 @@ export function PackageDetailsForm({
   const leaveMessage = watch("leaveMessage");
   const session = useSession();
   const TOKEN = session?.data?.accessToken || "";
+  const [agreed, setAgreed] = useState(false);
 
   const {
     data: userData,
@@ -264,9 +267,14 @@ export function PackageDetailsForm({
 
   return (
     <form
-      onSubmit={handleSubmit((data) =>
-        onSubmitAndProceed({ ...data, stores, physicalReturnLabelFiles }),
-      )}
+      onSubmit={handleSubmit((data) => {
+        if (!agreed) {
+          // optional: alert বা toast দেখাতে পারো, কিন্তু button disable থাকলে এটা আসবে না
+          toast.warning("Please agree to the terms before submitting");
+          return;
+        }
+        onSubmitAndProceed({ ...data, stores, physicalReturnLabelFiles });
+      })}
       className="space-y-6"
     >
       <div className="mb-6">
@@ -448,22 +456,6 @@ export function PackageDetailsForm({
                       </div>
 
                       <div className="space-y-4">
-                        {/* Fixed: Package number field is now visible and optional */}
-                        {/* <div>
-                        <Label>Package Number</Label>
-                        <Input
-                          placeholder="Enter package number "
-                          className="mt-1"
-                          value={store.packageNumbers?.[pkgIndex] || ""}
-                          onChange={(e) =>
-                            updateStoreData(storeIndex, "packageNumbers", {
-                              ...store.packageNumbers,
-                              [pkgIndex]: e.target.value,
-                            })
-                          }
-                        />
-                      </div> */}
-
                         <div>
                           <Label>Barcode / Label Images (optional)</Label>
                           <div className="mt-1">
@@ -596,166 +588,168 @@ export function PackageDetailsForm({
           </div>
         </CollapsibleTrigger>
 
-       <CollapsibleContent className="pt-4 px-2 sm:px-4 space-y-6">
-  <RadioGroup
-    onValueChange={(v) => setValue("printShippingLabel", v === "yes")}
-    value={printShippingLabel ? "yes" : "no"}
-  >
-    <div className="flex flex-wrap items-center gap-8 mb-5">
-      <div className="flex items-center space-x-3">
-        <RadioGroupItem value="yes" id="label-yes" />
-        <Label htmlFor="label-yes" className="text-base font-medium">
-          Yes, I need a physical return label
-        </Label>
-      </div>
-
-      <div className="flex items-center space-x-3">
-        <RadioGroupItem value="no" id="label-no" />
-        <Label htmlFor="label-no" className="text-base font-medium">
-          No, I will use my own label
-        </Label>
-      </div>
-    </div>
-  </RadioGroup>
-
-  {printShippingLabel && (
-    <div className="space-y-6 animate-in fade-in duration-300">
-      {/* Fee notice - only shown when Yes is selected */}
-      {isFreePhysicalLabel ? (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <p className="text-sm font-medium text-amber-800">
-            Additional fee: <strong>$3.50</strong> will be charged for
-            physical return label
-          </p>
-          <p className="text-sm text-amber-700 mt-1">
-            (applies to your current plan)
-          </p>
-        </div>
-      ) : (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
-          <p className="text-sm font-medium text-emerald-800">
-            ✓ Physical return label is <strong>included free</strong> in
-            your plan
-          </p>
-        </div>
-      )}
-
-      {/* Upload area - only when Yes */}
-      <div>
-        <Label className="mb-2.5 block font-medium">
-          Upload Physical Return Label{" "}
-          {isFreePhysicalLabel ? "(PDF or Image)" : "(PDF or Image)"}
-        </Label>
-
-        <input
-          type="file"
-          accept="image/*,.pdf"
-          multiple
-          className="hidden"
-          id="physical-return-labels"
-          onChange={handlePhysicalLabelUpload}
-        />
-
-        {physicalReturnLabelFiles.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {physicalReturnLabelFiles.map((item, idx) => (
-              <div
-                key={idx}
-                className="relative group border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow transition-all duration-200"
-              >
-                <div className="aspect-[4/5] sm:aspect-[3/4] bg-gray-50 relative">
-                  {item.preview ? (
-                    <img
-                      src={item.preview}
-                      alt="Label preview"
-                      className="absolute inset-0 w-full h-full object-contain p-4"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                      <FileText className="w-16 h-16 text-blue-600 mb-4" />
-                      <p className="text-base font-semibold text-gray-800 truncate max-w-[90%] px-2">
-                        {item.file.name}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-2">
-                        {item.file.type.includes("pdf") ? "PDF" : "File"} •{" "}
-                        {(item.file.size / 1024).toFixed(0)} KB
-                      </p>
-                      <p className="text-xs text-gray-500 mt-3 italic">
-                        Preview not available
-                      </p>
-
-                      <a
-                        href={URL.createObjectURL(item.file)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-5 inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors shadow-sm"
-                      >
-                        <FileText className="w-4 h-4" />
-                        Open File
-                      </a>
-                    </div>
-                  )}
-                </div>
-
-                {/* File info & remove button */}
-                <div className="p-3 flex items-center justify-between bg-gray-50 border-t">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">
-                      {item.file.name}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      {(item.file.size / 1024).toFixed(1)} KB •{" "}
-                      {item.file.type.includes("pdf") ? "PDF" : "Image"}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => removePhysicalLabelFile(idx)}
-                    className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors ml-2 flex-shrink-0"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-
-            {/* Add more button */}
-            <label
-              htmlFor="physical-return-labels"
-              className="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-colors min-h-[220px]"
-            >
-              <Upload className="w-10 h-10 text-gray-400 mb-3" />
-              <p className="text-sm font-medium text-gray-700">
-                Add more files
-              </p>
-              <p className="text-xs text-gray-500 mt-1">PDF or Image</p>
-            </label>
-          </div>
-        ) : (
-          <label
-            htmlFor="physical-return-labels"
-            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-colors min-h-[280px]"
+        <CollapsibleContent className="pt-4 px-2 sm:px-4 space-y-6">
+          <RadioGroup
+            onValueChange={(v) => setValue("printShippingLabel", v === "yes")}
+            value={printShippingLabel ? "yes" : "no"}
           >
-            <Upload className="w-14 h-14 text-gray-400 mb-4" />
-            <p className="text-base font-medium text-gray-700">
-              Click to upload return label files
-            </p>
-            <p className="text-sm text-gray-500 mt-3">
-              Supports JPG, PNG, PDF (multiple files allowed)
-            </p>
-          </label>
-        )}
-      </div>
-    </div>
-  )}
+            <div className="flex flex-wrap items-center gap-8 mb-5">
+              <div className="flex items-center space-x-3">
+                <RadioGroupItem value="yes" id="label-yes" />
+                <Label htmlFor="label-yes" className="text-base font-medium">
+                  Yes, I need a physical return label
+                </Label>
+              </div>
 
-  {!printShippingLabel && (
-    <p className="text-sm text-gray-500 italic pt-2">
-      You will need to provide your own shipping label during drop-off.
-    </p>
-  )}
-</CollapsibleContent>
+              <div className="flex items-center space-x-3">
+                <RadioGroupItem value="no" id="label-no" />
+                <Label htmlFor="label-no" className="text-base font-medium">
+                  No, I will use my own label
+                </Label>
+              </div>
+            </div>
+          </RadioGroup>
+
+          {printShippingLabel && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              {/* Fee notice - only shown when Yes is selected */}
+              {isFreePhysicalLabel ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <p className="text-sm font-medium text-amber-800">
+                    Additional fee: <strong>$3.50</strong> will be charged for
+                    physical return label
+                  </p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    (applies to your current plan)
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                  <p className="text-sm font-medium text-emerald-800">
+                    ✓ Physical return label is <strong>included free</strong> in
+                    your plan
+                  </p>
+                </div>
+              )}
+
+              {/* Upload area - only when Yes */}
+              <div>
+                <Label className="mb-2.5 block font-medium">
+                  Upload Physical Return Label{" "}
+                  {isFreePhysicalLabel ? "(PDF or Image)" : "(PDF or Image)"}
+                </Label>
+
+                <input
+                  type="file"
+                  accept="image/*,.pdf"
+                  multiple
+                  className="hidden"
+                  id="physical-return-labels"
+                  onChange={handlePhysicalLabelUpload}
+                />
+
+                {physicalReturnLabelFiles.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {physicalReturnLabelFiles.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="relative group border rounded-lg overflow-hidden bg-white shadow-sm hover:shadow transition-all duration-200"
+                      >
+                        <div className="aspect-[4/5] sm:aspect-[3/4] bg-gray-50 relative">
+                          {item.preview ? (
+                            <img
+                              src={item.preview}
+                              alt="Label preview"
+                              className="absolute inset-0 w-full h-full object-contain p-4"
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                              <FileText className="w-16 h-16 text-blue-600 mb-4" />
+                              <p className="text-base font-semibold text-gray-800 truncate max-w-[90%] px-2">
+                                {item.file.name}
+                              </p>
+                              <p className="text-sm text-gray-600 mt-2">
+                                {item.file.type.includes("pdf")
+                                  ? "PDF"
+                                  : "File"}{" "}
+                                • {(item.file.size / 1024).toFixed(0)} KB
+                              </p>
+                              <p className="text-xs text-gray-500 mt-3 italic">
+                                Preview not available
+                              </p>
+
+                              <a
+                                href={URL.createObjectURL(item.file)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-5 inline-flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors shadow-sm"
+                              >
+                                <FileText className="w-4 h-4" />
+                                Open File
+                              </a>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* File info & remove button */}
+                        <div className="p-3 flex items-center justify-between bg-gray-50 border-t">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">
+                              {item.file.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              {(item.file.size / 1024).toFixed(1)} KB •{" "}
+                              {item.file.type.includes("pdf") ? "PDF" : "Image"}
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => removePhysicalLabelFile(idx)}
+                            className="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition-colors ml-2 flex-shrink-0"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Add more button */}
+                    <label
+                      htmlFor="physical-return-labels"
+                      className="border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center p-8 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-colors min-h-[220px]"
+                    >
+                      <Upload className="w-10 h-10 text-gray-400 mb-3" />
+                      <p className="text-sm font-medium text-gray-700">
+                        Add more files
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">PDF or Image</p>
+                    </label>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="physical-return-labels"
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/30 transition-colors min-h-[280px]"
+                  >
+                    <Upload className="w-14 h-14 text-gray-400 mb-4" />
+                    <p className="text-base font-medium text-gray-700">
+                      Click to upload return label files
+                    </p>
+                    <p className="text-sm text-gray-500 mt-3">
+                      Supports JPG, PNG, PDF (multiple files allowed)
+                    </p>
+                  </label>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!printShippingLabel && (
+            <p className="text-sm text-gray-500 italic pt-2">
+              You will need to provide your own shipping label during drop-off.
+            </p>
+          )}
+        </CollapsibleContent>
       </Collapsible>
 
       {/* Physical Receipt */}
@@ -887,13 +881,56 @@ export function PackageDetailsForm({
         </CollapsibleContent>
       </Collapsible>
 
+      <div className="pt-6 border-t space-y-3">
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id="agreement"
+            checked={agreed}
+            onCheckedChange={(checked) => setAgreed(!!checked)}
+            className={cn(
+              "data-[state=checked]:bg-[#31B8FA] data-[state=checked]:border-[#31B8FA]",
+              !agreed && "border-red-500", // optional: চেক না থাকলে লাল বর্ডার
+            )}
+          />
+          <label
+            htmlFor="agreement"
+            className={cn(
+              "text-sm leading-relaxed cursor-pointer select-none flex-1",
+              !agreed && "text-red-600", // optional: চেক না থাকলে লাল টেক্সট
+            )}
+          >
+            I agree that I have selected the correct pickup address/drop-off
+            location, uploaded the necessary barcodes, and will write the number
+            on the outside of each package that corresponds to the package
+            number where the barcode was uploaded. For more details, you can
+            watch our{" "}
+            <a
+              href="https://www.youtube.com/watch?v=your-video-id"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#31B8FA] underline hover:text-[#2BA5D6]"
+            >
+              how-to video here
+            </a>
+            .
+          </label>
+        </div>
+
+        {/* Optional error message যদি চাও */}
+        {!agreed && (
+          <p className="text-sm text-red-600 pl-7">
+            You must agree to continue
+          </p>
+        )}
+      </div>
+
       {/* Submit Buttons */}
       <div className="flex flex-col md:flex-row gap-4 justify-between pt-8 border-t">
         <Button
           type="button"
           variant="outline"
           onClick={onBack}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !agreed}
         >
           Back
         </Button>

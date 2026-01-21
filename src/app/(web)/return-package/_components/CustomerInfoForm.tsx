@@ -33,7 +33,7 @@ const customerInfoSchema = z.object({
   street: z.string().min(3, "Street is required"),
   state: z.string().min(2, "State is required"),
   city: z.string().min(2, "City is required"),
-  unit: z.string().optional(),
+  unit: z.string().min(1, "Unit number is required"),
   pickupInstructions: z.string().optional(),
   rushService: z.boolean(),
   lat: z.number().optional(),
@@ -67,7 +67,7 @@ export function CustomerInfoForm({
         unit: "",
         ...initialData,
       }),
-      [initialData]
+      [initialData],
     ),
   });
 
@@ -78,10 +78,8 @@ export function CustomerInfoForm({
 
   const currentLocation = useMemo(
     () =>
-      pickupAddress && lat && lng
-        ? { address: pickupAddress, lat, lng }
-        : null,
-    [pickupAddress, lat, lng]
+      pickupAddress && lat && lng ? { address: pickupAddress, lat, lng } : null,
+    [pickupAddress, lat, lng],
   );
 
   const onSubmit: SubmitHandler<CustomerInfoFormData> = useCallback(
@@ -105,75 +103,75 @@ export function CustomerInfoForm({
       onNext(payload);
       window.scrollTo({ top: 0, behavior: "smooth" });
     },
-    [onNext]
+    [onNext],
   );
 
   const handleMapSelect = useCallback(
-  ({
-    address,
-    lat,
-    lng,
-    addressComponents,
-  }: {
-    address: string;
-    lat: number;
-    lng: number;
-    addressComponents?: Record<string, string>;
-  }) => {
-    // 1. পুরো ঠিকানা
-    setValue("pickupAddress", address.trim(), { shouldValidate: true });
+    ({
+      address,
+      lat,
+      lng,
+      addressComponents,
+    }: {
+      address: string;
+      lat: number;
+      lng: number;
+      addressComponents?: Record<string, string>;
+    }) => {
+      // 1. পুরো ঠিকানা
+      setValue("pickupAddress", address.trim(), { shouldValidate: true });
 
-    // 2. কো-অর্ডিনেট
-    setValue("lat", lat);
-    setValue("lng", lng);
+      // 2. কো-অর্ডিনেট
+      setValue("lat", lat);
+      setValue("lng", lng);
 
-    if (addressComponents && Object.keys(addressComponents).length > 0) {
-      // Street Address — Google-এর স্ট্যান্ডার্ড কম্পোনেন্ট ব্যবহার
-      const streetNumber = addressComponents["street_number"] || "";
-      const route = addressComponents["route"] || "";
-      let street = "";
+      if (addressComponents && Object.keys(addressComponents).length > 0) {
+        // Street Address — Google-এর স্ট্যান্ডার্ড কম্পোনেন্ট ব্যবহার
+        const streetNumber = addressComponents["street_number"] || "";
+        const route = addressComponents["route"] || "";
+        let street = "";
 
-      if (streetNumber && route) {
-        street = `${streetNumber} ${route}`.trim();
-      } else if (route) {
-        street = route.trim();
-      } else if (addressComponents["street_address"]) {
-        street = addressComponents["street_address"].trim();
+        if (streetNumber && route) {
+          street = `${streetNumber} ${route}`.trim();
+        } else if (route) {
+          street = route.trim();
+        } else if (addressComponents["street_address"]) {
+          street = addressComponents["street_address"].trim();
+        }
+
+        if (street) {
+          setValue("street", street, { shouldValidate: true });
+        }
+
+        // City
+        const city =
+          addressComponents["locality"] ||
+          addressComponents["sublocality"] ||
+          addressComponents["sublocality_level_1"] ||
+          addressComponents["city"] ||
+          "";
+        if (city) setValue("city", city.trim(), { shouldValidate: true });
+
+        // State / Province
+        const state =
+          addressComponents["administrative_area_level_1"] ||
+          addressComponents["state"] ||
+          "";
+        if (state) setValue("state", state.trim(), { shouldValidate: true });
+
+        // Zip / Postal Code
+        const zip =
+          addressComponents["postal_code"] ||
+          addressComponents["postal_code_prefix"] ||
+          addressComponents["zipCode"] ||
+          "";
+        if (zip) setValue("zipCode", zip.trim(), { shouldValidate: true });
       }
 
-      if (street) {
-        setValue("street", street, { shouldValidate: true });
-      }
-
-      // City
-      const city =
-        addressComponents["locality"] ||
-        addressComponents["sublocality"] ||
-        addressComponents["sublocality_level_1"] ||
-        addressComponents["city"] ||
-        "";
-      if (city) setValue("city", city.trim(), { shouldValidate: true });
-
-      // State / Province
-      const state =
-        addressComponents["administrative_area_level_1"] ||
-        addressComponents["state"] ||
-        "";
-      if (state) setValue("state", state.trim(), { shouldValidate: true });
-
-      // Zip / Postal Code
-      const zip =
-        addressComponents["postal_code"] ||
-        addressComponents["postal_code_prefix"] ||
-        addressComponents["zipCode"] ||
-        "";
-      if (zip) setValue("zipCode", zip.trim(), { shouldValidate: true });
-    }
-
-    setShowMap(false);
-  },
-  [setValue]
-);
+      setShowMap(false);
+    },
+    [setValue],
+  );
 
   const handleOpenMap = useCallback(() => {
     setShowMap(true);
@@ -298,6 +296,9 @@ export function CustomerInfoForm({
                 {...register("unit")}
               />
             </div>
+            {errors.unit && (
+              <p className="text-sm text-red-500">{errors.unit.message}</p>
+            )}
           </div>
         </div>
 
@@ -415,4 +416,4 @@ export function CustomerInfoForm({
       )}
     </>
   );
-} 
+}

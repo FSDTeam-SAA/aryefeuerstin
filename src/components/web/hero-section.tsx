@@ -129,17 +129,26 @@ export default function HeroSection() {
 
       return res.json()
     },
-    enabled: !!TOKEN && role === "USER", // শুধু USER হলে fetch করবে
+    enabled: !!TOKEN && role === "USER",
   })
 
   const hasActiveSubscription = userData?.data?.user?.hasActiveSubscription ?? false
+  const maxReturnOrders = userData?.data?.user?.subscription?.planId?.limits?.maxReturnOrders
+  const returnOrdersUsed = userData?.data?.user?.subscriptionUsage?.returnOrdersUsed ?? 0
 
   const handleScheduleClick = () => {
-    if (hasActiveSubscription) {
-      window.location.href = "/return-package"  
-    } else {
+    if (!hasActiveSubscription) {
       toast.info("Please purchase a package first to request a return pickup!")
+      return
     }
+
+    // maxReturnOrders null হলে unlimited, না হলে limit check করবে
+    if (maxReturnOrders !== null && returnOrdersUsed >= maxReturnOrders) {
+      toast.error("You have reached your return order limit for this package! Buy a new package")
+      return
+    }
+
+    window.location.href = "/return-package"
   }
 
   if (isLoading) {
@@ -166,7 +175,6 @@ export default function HeroSection() {
 
             {role === "USER" && (
               <div className="mt-5">
-                {/* Link এর বদলে Button + onClick */}
                 <Button
                   onClick={handleScheduleClick}
                   className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full px-8 py-6 text-base"

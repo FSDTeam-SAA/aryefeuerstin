@@ -99,6 +99,7 @@ import { useSession } from "next-auth/react"
 import Image from "next/image"
 import { useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function HeroSection() {
   const session = useSession();
@@ -152,7 +153,38 @@ export default function HeroSection() {
   }
 
   if (isLoading) {
-    return <div className="py-12 text-center">Loading user info...</div>
+    return (
+      <section className="bg-[#E4F6FF] py-12 md:py-12 lg:py-14">
+        <div className="container mx-auto px-4">
+          <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+            
+            {/* Left Content Skeleton */}
+            <div className="space-y-7 lg:col-span-5">
+              <Skeleton className="h-12 md:h-16 lg:h-20 w-full rounded-lg" />
+              <Skeleton className="h-12 md:h-16 lg:h-20 w-5/6 rounded-lg" />
+              
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-full rounded" />
+                <Skeleton className="h-4 w-full rounded" />
+                <Skeleton className="h-4 w-4/5 rounded" />
+              </div>
+
+              {role === "USER" && (
+                <div className="mt-5">
+                  <Skeleton className="h-12 w-64 rounded-full" />
+                </div>
+              )}
+            </div>
+
+            {/* Right Image Skeleton */}
+            <div className="flex justify-center lg:justify-end lg:col-span-7">
+              <Skeleton className="w-full h-64 md:h-96 lg:h-[550px] rounded-lg" />
+            </div>
+
+          </div>
+        </div>
+      </section>
+    )
   }
 
   return (
@@ -178,7 +210,6 @@ export default function HeroSection() {
                 <Button
                   onClick={handleScheduleClick}
                   className="bg-[#31B8FA] hover:bg-[#2BA5D6] text-white rounded-full px-8 py-6 text-base"
-                  disabled={isLoading}
                 >
                   Schedule My Return Pickup
                 </Button>
@@ -195,6 +226,7 @@ export default function HeroSection() {
                 width={1000}
                 height={1000}
                 className="object-contain"
+                priority
               />
             </div>
           </div>

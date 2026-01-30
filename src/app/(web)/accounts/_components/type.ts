@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // types/user.ts
 export interface UserProfileResponse {
   status: boolean;
@@ -11,9 +12,13 @@ export interface UserProfileResponse {
       phone: string;
       pickupAddress: string;
       profileImage: string;
+      subscription: any;
+      subscriptionUsage: any;
+      role: string;
       // ... add other fields if needed
     };
     totalPackages: number;
+    totalReturnOrders: any;
   };
 }
 

@@ -282,7 +282,7 @@ export default function OrderRequestsPage() {
             />
 
             {/* Buttons */}
-            <div className="flex flex-col sm:flex-row justify-end gap-2 mt-2">
+            <div className="flex sm:flex-row justify-end gap-2 mt-2">
               <Button
                 variant="outline"
                 className="w-full sm:w-auto"

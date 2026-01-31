@@ -198,7 +198,7 @@ export default function LocationPickerModal({
 
   return (
     <div className="space-y-3">
-      <div className="h-[500px] w-full rounded-md border overflow-hidden relative">
+      <div className="lg:h-[500px] h-[350px] w-full rounded-md border overflow-hidden relative">
         <GoogleMap
           center={position}
           zoom={14}

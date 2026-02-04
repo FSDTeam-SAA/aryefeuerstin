@@ -29,6 +29,7 @@ interface PickupPoint {
   lng: number;
   orderIndex: number;
   id: string;
+  status?: string;
 }
 
 interface Leg {
@@ -484,6 +485,13 @@ export default function RouteDetailsPage() {
                               </Link>
                             </div>
                           </div>
+                          {pickup?.status === "PICKED_UP" && (
+                            <div className="ml-2 mt-1">
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                               {pickup?.status}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       {index < orderedPickups.length - 1 && (

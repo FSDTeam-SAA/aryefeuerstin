@@ -15,10 +15,12 @@ import {
   User,
   ArrowRight,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { SeeDetailsModal } from "@/components/shared/SeeDetailsModal";
+// import { SeeDetailsModal } from "@/components/shared/SeeDetailsModal";
+import Link from "next/link";
 
 interface PickupPoint {
   customer: string;
@@ -27,6 +29,7 @@ interface PickupPoint {
   lng: number;
   orderIndex: number;
   id: string;
+  status?: string;
 }
 
 interface Leg {
@@ -469,9 +472,26 @@ export default function RouteDetailsPage() {
 
                             {/* See Details Button */}
                             <div className="mt-3">
-                              <SeeDetailsModal orderId={pickup.id} />
+                              {/* <SeeDetailsModal orderId={pickup.id} /> */}
+                              <Link href={`/driver/order-details/${pickup.id}`}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full border-[#33B8FF] text-[#33B8FF] hover:bg-blue-50"
+                                >
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  See Details
+                                </Button>
+                              </Link>
                             </div>
                           </div>
+                          {pickup?.status === "PICKED_UP" && (
+                            <div className="ml-2 mt-1">
+                              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                               {pickup?.status}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       {index < orderedPickups.length - 1 && (

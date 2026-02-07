@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { Eye, EyeOff, MapPin, Loader2, Upload, FileText, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, Upload, FileText, X } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -13,29 +13,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+//   DialogTrigger,
+// } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 
 // Dynamic import for Map
-const MapPicker = dynamic(() => import("./_components/LocationPickerModal"), {
-  ssr: false,
-  loading: () => (
-    <div className="h-[300px] w-full flex items-center justify-center bg-gray-100 rounded-lg">
-      <Loader2 className="animate-spin text-gray-400" />
-    </div>
-  ),
-});
+// const MapPicker = dynamic(() => import("./_components/LocationPickerModal"), {
+//   ssr: false,
+//   loading: () => (
+//     <div className="h-[300px] w-full flex items-center justify-center bg-gray-100 rounded-lg">
+//       <Loader2 className="animate-spin text-gray-400" />
+//     </div>
+//   ),
+// });
 
 export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isMapOpen, setIsMapOpen] = useState(false);
+  // const [isMapOpen, setIsMapOpen] = useState(false);
 
   // Form fields
   const [firstName, setFirstName] = useState("");
@@ -47,32 +47,32 @@ export default function SignUpPage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Location
-  const [location, setLocation] = useState({
-    address: "",
-    lat: 23.8103,
-    lng: 90.4125,
-  });
+  // const [location, setLocation] = useState({
+  //   address: "",
+  //   lat: 23.8103,
+  //   lng: 90.4125,
+  // });
 
   // Driving License File
   const [drivingLicenseFile, setDrivingLicenseFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const router = useRouter()
 
-  const handleLocationSelect = (data: { address: string; lat: number; lng: number }) => {
-    console.log("Location selected:", data); // Debug করার জন্য
-    setLocation(data);
-  };
+  // const handleLocationSelect = (data: { address: string; lat: number; lng: number }) => {
+  //   console.log("Location selected:", data); // Debug করার জন্য
+  //   setLocation(data);
+  // };
 
-  const handleConfirmLocation = () => {
-    // Close modal after confirming
-    setIsMapOpen(false);
-    // Show success toast if location is selected
-    if (location.address) {
-      toast.success("Location confirmed successfully!");
-    } else {
-      toast.error("Please select a location on the map");
-    }
-  };
+  // const handleConfirmLocation = () => {
+  //   // Close modal after confirming
+  //   setIsMapOpen(false);
+  //   // Show success toast if location is selected
+  //   if (location.address) {
+  //     toast.success("Location confirmed successfully!");
+  //   } else {
+  //     toast.error("Please select a location on the map");
+  //   }
+  // };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -133,10 +133,10 @@ export default function SignUpPage() {
       toast.error("Please upload driving license");
       return;
     }
-    if (!location.address) {
-      toast.error("Please select a location");
-      return;
-    }
+    // if (!location.address) {
+    //   toast.error("Please select a location");
+    //   return;
+    // }
 
     console.log("Submitting location:", location); // Debug করার জন্য
 
@@ -146,7 +146,7 @@ export default function SignUpPage() {
     formData.append("email", email);
     formData.append("phone", phone);
     formData.append("password", password);
-    formData.append("location", JSON.stringify({ address: location.address, lat: location.lat, lng: location.lng }));
+    // formData.append("location", JSON.stringify({ address: location.address, lat: location.lat, lng: location.lng }));
     formData.append("drivingLicense", drivingLicenseFile);
 
     mutation.mutate(formData);
@@ -216,7 +216,7 @@ export default function SignUpPage() {
             </div>
 
             {/* Location Picker */}
-            <div>
+            {/* <div>
               <Label>Location *</Label>
               <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
                 <DialogTrigger asChild>
@@ -245,7 +245,7 @@ export default function SignUpPage() {
                   </Button>
                 </DialogContent>
               </Dialog>
-            </div>
+            </div> */}
 
             {/* Password Fields */}
             <div>

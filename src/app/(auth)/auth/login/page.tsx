@@ -26,7 +26,7 @@ export default function SignInPage() {
 
     if (!agreed) {
       return toast.error(
-        "Please agree to the terms & conditions before signing in"
+        "Please agree to the terms & conditions before signing in",
       );
     }
     if (!email.trim()) return toast.error("Email is required");
@@ -49,7 +49,9 @@ export default function SignInPage() {
       }
 
       toast.success("Login successful!", { id: toastId, duration: 2000 });
-      setTimeout(() => router.push(res?.url ?? "/"), 2100);
+      setTimeout(() => {
+        router.push("/?showModal=true");
+      }, 2100);
     } catch (error) {
       toast.error("Something went wrong. Try again." + error, { id: toastId });
     } finally {

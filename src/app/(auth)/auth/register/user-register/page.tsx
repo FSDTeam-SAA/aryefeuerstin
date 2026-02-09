@@ -21,7 +21,7 @@ interface RegisterPayload {
   lastName: string;
   email: string;
   password?: string; // Optional if you handle confirm password separately
-  phonNumber: string;
+  phone: string;
 }
 
 export default function SignUpPage() {
@@ -70,7 +70,7 @@ export default function SignUpPage() {
       lastName: formData.get("lastName") as string,
       email: formData.get("email") as string,
       password: password,
-      phonNumber: formData.get("phoneNumber") as string,
+      phone: formData.get("phone") as string,
     };
 
     mutate(payload);
@@ -116,7 +116,7 @@ export default function SignUpPage() {
 
             <div>
               <Label htmlFor="pickupAddress">Phone Number *</Label>
-              <Input name="phoneNumber" id="phoneNumber" type="text" required className="bg-[#E4F6FF] h-11 mt-1" placeholder="phoneNumber" />
+              <Input name="phone" id="phone" type="text" required className="bg-[#E4F6FF] h-11 mt-1" placeholder="phone" />
             </div>
 
             <div>

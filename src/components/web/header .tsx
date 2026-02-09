@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Menu,
   User,
@@ -9,13 +9,9 @@ import {
   RotateCcw,
   Check,
   UserPlus,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +19,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,24 +29,24 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { useSession, signOut } from "next-auth/react"
-import { useQuery } from "@tanstack/react-query"
-import { toast } from "sonner"
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const menuItems = [
   { name: "Home", href: "/" },
   { name: "About Us", href: "/about-us" },
   { name: "Contact Us", href: "/contact-us" },
-]
+];
 
 const fetchUserProfile = async (token: string | undefined) => {
-  if (!token) throw new Error("No access token")
+  if (!token) throw new Error("No access token");
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/me`, {
     headers: {
@@ -58,25 +54,25 @@ const fetchUserProfile = async (token: string | undefined) => {
       "Content-Type": "application/json",
     },
     cache: "no-store",
-  })
+  });
 
   if (!res.ok) {
-    throw new Error("Failed to fetch user profile")
+    throw new Error("Failed to fetch user profile");
   }
 
-  return res.json()
-}
+  return res.json();
+};
 
 export default function Header() {
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const { data: session } = useSession()
-  const token = session?.accessToken as string | undefined
-  const role = session?.user?.role as "USER" | "DRIVER" | "ADMIN" | undefined
+  const { data: session } = useSession();
+  const token = session?.accessToken as string | undefined;
+  const role = session?.user?.role as "USER" | "DRIVER" | "ADMIN" | undefined;
 
-  const [open, setOpen] = useState(false)
-  const [logoutModal, setLogoutModal] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [logoutModal, setLogoutModal] = useState(false);
 
   const { data: profileData } = useQuery({
     queryKey: ["userProfile"],
@@ -84,41 +80,72 @@ export default function Header() {
     enabled: !!token && !!session,
     select: (data) => data?.data?.user,
     staleTime: 5 * 60 * 1000,
-  })
+  });
 
-  const profileImage = profileData?.profileImage
-  const firstName = profileData?.firstName || "User"
-  const hasActiveSubscription = profileData?.hasActiveSubscription ?? false
+  const profileImage = profileData?.profileImage;
+  const firstName = profileData?.firstName || "User";
+  // const hasActiveSubscription = profileData?.hasActiveSubscription ?? false;
+  const hasActiveSubscription = profileData?.hasActiveSubscription ?? false;
+  const maxReturnOrders =
+    profileData?.subscription?.planId?.limits?.maxReturnOrders ?? null;
+  const returnOrdersUsed =
+    profileData?.subscriptionUsage?.returnOrdersUsed ?? 0;
 
   // Generate initials: First 2 letters of firstName (uppercase)
   const getInitials = (name: string) => {
-    return name
-      .trim()
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || "US"
-  }
+    return (
+      name
+        .trim()
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2) || "US"
+    );
+  };
 
-  const initials = getInitials(firstName)
+  const initials = getInitials(firstName);
 
-  const isActive = (href: string) => pathname === href
+  const isActive = (href: string) => pathname === href;
+
+  // const handleReturnPackageClick = (e: React.MouseEvent) => {
+  //   e.preventDefault();
+
+  //   if (role === "USER" && !hasActiveSubscription) {
+  //     toast.error("You need an active subscription to return a package.");
+  //     return;
+  //   }
+
+  //   router.push("/return-package");
+  //   setOpen(false);
+  // };
 
   const handleReturnPackageClick = (e: React.MouseEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (role === "USER" && !hasActiveSubscription) {
-      toast.error("You need an active subscription to return a package.")
-      return
+      toast.info("Please purchase a package first to request a return pickup!");
+      return;
     }
 
-    router.push("/return-package")
-    setOpen(false)
-  }
+    // maxReturnOrders null হলে unlimited
+    if (
+      role === "USER" &&
+      maxReturnOrders !== null &&
+      returnOrdersUsed >= maxReturnOrders
+    ) {
+      toast.error(
+        "You have reached your return order limit for this package! Buy a new package",
+      );
+      return;
+    }
+
+    router.push("/return-package");
+    setOpen(false);
+  };
 
   const DesktopAvatar = () => {
-    if (!session) return null
+    if (!session) return null;
 
     return (
       <DropdownMenu>
@@ -219,8 +246,8 @@ export default function Header() {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -228,7 +255,7 @@ export default function Header() {
         <div className="container mx-auto py-2 flex items-center justify-between">
           <Link href="/">
             <div className="w-[100px] h-[60px] md:w-[125px] md:h-[75px]">
-               <Image
+              <Image
                 src="/logo.png"
                 alt="Logo"
                 width={120}
@@ -340,7 +367,9 @@ export default function Header() {
                                   ? "text-muted-foreground"
                                   : "hover:text-[#31B8FA]"
                               }`}
-                              disabled={role === "USER" && !hasActiveSubscription}
+                              disabled={
+                                role === "USER" && !hasActiveSubscription
+                              }
                             >
                               Return Package
                               {!hasActiveSubscription && role === "USER" && (
@@ -381,8 +410,8 @@ export default function Header() {
 
                       <button
                         onClick={() => {
-                          setLogoutModal(true)
-                          setOpen(false)
+                          setLogoutModal(true);
+                          setOpen(false);
                         }}
                         className="text-lg font-medium text-red-600 hover:text-red-700 transition w-full text-left"
                       >
@@ -401,7 +430,9 @@ export default function Header() {
       <AlertDialog open={logoutModal} onOpenChange={setLogoutModal}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to logout?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Are you sure you want to logout?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               You will be signed out of your account.
             </AlertDialogDescription>
@@ -418,5 +449,5 @@ export default function Header() {
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

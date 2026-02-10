@@ -96,7 +96,7 @@ export default function PackageReturnService() {
       formDataToSend.append("city", updatedData.city || "");
       formDataToSend.append(
         "pickupInstructions",
-        updatedData.pickupInstructions || ""
+        updatedData.pickupInstructions || "",
       );
       formDataToSend.append("address", fullAddress);
       formDataToSend.append("lat", updatedData.lat?.toString() || "");
@@ -106,19 +106,19 @@ export default function PackageReturnService() {
       formDataToSend.append("rushService", String(updatedData.rushService));
       formDataToSend.append(
         "physicalReturnLabel",
-        String(updatedData.printShippingLabel)
+        String(updatedData.printShippingLabel),
       );
       formDataToSend.append("physicalReceipt", String(updatedData.hasReceipt));
       formDataToSend.append(
         "returnShippingLabel",
-        String(updatedData.needShippingLabel)
+        String(updatedData.needShippingLabel),
       );
       formDataToSend.append("leaveMessage", String(updatedData.leaveMessage));
 
       if (updatedData.hasReceipt) {
         formDataToSend.append(
           "creditCardLast4",
-          updatedData.creditCardLast4 || ""
+          updatedData.creditCardLast4 || "",
         );
       }
 
@@ -133,63 +133,6 @@ export default function PackageReturnService() {
       if (updatedData.leaveMessage) {
         formDataToSend.append("messageNote", updatedData.message || "");
       }
-
-      // === Stores mapping (unchanged) ===
-      // const storesForBackend = updatedData.stores.map((store: any) => {
-      //   let backendStoreValue: string
-
-      //   switch (store.returnStore) {
-      //     case "STAPLES":
-      //       backendStoreValue = "Staples"
-      //       break
-      //     case "KOHLS":
-      //       backendStoreValue = "Kohl's"
-      //       break
-      //     case "SHEIN":
-      //       backendStoreValue = "Shein Return"
-      //       break
-      //     case "TARGET":
-      //       backendStoreValue = "Target"
-      //       break
-      //     case "WALMART":
-      //       backendStoreValue = "Walmart"
-      //       break
-      //     case "WHOLE FOODS MARKET":
-      //       backendStoreValue = "WHOLE FOODS MARKET"
-      //       break
-      //     case "HOME_DEPOT":
-      //       backendStoreValue = "Home Depot"
-      //       break
-      //     case "UPS":
-      //       backendStoreValue = "UPS Drop Off"
-      //       break
-      //     case "USPS":
-      //       backendStoreValue = "USPS Drop Off"
-      //       break
-      //     case "FEDEX":
-      //       backendStoreValue = "FedEx Drop Off"
-      //       break
-      //     case "OTHER":
-      //       backendStoreValue = "Other"
-      //       break
-      //     default:
-      //       backendStoreValue = "Other"
-      //   }
-
-      //   const isOther = store.returnStore === "OTHER"
-
-      //   return {
-      //     store: backendStoreValue,
-      //     ...(isOther && store.otherStoreName
-      //       ? { otherStoreName: store.otherStoreName.trim() }
-      //       : {}),
-      //     numberOfPackages: store.numberOfPackages,
-      //     packages: Object.keys(store.packageNumbers || {}).map((key) => ({
-      //       packageNumber: store.packageNumbers[key] || "",
-      //       barcodeImages: [],
-      //     })),
-      //   }
-      // })
 
       // === Stores mapping ===
       const storesForBackend = updatedData.stores.map((store: any) => {
@@ -296,7 +239,7 @@ export default function PackageReturnService() {
             ...(token && { Authorization: `Bearer ${token}` }),
           },
           body: formDataToSend,
-        }
+        },
       );
 
       const result = await response.json();
@@ -306,13 +249,22 @@ export default function PackageReturnService() {
       }
 
       // SUCCESS
+      const orderTotalAmount = result.data.pricing.totalAmount;
       setOrderId(result.data._id);
-      setTotalAmount(result.data.pricing.totalAmount);
+      setTotalAmount(orderTotalAmount);
       setOrderResponse(result.data);
       setSubmitStatus("success");
-      setSubmitMessage(result.message || "Return order created successfully!");
       setCurrentStep(3);
-      toast.success("Return order created successfully!");
+
+      // Use orderTotalAmount directly instead of totalAmount state
+      if (orderTotalAmount > 0) {
+        toast.warning(
+          `To create the return order, you need to pay ৳${orderTotalAmount.toFixed(2)}.`,
+        );
+      } else {
+        toast.success("Return order created successfully!");
+      }
+      // toast.success("Return order created successfully!");
     } catch (error: any) {
       setSubmitStatus("error");
       setSubmitMessage(error.message || "Something went wrong");

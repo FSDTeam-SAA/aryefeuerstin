@@ -316,38 +316,45 @@ export function SummaryReview({
           </li>
 
           <li>
-  <b>Physical Return Label:</b>{" "}
-  {options.physicalReturnLabel.enabled ? (
-    <>
-      Yes{" "}
-      {!isFreePhysicalLabel ? (
-        <span className="text-green-600 font-medium">(Free with plan)</span>
-      ) : (
-        <span className="text-amber-700">(+${options.physicalReturnLabel.fee || 3.5})</span>
-      )}
-    </>
-  ) : (
-    "No"
-  )}
-</li>
+            <b>Physical Return Label:</b>{" "}
+            {options.physicalReturnLabel.enabled ? (
+              <>
+                Yes{" "}
+                {!isFreePhysicalLabel ? (
+                  <span className="text-green-600 font-medium">
+                    (Free with plan)
+                  </span>
+                ) : (
+                  <span className="text-amber-700">
+                    (+${options.physicalReturnLabel.fee || 3.5})
+                  </span>
+                )}
+              </>
+            ) : (
+              "No"
+            )}
+          </li>
 
-<li>
-  <b>Physical Receipt:</b>{" "}
-  {options.physicalReceipt.enabled ? (
-    <>
-      Yes{" "}
-      {!isFreePhysicalReceipt ? (
-        <span className="text-green-600 font-medium">(Free with plan)</span>
-      ) : (
-        <span className="text-amber-700">
-          (+${options.physicalReceipt.fee || 8}) - Last 4: {options.physicalReceipt.creditCardLast4 || "N/A"}
-        </span>
-      )}
-    </>
-  ) : (
-    "No"
-  )}
-</li>
+          <li>
+            <b>Physical Receipt:</b>{" "}
+            {options.physicalReceipt.enabled ? (
+              <>
+                Yes{" "}
+                {!isFreePhysicalReceipt ? (
+                  <span className="text-green-600 font-medium">
+                    (Free with plan)
+                  </span>
+                ) : (
+                  <span className="text-amber-700">
+                    (+${options.physicalReceipt.fee || 8}) - Last 4:{" "}
+                    {options.physicalReceipt.creditCardLast4 || "N/A"}
+                  </span>
+                )}
+              </>
+            ) : (
+              "No"
+            )}
+          </li>
 
           <li>
             <b>Return Shipping Label:</b>{" "}

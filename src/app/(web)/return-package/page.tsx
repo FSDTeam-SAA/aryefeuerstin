@@ -259,7 +259,10 @@ export default function PackageReturnService() {
       // Use orderTotalAmount directly instead of totalAmount state
       if (orderTotalAmount > 0) {
         toast.warning(
-          `To create the return order, you need to pay ৳${orderTotalAmount.toFixed(2)}.`,
+          `To create the return order, you need to pay $${orderTotalAmount.toFixed(2)}.`,
+          {
+             duration: 15000, // 15 seconds
+          }
         );
       } else {
         toast.success("Return order created successfully!");

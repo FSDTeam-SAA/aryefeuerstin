@@ -35,6 +35,7 @@ interface PackageItem {
 interface Store {
   store: string;
   packages: PackageItem[];
+  otherStoreName?: string;
 }
 
 interface Customer {
@@ -703,8 +704,10 @@ export default function JobDetailsPage() {
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-gray-900">
-                        {pkg.store}
-                      </h3>
+  {pkg.store === "OTHER"
+    ? orderData?.stores.find(s => s.store === "OTHER")?.otherStoreName || "OTHER"
+    : pkg.store}
+</h3>
                       <div className="mt-1.5 flex items-center gap-1.5">
                         <div className="h-2 w-2 rounded-full bg-gray-300"></div>
                         <span className="font-mono text-[10px] font-bold text-gray-400 uppercase tracking-widest">

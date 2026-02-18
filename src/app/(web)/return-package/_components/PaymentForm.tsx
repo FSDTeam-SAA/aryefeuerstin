@@ -173,8 +173,8 @@ export function SummaryReview({
 
   // Helper to display store name correctly
   const getStoreDisplayName = (store: Store) => {
-    if (store.store === "Other" && store.otherStoreName) {
-      return `Other: ${store.otherStoreName}`;
+    if (store.store === "OTHER" && store.otherStoreName) {
+      return `${store.otherStoreName}`;
     }
     return store.store;
   };

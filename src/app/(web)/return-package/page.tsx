@@ -1,3 +1,334 @@
+// /* eslint-disable */
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { useSession } from "next-auth/react";
+// import { Package } from "lucide-react";
+
+// import { StepIndicator } from "./_components/StepIndicator";
+// import { SummaryReview } from "./_components/PaymentForm";
+// import { toast } from "sonner";
+// import { PackageDetailsForm } from "./_components/PackageDetailsForm";
+// import { CustomerInfoForm } from "./_components/CustomerInfoForm";
+// // import { PackageDetailsForm } from "./_components/CustomerInfoForm"
+
+// type Step = 1 | 2 | 3;
+
+// export default function PackageReturnService() {
+//   const session = useSession();
+//   const token = session.data?.accessToken as string | undefined;
+
+//   const [currentStep, setCurrentStep] = useState<Step>(1);
+//   const [orderId, setOrderId] = useState<string>("");
+//   const [totalAmount, setTotalAmount] = useState<number>(0);
+//   const [orderResponse, setOrderResponse] = useState<any>(null);
+
+//   useEffect(() => {
+//     window.scrollTo(0, 0);
+//   }, [currentStep]);
+
+//   const [formData, setFormData] = useState<any>({
+//     fullName: "",
+//     phoneNumber: "",
+//     email: "",
+//     zipCode: "",
+//     street: "",
+//     state: "",
+//     city: "",
+//     unit: "", // ← NEW: Added unit field
+//     pickupAddress: "",
+//     pickupInstructions: "",
+//     lat: undefined,
+//     lng: undefined,
+//     rushService: false,
+
+//     stores: [],
+//     printShippingLabel: false,
+//     hasReceipt: false,
+//     creditCardLast4: "",
+//     needShippingLabel: false,
+//     productLength: "",
+//     productWidth: "",
+//     productHeight: "",
+//     productWeight: "",
+//     leaveMessage: false,
+//     message: "",
+//     physicalReturnLabelFiles: [],
+//   });
+
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [submitStatus, setSubmitStatus] = useState<
+//     "idle" | "success" | "error"
+//   >("idle");
+//   const [submitMessage, setSubmitMessage] = useState("");
+
+//   const handleNext = (stepData: any) => {
+//     setFormData((prev: any) => ({ ...prev, ...stepData }));
+//     if (currentStep < 3) setCurrentStep((prev) => (prev + 1) as Step);
+//   };
+
+//   const handleBack = () => {
+//     if (currentStep > 1) setCurrentStep((prev) => (prev - 1) as Step);
+//   };
+
+//   const handleSubmitAndProceed = async (finalStepData: any) => {
+//     const updatedData = { ...formData, ...finalStepData };
+//     setFormData(updatedData);
+
+//     setIsSubmitting(true);
+//     setSubmitStatus("idle");
+//     setSubmitMessage("");
+
+//     try {
+//       const fullAddress =
+//         updatedData.pickupAddress ||
+//         `${updatedData.street}${
+//           updatedData.unit ? ` ${updatedData.unit}` : ""
+//         }, ${updatedData.city}, USA`;
+
+//       const formDataToSend = new FormData();
+
+//       // Customer info
+//       formDataToSend.append("fullName", updatedData.fullName);
+//       // formDataToSend.append("lastName", updatedData.lastName)
+//       formDataToSend.append("phone", updatedData.phoneNumber);
+//       formDataToSend.append("email", updatedData.email);
+//       formDataToSend.append("unit", updatedData.unit || ""); // ← NEW: Send unit to backend
+//       formDataToSend.append("zipCode", updatedData.zipCode || "");
+//       formDataToSend.append("street", updatedData.street || "");
+//       formDataToSend.append("state", updatedData.state || "");
+//       formDataToSend.append("city", updatedData.city || "");
+//       formDataToSend.append(
+//         "pickupInstructions",
+//         updatedData.pickupInstructions || "",
+//       );
+//       formDataToSend.append("address", fullAddress);
+//       formDataToSend.append("lat", updatedData.lat?.toString() || "");
+//       formDataToSend.append("lng", updatedData.lng?.toString() || "");
+
+//       // Options
+//       formDataToSend.append("rushService", String(updatedData.rushService));
+//       formDataToSend.append(
+//         "physicalReturnLabel",
+//         String(updatedData.printShippingLabel),
+//       );
+//       formDataToSend.append("physicalReceipt", String(updatedData.hasReceipt));
+//       formDataToSend.append(
+//         "returnShippingLabel",
+//         String(updatedData.needShippingLabel),
+//       );
+//       formDataToSend.append("leaveMessage", String(updatedData.leaveMessage));
+
+//       if (updatedData.hasReceipt) {
+//         formDataToSend.append(
+//           "creditCardLast4",
+//           updatedData.creditCardLast4 || "",
+//         );
+//       }
+
+//       if (updatedData.needShippingLabel) {
+//         formDataToSend.append("pickupAndReturnAddress", fullAddress);
+//         formDataToSend.append("productLength", updatedData.productLength || "");
+//         formDataToSend.append("productWidth", updatedData.productWidth || "");
+//         formDataToSend.append("productHeight", updatedData.productHeight || "");
+//         formDataToSend.append("productWeight", updatedData.productWeight || "");
+//       }
+
+//       if (updatedData.leaveMessage) {
+//         formDataToSend.append("messageNote", updatedData.message || "");
+//       }
+
+//       // === Stores mapping ===
+//       const storesForBackend = updatedData.stores.map((store: any) => {
+//         let backendStoreValue: string;
+
+//         switch (store.returnStore) {
+//           case "STAPLES":
+//             backendStoreValue = "Staples";
+//             break;
+//           case "KOHLS":
+//             backendStoreValue = "Kohl's";
+//             break;
+//           case "SHEIN":
+//             backendStoreValue = "Shein Return";
+//             break;
+//           case "TARGET":
+//             backendStoreValue = "Target";
+//             break;
+//           case "WALMART":
+//             backendStoreValue = "Walmart";
+//             break;
+//           case "WHOLE FOODS MARKET":
+//             backendStoreValue = "Whole Foods Market";
+//             break;
+//           case "UPS":
+//             backendStoreValue = "UPS Drop Off";
+//             break;
+//           case "USPS":
+//             backendStoreValue = "USPS Drop Off";
+//             break;
+//           case "FEDEX":
+//             backendStoreValue = "FedEx Drop Off";
+//             break;
+//           case "OTHER":
+//             backendStoreValue = "Other";
+//             break;
+//           default:
+//             backendStoreValue = "Other";
+//         }
+
+//         const isOther = store.returnStore === "OTHER";
+
+//         // ── Important fix starts here ────────────────────────────────
+//         const numberOfPackages = Number(store.numberOfPackages) || 1;
+
+//         // Create proper number of package entries even if packageNumbers is empty
+//         const packages = Array.from({ length: numberOfPackages }, (_, idx) => ({
+//           packageNumber: String(idx + 1), // ✅ "1", "2", "3" ...
+//           barcodeImages: [],
+//         }));
+//         // ──────────────────────────────────────────────────────────────
+
+//         return {
+//           store: backendStoreValue,
+//           ...(isOther && store.otherStoreName?.trim()
+//             ? { otherStoreName: store.otherStoreName.trim() }
+//             : {}),
+//           numberOfPackages,
+//           packages,
+//         };
+//       });
+
+//       formDataToSend.append("stores", JSON.stringify(storesForBackend));
+
+//       // Handle barcode images
+//       let imageIndex = 0;
+//       const imagePromises: Promise<void>[] = [];
+
+//       updatedData.stores.forEach((store: any) => {
+//         Object.keys(store.packageImages || {}).forEach((pkgIdx: string) => {
+//           (store.packageImages[pkgIdx] || []).forEach((dataUrl: string) => {
+//             const p = fetch(dataUrl)
+//               .then((res) => res.blob())
+//               .then((blob) => {
+//                 const file = new File([blob], `barcode_${imageIndex}.jpg`, {
+//                   type: "image/jpeg",
+//                 });
+//                 formDataToSend.append("barcodeImages", file);
+//                 imageIndex++;
+//               });
+//             imagePromises.push(p);
+//           });
+//         });
+//       });
+
+//       // Handle physical return label files
+//       if (
+//         updatedData.physicalReturnLabelFiles &&
+//         updatedData.physicalReturnLabelFiles.length > 0
+//       ) {
+//         updatedData.physicalReturnLabelFiles.forEach((item: { file: File }) => {
+//           formDataToSend.append("physicalReturnLabelFiles", item.file);
+//         });
+//       }
+
+//       await Promise.all(imagePromises);
+
+//       // API Call
+//       const response = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_BASE_URL}/return-order`,
+//         {
+//           method: "POST",
+//           headers: {
+//             ...(token && { Authorization: `Bearer ${token}` }),
+//           },
+//           body: formDataToSend,
+//         },
+//       );
+
+//       const result = await response.json();
+
+//       if (!response.ok) {
+//         throw new Error(result.message || "Submission failed");
+//       }
+
+//       // SUCCESS
+//       const orderTotalAmount = result.data.pricing.totalAmount;
+//       setOrderId(result.data._id);
+//       setTotalAmount(orderTotalAmount);
+//       setOrderResponse(result.data);
+//       setSubmitStatus("success");
+//       setCurrentStep(3);
+
+//       // setTimeout(() => {
+//       //   window.scrollTo({ top: 0, behavior: "instant" });
+//       // }, 0);
+
+//       // Use orderTotalAmount directly instead of totalAmount state
+//       if (orderTotalAmount > 0) {
+//         toast.warning(
+//           `To create the return order, you need to pay $${orderTotalAmount.toFixed(2)}.`,
+//           {
+//             duration: 15000, // 15 seconds
+//           },
+//         );
+//       } else {
+//         toast.success("Return order created successfully!");
+//       }
+//       // toast.success("Return order created successfully!");
+//     } catch (error: any) {
+//       setSubmitStatus("error");
+//       setSubmitMessage(error.message || "Something went wrong");
+//       toast.error(error.message || "Submission failed");
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 py-8 lg:px-4">
+//       <div className="container mx-auto max-w-6xl">
+//         <div className="text-center mb-8">
+//           <div className="inline-flex w-16 h-16 bg-[#31B8FA] rounded-full items-center justify-center mb-4">
+//             <Package className="text-white w-8 h-8" />
+//           </div>
+//           <h1 className="text-2xl font-bold">
+//             Customer Package Return Service
+//           </h1>
+//         </div>
+
+//         <StepIndicator currentStep={currentStep} />
+
+//         <div className="bg-white lg:p-6 p-3 mt-8 rounded-lg shadow">
+//           {currentStep === 1 && (
+//             <CustomerInfoForm initialData={formData} onNext={handleNext} />
+//           )}
+//           {currentStep === 2 && (
+//             <PackageDetailsForm
+//               initialData={formData}
+//               onSubmitAndProceed={handleSubmitAndProceed}
+//               onBack={handleBack}
+//               isSubmitting={isSubmitting}
+//             />
+//           )}
+//           {currentStep === 3 && orderResponse && (
+//             <SummaryReview
+//               orderData={orderResponse}
+//               status={submitStatus}
+//               message={submitMessage}
+//               orderId={orderId}
+//               totalAmount={totalAmount}
+//             />
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
 /* eslint-disable */
 "use client";
 
@@ -10,7 +341,6 @@ import { SummaryReview } from "./_components/PaymentForm";
 import { toast } from "sonner";
 import { PackageDetailsForm } from "./_components/PackageDetailsForm";
 import { CustomerInfoForm } from "./_components/CustomerInfoForm";
-// import { PackageDetailsForm } from "./_components/CustomerInfoForm"
 
 type Step = 1 | 2 | 3;
 
@@ -31,7 +361,7 @@ export default function PackageReturnService() {
     street: "",
     state: "",
     city: "",
-    unit: "", // ← NEW: Added unit field
+    unit: "",
     pickupAddress: "",
     pickupInstructions: "",
     lat: undefined,
@@ -86,17 +416,16 @@ export default function PackageReturnService() {
 
       // Customer info
       formDataToSend.append("fullName", updatedData.fullName);
-      // formDataToSend.append("lastName", updatedData.lastName)
       formDataToSend.append("phone", updatedData.phoneNumber);
       formDataToSend.append("email", updatedData.email);
-      formDataToSend.append("unit", updatedData.unit || ""); // ← NEW: Send unit to backend
+      formDataToSend.append("unit", updatedData.unit || "");
       formDataToSend.append("zipCode", updatedData.zipCode || "");
       formDataToSend.append("street", updatedData.street || "");
       formDataToSend.append("state", updatedData.state || "");
       formDataToSend.append("city", updatedData.city || "");
       formDataToSend.append(
         "pickupInstructions",
-        updatedData.pickupInstructions || "",
+        updatedData.pickupInstructions || ""
       );
       formDataToSend.append("address", fullAddress);
       formDataToSend.append("lat", updatedData.lat?.toString() || "");
@@ -106,19 +435,19 @@ export default function PackageReturnService() {
       formDataToSend.append("rushService", String(updatedData.rushService));
       formDataToSend.append(
         "physicalReturnLabel",
-        String(updatedData.printShippingLabel),
+        String(updatedData.printShippingLabel)
       );
       formDataToSend.append("physicalReceipt", String(updatedData.hasReceipt));
       formDataToSend.append(
         "returnShippingLabel",
-        String(updatedData.needShippingLabel),
+        String(updatedData.needShippingLabel)
       );
       formDataToSend.append("leaveMessage", String(updatedData.leaveMessage));
 
       if (updatedData.hasReceipt) {
         formDataToSend.append(
           "creditCardLast4",
-          updatedData.creditCardLast4 || "",
+          updatedData.creditCardLast4 || ""
         );
       }
 
@@ -134,10 +463,9 @@ export default function PackageReturnService() {
         formDataToSend.append("messageNote", updatedData.message || "");
       }
 
-      // === Stores mapping ===
+      // Stores mapping
       const storesForBackend = updatedData.stores.map((store: any) => {
         let backendStoreValue: string;
-
         switch (store.returnStore) {
           case "STAPLES":
             backendStoreValue = "Staples";
@@ -174,16 +502,11 @@ export default function PackageReturnService() {
         }
 
         const isOther = store.returnStore === "OTHER";
-
-        // ── Important fix starts here ────────────────────────────────
         const numberOfPackages = Number(store.numberOfPackages) || 1;
-
-        // Create proper number of package entries even if packageNumbers is empty
         const packages = Array.from({ length: numberOfPackages }, (_, idx) => ({
-          packageNumber: String(idx + 1), // ✅ "1", "2", "3" ...
+          packageNumber: String(idx + 1),
           barcodeImages: [],
         }));
-        // ──────────────────────────────────────────────────────────────
 
         return {
           store: backendStoreValue,
@@ -218,19 +541,19 @@ export default function PackageReturnService() {
         });
       });
 
-      // Handle physical return label files
       if (
         updatedData.physicalReturnLabelFiles &&
         updatedData.physicalReturnLabelFiles.length > 0
       ) {
-        updatedData.physicalReturnLabelFiles.forEach((item: { file: File }) => {
-          formDataToSend.append("physicalReturnLabelFiles", item.file);
-        });
+        updatedData.physicalReturnLabelFiles.forEach(
+          (item: { file: File }) => {
+            formDataToSend.append("physicalReturnLabelFiles", item.file);
+          }
+        );
       }
 
       await Promise.all(imagePromises);
 
-      // API Call
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/return-order`,
         {
@@ -239,7 +562,7 @@ export default function PackageReturnService() {
             ...(token && { Authorization: `Bearer ${token}` }),
           },
           body: formDataToSend,
-        },
+        }
       );
 
       const result = await response.json();
@@ -254,27 +577,24 @@ export default function PackageReturnService() {
       setTotalAmount(orderTotalAmount);
       setOrderResponse(result.data);
       setSubmitStatus("success");
-      setCurrentStep(3);
+      setCurrentStep(3); // Step changes normally, no scroll
 
-      // Use orderTotalAmount directly instead of totalAmount state
       if (orderTotalAmount > 0) {
         toast.warning(
-          `To create the return order, you need to pay $${orderTotalAmount.toFixed(2)}.`,
-          {
-             duration: 15000, // 15 seconds
-          }
+          `To create the return order, you need to pay $${orderTotalAmount.toFixed(
+            2
+          )}.`,
+          { duration: 15000 }
         );
       } else {
         toast.success("Return order created successfully!");
       }
-      // toast.success("Return order created successfully!");
     } catch (error: any) {
       setSubmitStatus("error");
       setSubmitMessage(error.message || "Something went wrong");
       toast.error(error.message || "Submission failed");
     } finally {
       setIsSubmitting(false);
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 

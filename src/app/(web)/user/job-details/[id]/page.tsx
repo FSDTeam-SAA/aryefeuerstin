@@ -1,100 +1,111 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-'use client'
+"use client";
 
-import { useState, useRef } from "react"
-import { useParams } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { useQuery } from "@tanstack/react-query"
-import { Copy, MapPin, Phone, Printer, Package, MessageSquare, FileText } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { toast } from "sonner"
-import Image from "next/image"
-import jsPDF from "jspdf"
-import html2canvas from "html2canvas"
+import { useState, useRef } from "react";
+import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Copy,
+  MapPin,
+  Phone,
+  Printer,
+  Package,
+  MessageSquare,
+  FileText,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import Image from "next/image";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 /* ================= TYPES ================= */
 
 interface PackageItem {
-  packageNumber: string
-  barcodeImages: string[]
+  packageNumber: string;
+  barcodeImages: string[];
 }
 
 interface Store {
-  store: string
-  otherStoreName?: string
-  numberOfPackages: number
-  packages: PackageItem[]
+  store: string;
+  otherStoreName?: string;
+  numberOfPackages: number;
+  packages: PackageItem[];
 }
 
 interface Customer {
-  fullName: string
-  phone: string
-  email?: string
-  unit?: string
+  fullName: string;
+  phone: string;
+  email?: string;
+  unit?: string;
   address?: {
-    street: string
-    state: string
-    city: string
-    zipCode: string
-  }
+    street: string;
+    state: string;
+    city: string;
+    zipCode: string;
+  };
   pickupLocation?: {
-    address: string
-  }
-  pickupInstructions?: string
+    address: string;
+  };
+  pickupInstructions?: string;
 }
 
 interface MessageOption {
-  enabled: boolean
-  note: string
+  enabled: boolean;
+  note: string;
 }
 
 interface ReturnOrderData {
-  _id: string
-  customer: Customer
-  stores: Store[]
-  status: string
-  paymentStatus: string
+  _id: string;
+  customer: Customer;
+  stores: Store[];
+  status: string;
+  paymentStatus: string;
   options?: {
     physicalReturnLabel?: {
-      enabled: boolean
-      labelFiles: string[]
-    }
-    message?: MessageOption
-  }
+      enabled: boolean;
+      labelFiles: string[];
+    };
+    message?: MessageOption;
+  };
 }
 
 /* ================= API ================= */
 
 const fetchReturnOrder = async (
   orderId: string,
-  token: string
+  token: string,
 ): Promise<ReturnOrderData> => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/return-order/${orderId}`,
     {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    }
-  )
-  const result = await res.json()
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+  const result = await res.json();
   if (!res.ok || !result.status)
-    throw new Error(result.message || "Failed to fetch order")
-  return result.data
-}
+    throw new Error(result.message || "Failed to fetch order");
+  return result.data;
+};
 
 export default function JobDetailsPage() {
-  const { id: orderId } = useParams<{ id: string }>()
-  const { data: session, status: sessionStatus } = useSession()
-  const token = session?.accessToken as string
+  const { id: orderId } = useParams<{ id: string }>();
+  const { data: session, status: sessionStatus } = useSession();
+  const token = session?.accessToken as string;
 
-  const pdfTemplateRef = useRef<HTMLDivElement>(null)
+  const pdfTemplateRef = useRef<HTMLDivElement>(null);
   const [activePkg, setActivePkg] = useState<{
-    id: string
-    store: string
-    barcodeImage: string
-  } | null>(null)
-  const [isGenerating, setIsGenerating] = useState(false)
+    id: string;
+    store: string;
+    barcodeImage: string;
+  } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   /* ---------- QUERY ---------- */
   const {
@@ -105,7 +116,7 @@ export default function JobDetailsPage() {
     queryKey: ["returnOrder", orderId],
     queryFn: () => fetchReturnOrder(orderId!, token),
     enabled: !!orderId && !!token && sessionStatus === "authenticated",
-  })
+  });
 
   /* ================= DATA ================= */
   const allPackages =
@@ -114,18 +125,18 @@ export default function JobDetailsPage() {
         id: pkg.packageNumber,
         store: store.store,
         barcodeImage: pkg.barcodeImages?.[0] || "",
-      }))
-    ) || []
+      })),
+    ) || [];
 
   const returnLabelFile = orderData?.options?.physicalReturnLabel?.enabled
     ? orderData.options.physicalReturnLabel.labelFiles?.[0]
-    : null
+    : null;
 
-  const isReturnLabelPDF = returnLabelFile?.toLowerCase().endsWith(".pdf")
-  const returnLabelImage = !isReturnLabelPDF ? returnLabelFile : null
+  const isReturnLabelPDF = returnLabelFile?.toLowerCase().endsWith(".pdf");
+  const returnLabelImage = !isReturnLabelPDF ? returnLabelFile : null;
 
-  const customer = orderData?.customer
-  const fullName = `${customer?.fullName || ""}`.trim() || "N/A"
+  const customer = orderData?.customer;
+  const fullName = `${customer?.fullName || ""}`.trim() || "N/A";
   const address =
     customer?.pickupLocation?.address ??
     (customer?.address
@@ -134,67 +145,67 @@ export default function JobDetailsPage() {
         }, ${customer.address.city}, ${customer.address.state}, ${
           customer.address.zipCode
         }`
-      : "N/A")
+      : "N/A");
 
-  const pickupInstructions = customer?.pickupInstructions?.trim()
+  const pickupInstructions = customer?.pickupInstructions?.trim();
   const customerMessage =
     orderData?.options?.message?.enabled &&
     orderData?.options?.message?.note?.trim()
       ? orderData.options.message.note.trim()
-      : null
+      : null;
 
   /* ================= PDF PRINT LOGIC ================= */
   const handlePrintAsPDF = async (
-    pkg: { id: string; store: string; barcodeImage: string } | "return-label"
+    pkg: { id: string; store: string; barcodeImage: string } | "return-label",
   ) => {
-    setIsGenerating(true)
-    const toastId = toast.loading("Generating high-quality label...")
+    setIsGenerating(true);
+    const toastId = toast.loading("Generating high-quality label...");
 
-    let targetPkg: { id: string; store: string; barcodeImage: string }
+    let targetPkg: { id: string; store: string; barcodeImage: string };
 
     if (pkg === "return-label") {
       if (!returnLabelImage) {
-        toast.error("Return label not available", { id: toastId })
-        setIsGenerating(false)
-        return
+        toast.error("Return label not available", { id: toastId });
+        setIsGenerating(false);
+        return;
       }
       targetPkg = {
         id: "Return Label",
         store: "Return Shipping Label",
         barcodeImage: returnLabelImage,
-      }
+      };
     } else {
-      targetPkg = pkg
+      targetPkg = pkg;
       if (!targetPkg.barcodeImage) {
-        toast.error("No barcode image available", { id: toastId })
-        setIsGenerating(false)
-        return
+        toast.error("No barcode image available", { id: toastId });
+        setIsGenerating(false);
+        return;
       }
     }
 
-    setActivePkg(targetPkg)
+    setActivePkg(targetPkg);
 
     // Ensure image is fully loaded before generating PDF
     setTimeout(async () => {
       try {
-        const element = pdfTemplateRef.current
+        const element = pdfTemplateRef.current;
         if (!element) {
-          toast.error("Template error", { id: toastId })
-          setIsGenerating(false)
-          return
+          toast.error("Template error", { id: toastId });
+          setIsGenerating(false);
+          return;
         }
 
         // Wait for image to load
-        const img = element.querySelector("img")
+        const img = element.querySelector("img");
         if (img && !img.complete) {
           await new Promise((resolve) => {
-            img.onload = resolve
-            img.onerror = resolve
-          })
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
         }
 
         // Additional small delay to ensure rendering
-        await new Promise((resolve) => setTimeout(resolve, 300))
+        await new Promise((resolve) => setTimeout(resolve, 300));
 
         const canvas = await html2canvas(element, {
           scale: 5, // High resolution for sharp barcodes
@@ -204,33 +215,35 @@ export default function JobDetailsPage() {
           logging: false,
           imageTimeout: 20000, // Increased timeout
           removeContainer: true,
-        })
+        });
 
-        const imgData = canvas.toDataURL("image/jpeg", 0.95) // JPEG for smaller size + great quality
+        const imgData = canvas.toDataURL("image/jpeg", 0.95); // JPEG for smaller size + great quality
 
         // Detect printer type by width (adaptive)
         // Small printer ~80mm, otherwise default A4
-        const isThermal = window.innerWidth <= 500 // example: small screen = small printer
-        const pdfFormat = isThermal ? [80, (canvas.height * 80) / canvas.width] : "a4"
+        const isThermal = window.innerWidth <= 500; // example: small screen = small printer
+        const pdfFormat = isThermal
+          ? [80, (canvas.height * 80) / canvas.width]
+          : "a4";
         const pdf = new jsPDF({
           orientation: "portrait",
           unit: "mm",
           format: [100, 150], // 4" x 6" label size (perfect for thermal printers)
           compress: true, // Enable compression
-        })
+        });
 
-        const pdfWidth = pdf.internal.pageSize.getWidth()
-        const pdfHeight = pdf.internal.pageSize.getHeight()
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
 
         // Calculate scaling to fit perfectly
-        const imgWidth = canvas.width
-        const imgHeight = canvas.height
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
         const ratio = Math.min(
           pdfWidth / (imgWidth / 5),
-          pdfHeight / (imgHeight / 5)
-        )
-        const finalWidth = (imgWidth / 5) * ratio
-        const finalHeight = (imgHeight / 5) * ratio
+          pdfHeight / (imgHeight / 5),
+        );
+        const finalWidth = (imgWidth / 5) * ratio;
+        const finalHeight = (imgHeight / 5) * ratio;
 
         pdf.addImage(
           imgData,
@@ -240,64 +253,64 @@ export default function JobDetailsPage() {
           finalWidth,
           finalHeight,
           undefined,
-          "FAST" // Fast compression = smaller file
-        )
+          "FAST", // Fast compression = smaller file
+        );
 
         // Generate blob
-        const blob = pdf.output("blob")
-        const url = URL.createObjectURL(blob)
+        const blob = pdf.output("blob");
+        const url = URL.createObjectURL(blob);
 
         // Mobile & PC: Try to open print dialog
-        const printWindow = window.open(url, "_blank")
+        const printWindow = window.open(url, "_blank");
 
         if (printWindow) {
           printWindow.onload = () => {
             setTimeout(() => {
-              printWindow.focus()
-              printWindow.print()
-            }, 800)
-          }
+              printWindow.focus();
+              printWindow.print();
+            }, 800);
+          };
 
           // Fallback for mobile
           setTimeout(() => {
             if (!printWindow.closed) {
-              printWindow.focus()
-              printWindow.print()
+              printWindow.focus();
+              printWindow.print();
             }
-          }, 2000)
+          }, 2000);
 
           toast.success("Print ready! Use system print dialog.", {
             id: toastId,
-          })
+          });
         } else {
           // If popup blocked → direct download
-          pdf.save(`Label_${targetPkg.id.replace(/\s+/g, "_")}.pdf`)
-          toast.success("PDF downloaded – open and print", { id: toastId })
+          pdf.save(`Label_${targetPkg.id.replace(/\s+/g, "_")}.pdf`);
+          toast.success("PDF downloaded – open and print", { id: toastId });
         }
 
-        toast.success("Ready to print", { id: toastId })
+        toast.success("Ready to print", { id: toastId });
       } catch (err) {
-        console.error("PDF Generation Error:", err)
-        toast.error("Failed to generate label", { id: toastId })
+        console.error("PDF Generation Error:", err);
+        toast.error("Failed to generate label", { id: toastId });
       } finally {
-        setIsGenerating(false)
-        setActivePkg(null)
+        setIsGenerating(false);
+        setActivePkg(null);
       }
-    }, 1500) // Increased delay for image loading
-  }
+    }, 1500); // Increased delay for image loading
+  };
 
   const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success(`${label} copied!`)
-  }
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied!`);
+  };
 
-  if (sessionStatus === "loading" || isLoading) return <JobDetailsSkeleton />
+  if (sessionStatus === "loading" || isLoading) return <JobDetailsSkeleton />;
   if (isError || !orderData)
     return (
       <div className="p-10 text-center text-red-500">
         Error loading job details.
       </div>
-    )
+    );
 
   return (
     <>
@@ -557,8 +570,12 @@ export default function JobDetailsPage() {
             {allPackages.length === 0 ? (
               <Card className="p-8 text-center border-none shadow-sm ring-1 ring-gray-200">
                 <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500 font-medium">No package barcodes generated yet</p>
-                <p className="text-xs text-gray-400 mt-1">Package labels will appear here once created</p>
+                <p className="text-sm text-gray-500 font-medium">
+                  No package barcodes generated yet
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Package labels will appear here once created
+                </p>
               </Card>
             ) : (
               allPackages.map((pkg) => (
@@ -573,7 +590,10 @@ export default function JobDetailsPage() {
                       </div>
                       <div>
                         <h3 className="text-base font-bold text-gray-900">
-                          {pkg.store}
+                          {pkg.store === "OTHER"
+                            ? orderData?.stores.find((s) => s.store === "OTHER")
+                                ?.otherStoreName || "OTHER"
+                            : pkg.store}
                         </h3>
                         <div className="mt-1.5 flex items-center gap-1.5">
                           <div className="h-2 w-2 rounded-full bg-gray-300"></div>
@@ -622,7 +642,7 @@ export default function JobDetailsPage() {
         </div>
       </div>
     </>
-  )
+  );
 }
 
 function JobDetailsSkeleton() {
@@ -632,5 +652,5 @@ function JobDetailsSkeleton() {
       <Skeleton className="h-40 max-w-7xl mx-auto" />
       <Skeleton className="h-20 max-w-7xl mx-auto" />
     </div>
-  )
+  );
 }

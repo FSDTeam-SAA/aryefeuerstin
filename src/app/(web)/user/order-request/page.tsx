@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Package } from "lucide-react";
+import { MapPin, Package, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
@@ -29,6 +29,10 @@ type Order = {
   review: {
     rating: number | null;
     reviewedAt: string | null;
+  };
+  rushService: {
+    enabled: boolean;
+    fee: number;
   };
 };
 
@@ -167,6 +171,7 @@ export default function OrderRequestsPage() {
               );
 
               const isCompleted = order.status === "COMPLETED";
+              const isRushService = order.rushService?.enabled === true; // ✅ rushService check
 
               return (
                 <Card key={order._id} className="p-5 shadow-none border">
@@ -180,19 +185,28 @@ export default function OrderRequestsPage() {
                       </h3>
                     </div>
 
-                    <span
-                      className={`rounded-full px-3 py-1.5 text-xs font-medium ${
-                        getStatusColor(order.status) === "orange"
-                          ? "bg-orange-100 text-orange-800"
-                          : getStatusColor(order.status) === "purple"
-                          ? "bg-purple-100 text-purple-800"
-                          : getStatusColor(order.status) === "green"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {getStatusText(order.status)}
-                    </span>
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      {isRushService && (
+                        <span className="flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium bg-red-100 text-red-700">
+                          <Zap className="h-3 w-3" />
+                          Rush Service
+                        </span>
+                      )}
+
+                      <span
+                        className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+                          getStatusColor(order.status) === "orange"
+                            ? "bg-orange-100 text-orange-800"
+                            : getStatusColor(order.status) === "purple"
+                            ? "bg-purple-100 text-purple-800"
+                            : getStatusColor(order.status) === "green"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
+                        {getStatusText(order.status)}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="mb-6 space-y-3">

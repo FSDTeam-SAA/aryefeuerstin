@@ -30,6 +30,9 @@ interface PickupPoint {
   orderIndex: number;
   id: string;
   status?: string;
+  rushService?: {
+    enabled: boolean;
+  };
 }
 
 interface Leg {
@@ -428,10 +431,18 @@ export default function RouteDetailsPage() {
                       : index === 1
                         ? "bg-[#F59E0B]"
                         : "bg-[#EF4444]";
-
+                  const isRush = pickup.rushService?.enabled === true;
                   return (
                     <div key={pickup.orderIndex}>
                       <div className="p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-[#31B8FA] transition-colors">
+                        {/* Rush Service Badge – শুধু enabled হলে দেখাবে */}
+                        {/* {isRush && (
+                          <div className="absolute top-3 right-3">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300 shadow-sm">
+                              <span className="mr-1">⚡</span> Rush Service
+                            </span>
+                          </div>
+                        )} */}
                         <div className="flex items-start gap-3">
                           <div className="flex-shrink-0">
                             <div
@@ -441,12 +452,22 @@ export default function RouteDetailsPage() {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                              <p className="text-sm font-semibold text-gray-900 truncate">
-                                {pickup.customer}
-                              </p>
-                            </div>
+                            {/* Customer Name + Rush Badge একই লাইনে */}
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <p className="text-sm font-semibold text-gray-900 truncate">
+                    {pickup.customer}
+                  </p>
+                </div>
+
+                {/* Rush Service badge – customer name এর পাশে */}
+                {isRush && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300">
+                    <span className="mr-1">⚡</span>Rush Service
+                  </span>
+                )}
+              </div>
                             <div className="flex items-start gap-2 mb-2">
                               <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
                               <p className="text-xs text-gray-600">
@@ -488,7 +509,7 @@ export default function RouteDetailsPage() {
                           {pickup?.status === "PICKED_UP" && (
                             <div className="ml-2 mt-1">
                               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
-                               {pickup?.status}
+                                {pickup?.status}
                               </span>
                             </div>
                           )}

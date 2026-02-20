@@ -637,13 +637,13 @@ export function SummaryReview({
 
         setTimeout(() => {
           window.scrollBy({
-            top: -120,
+            top: -620,
             behavior: "smooth",
           });
         }, 600);
       } else {
         window.scrollTo({
-          top: document.documentElement.scrollHeight * 0.55,
+          top: document.documentElement.scrollHeight * 1,
           behavior: "smooth",
         });
       }

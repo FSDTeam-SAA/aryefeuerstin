@@ -438,8 +438,6 @@
 //   );
 // }
 
-
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -622,26 +620,25 @@ export function SummaryReview({
   };
 
   useEffect(() => {
-  if (window.innerWidth >= 768) return;
+    if (window.innerWidth >= 768) return;
 
-  const timer = setTimeout(() => {
-    totalRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-
-    // একটু উপরে adjust করতে চাইলে
-    setTimeout(() => {
-      window.scrollBy({
-        top: -120,
+    const timer = setTimeout(() => {
+      totalRef.current?.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
+
+      // একটু উপরে adjust করতে চাইলে
+      setTimeout(() => {
+        window.scrollBy({
+          top: -120,
+          behavior: "smooth",
+        });
+      }, 300);
     }, 300);
 
-  }, 300);
-
-  return () => clearTimeout(timer);
-}, []);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -681,7 +678,7 @@ export function SummaryReview({
               <b>Number of Packages:</b> {store.numberOfPackages}
             </p>
 
-            <div className="space-y-4">
+            <div ref={totalRef}  className="space-y-4">
               {store.packages.map((pkg, pkgIdx) => (
                 <div
                   key={pkgIdx}
@@ -771,7 +768,7 @@ export function SummaryReview({
         )}
 
       {/* Additional Options */}
-      <div ref={totalRef} className="border rounded-lg p-6 bg-[#F8FAFC]">
+      <div className="border rounded-lg p-6 bg-[#F8FAFC]">
         <h3 className="text-lg font-bold mb-4">Additional Options</h3>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <li>
@@ -863,7 +860,7 @@ export function SummaryReview({
       ) : (
         <>
           {/* Total Amount – মোবাইলে ছোট */}
-          <div  className="border-2 border-[#31B8FA] rounded-xl p-4 sm:p-6 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-lg">
+          <div className="border-2 border-[#31B8FA] rounded-xl p-4 sm:p-6 bg-gradient-to-r from-cyan-50 to-blue-50 shadow-lg">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
               <h3 className="text-lg sm:text-2xl font-bold text-[#31B8FA] text-center sm:text-left">
                 Total Amount to Pay

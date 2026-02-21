@@ -406,10 +406,10 @@ export function CustomerInfoForm({
             </div>
             <div className="flex-1 overflow-auto p-4">
               <MapPicker
-                onSelect={handleMapSelect}
-                onClose={() => setShowMap(false)}
-                initialLocation={currentLocation}
-              />
+                  onSelect={handleMapSelect}
+                  onClose={() => setShowMap(false)}
+                  initialLocation={currentLocation}
+                />
             </div>
           </div>
         </div>

@@ -47,23 +47,32 @@ export default function LocationPickerModal({
       setPosition({ lat: initialLocation.lat, lng: initialLocation.lng });
       setTempLocation(initialLocation);
     } else {
-      setPosition(DEFAULT_LOCATION);
+      // Auto-detect current location on open
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            setPosition({ lat, lng });
+          },
+          (err) => {
+            console.warn("Geolocation error:", err.message);
+          },
+          { timeout: 8000 }
+        );
+      }
     }
   }, [initialLocation]);
 
-  // Helper to extract address components safely
   const extractComponents = (components: google.maps.GeocoderAddressComponent[] | undefined) => {
     if (!components || !Array.isArray(components)) return {};
-
     const result: Record<string, string> = {};
-
     components.forEach((comp) => {
       if (comp.types?.length) {
-        const type = comp.types[0]; // primary type
+        const type = comp.types[0];
         result[type] = comp.long_name;
       }
     });
-
     return result;
   };
 
@@ -99,7 +108,6 @@ export default function LocationPickerModal({
     const lat = place.geometry.location.lat();
     const lng = place.geometry.location.lng();
     const address = place.formatted_address || place.name || "Selected Location";
-
     const components = place.address_components
       ? extractComponents(place.address_components)
       : {};
@@ -119,9 +127,8 @@ export default function LocationPickerModal({
       let components: Record<string, string> = {};
 
       if (status === "OK" && results?.length && results[0]) {
-        const firstResult = results[0];
-        address = firstResult.formatted_address || address;
-        components = extractComponents(firstResult.address_components);
+        address = results[0].formatted_address || address;
+        components = extractComponents(results[0].address_components);
       } else {
         console.warn("Geocoding failed:", status);
       }

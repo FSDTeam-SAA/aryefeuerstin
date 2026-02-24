@@ -224,8 +224,8 @@ interface LocationPickerModalProps {
 const libraries: ("places")[] = ["places"];
 
 const DEFAULT_LOCATION = {
-  lat: 23.6978,
-  lng: 90.3560,
+  lat: 40.7128,
+  lng: -74.0060,
 };
 
 export default function LocationPickerModal({
@@ -274,18 +274,26 @@ export default function LocationPickerModal({
         // Geocode to get address for current location
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ location: currentPos }, (results, status) => {
-          if (status === "OK" && results?.length && results[0]) {
-            const address = results[0].formatted_address || "Current Location";
-            const components = extractComponents(results[0].address_components);
-            setTempLocation({
-              address,
-              lat: latitude,
-              lng: longitude,
-              addressComponents: components,
-            });
-          }
-          setIsLocating(false);
-        });
+  const address =
+    status === "OK" && results?.length && results[0]
+      ? results[0].formatted_address || "Current Location"
+      : "Current Location";
+  const components =
+    status === "OK" && results?.[0]
+      ? extractComponents(results[0].address_components)
+      : {};
+
+  const data: DataProps = {
+    address,
+    lat: latitude,
+    lng: longitude,
+    addressComponents: Object.keys(components).length > 0 ? components : undefined,
+  };
+
+  setTempLocation(data);
+  onSelect(data); // ✅ এই লাইনটাই ছিল না, এটাই মূল সমস্যা
+  setIsLocating(false);
+});
       },
       (error) => {
         console.warn("Geolocation error:", error.message);

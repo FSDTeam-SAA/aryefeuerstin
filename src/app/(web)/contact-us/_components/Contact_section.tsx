@@ -95,7 +95,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h3 className="font-normal text-lg text-[#131313]">Phone Number</h3>
-                  <p className="text-base text-[#616161]">1917-426-6655</p>
+                  <p className="text-base text-[#616161]">1 917-426-6655</p>
                 </div>
               </div>
 
@@ -106,7 +106,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <h3 className="font-normal text-lg text-[#131313]">WhatsApp</h3>
-                  <p className="text-base text-[#616161]">1917-426-6655</p>
+                  <p className="text-base text-[#616161]">1 917-426-6655</p>
                 </div>
               </div>
             </div>

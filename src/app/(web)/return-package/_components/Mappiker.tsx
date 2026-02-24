@@ -22,7 +22,7 @@ interface LocationPickerModalProps {
   initialLocation?: DataProps | null;
 }
 
-const libraries: ("places")[] = ["places"];
+const libraries: "places"[] = ["places"];
 
 const DEFAULT_LOCATION = {
   lat: 40.7128,
@@ -40,31 +40,21 @@ export default function LocationPickerModal({
 
   const [position, setPosition] = useState(DEFAULT_LOCATION);
   const [tempLocation, setTempLocation] = useState<DataProps | null>(null);
-  const [searchBox, setSearchBox] = useState<google.maps.places.SearchBox | null>(null);
+  const [searchBox, setSearchBox] =
+    useState<google.maps.places.SearchBox | null>(null);
 
   useEffect(() => {
     if (initialLocation) {
       setPosition({ lat: initialLocation.lat, lng: initialLocation.lng });
       setTempLocation(initialLocation);
     } else {
-      // Auto-detect current location on open
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-            setPosition({ lat, lng });
-          },
-          (err) => {
-            console.warn("Geolocation error:", err.message);
-          },
-          { timeout: 8000 }
-        );
-      }
+      setPosition(DEFAULT_LOCATION);
     }
   }, [initialLocation]);
 
-  const extractComponents = (components: google.maps.GeocoderAddressComponent[] | undefined) => {
+  const extractComponents = (
+    components: google.maps.GeocoderAddressComponent[] | undefined,
+  ) => {
     if (!components || !Array.isArray(components)) return {};
     const result: Record<string, string> = {};
     components.forEach((comp) => {
@@ -80,13 +70,14 @@ export default function LocationPickerModal({
     lat: number,
     lng: number,
     address: string = "Selected Location",
-    components: Record<string, string> = {}
+    components: Record<string, string> = {},
   ) => {
     const data: DataProps = {
       address,
       lat,
       lng,
-      addressComponents: Object.keys(components).length > 0 ? components : undefined,
+      addressComponents:
+        Object.keys(components).length > 0 ? components : undefined,
     };
     setPosition({ lat, lng });
     setTempLocation(data);
@@ -107,7 +98,8 @@ export default function LocationPickerModal({
 
     const lat = place.geometry.location.lat();
     const lng = place.geometry.location.lng();
-    const address = place.formatted_address || place.name || "Selected Location";
+    const address =
+      place.formatted_address || place.name || "Selected Location";
     const components = place.address_components
       ? extractComponents(place.address_components)
       : {};
@@ -182,7 +174,8 @@ export default function LocationPickerModal({
           <p className="text-sm text-gray-600">Selected Location:</p>
           <p className="font-medium text-gray-900">{tempLocation.address}</p>
           <p className="text-xs text-gray-500 mt-1">
-            Coordinates: {tempLocation.lat.toFixed(4)}, {tempLocation.lng.toFixed(4)}
+            Coordinates: {tempLocation.lat.toFixed(4)},{" "}
+            {tempLocation.lng.toFixed(4)}
           </p>
         </div>
       )}

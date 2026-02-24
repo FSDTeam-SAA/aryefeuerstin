@@ -127,9 +127,13 @@ export default function OrderRequestsPage() {
     setIsMapOpen(true);
   };
 
-  const handleLocationSelect = (location: LocationData) =>
-    setSelectedLocation(location);
-
+  const handleLocationSelect = (location: any) => {
+  setSelectedLocation({
+    address: location.address,
+    lat: location.lat ?? location.latitude,
+    lng: location.lng ?? location.longitude,
+  });
+};
   const handleConfirmRoute = async () => {
     if (!selectedLocation) return;
 

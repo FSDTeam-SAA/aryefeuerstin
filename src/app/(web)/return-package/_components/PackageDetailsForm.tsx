@@ -904,14 +904,14 @@ export function PackageDetailsForm({
             on the outside of each package that corresponds to the package
             number where the barcode was uploaded. For more details, you can
             watch our{" "}
-            <a
+            {/* <a
               href="https://www.youtube.com/watch?v=your-video-id"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#31B8FA] underline hover:text-[#2BA5D6]"
             >
               how-to video here
-            </a>
+            </a> */}
             .
           </label>
         </div>

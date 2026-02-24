@@ -152,7 +152,7 @@ export default function HelpSection() {
             <p className="text-sm md:text-base text-[#424242]">
               We&apos;re here to assist through Phone, Text, WhatsApp, and Email
               <br />
-              <strong>1917-426-6655</strong>
+              <strong>1 917-426-6655</strong>
             </p>
 
             <div className="pt-10 lg:pt-14">
@@ -169,7 +169,7 @@ export default function HelpSection() {
                 >
                   <a href="tel:19174266655">
                     <Phone className="w-4 h-4 mr-2" />
-                    1917-426-6655
+                    1 917-426-6655
                   </a>
                 </Button>
 
@@ -209,7 +209,7 @@ export default function HelpSection() {
                   className="border-[#31B8FA] text-[#31B8FA] hover:bg-[#31B8FA] hover:text-white rounded-full px-6 h-[51px] text-sm bg-transparent"
                 >
                   <MessageCircleMore className="w-4 h-4 mr-2" />
-                  1917-426-6655
+                  1 917-426-6655
                 </Button>
 
               </div>

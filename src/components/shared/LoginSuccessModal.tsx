@@ -17,7 +17,7 @@ export default function LoginSuccessModal() {
 
   // Banner API Call
   const { data, isLoading } = useQuery({
-    queryKey: ["bannerData"],
+    queryKey: ["bannerData", TOKEN],
     queryFn: async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/banner`,
@@ -31,7 +31,7 @@ export default function LoginSuccessModal() {
       if (!res.ok) throw new Error("Failed to fetch banner");
       return res.json();
     },
-    enabled: open,
+    enabled: open && !!TOKEN,
   });
 
   useEffect(() => {
@@ -46,38 +46,39 @@ export default function LoginSuccessModal() {
   const banner = data?.data?.[0];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-5xl bg-white shadow-2xl overflow-hidden flex flex-col md:flex-row">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-3 sm:p-4">
+      <div className="relative w-full max-w-5xl bg-white shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[92dvh] md:max-h-[85dvh]">
+
         {/* Close Button */}
         <button
           onClick={() => setOpen(false)}
-          className="absolute right-4 top-4 z-10 rounded-sm bg-transparent hover:bg-gray-100 p-1 transition-colors"
+          className="absolute right-3 top-3 z-10 rounded-sm bg-white/80 hover:bg-gray-100 p-1 transition-colors"
           aria-label="Close modal"
         >
-          <X size={32} strokeWidth={1.5} className="text-red-600" />
+          <X size={24} strokeWidth={1.5} className="text-red-600" />
         </button>
 
         {/* Left Side - Content */}
-        <div className="w-full md:w-1/2 p-12 md:p-16 flex flex-col justify-center bg-white">
+        <div className="w-full md:w-1/2 px-6 py-8 sm:px-10 sm:py-10 md:p-16 flex flex-col justify-center bg-white overflow-y-auto">
           <div className="max-w-md">
             {isLoading ? (
               <div className="space-y-4">
-                <div className="h-10 md:h-12 w-3/4 bg-gray-200 animate-pulse rounded"></div>
+                <div className="h-8 sm:h-10 md:h-12 w-3/4 bg-gray-200 animate-pulse rounded"></div>
                 <div className="h-4 md:h-5 w-full bg-gray-200 animate-pulse rounded"></div>
                 <div className="h-4 md:h-5 w-5/6 bg-gray-200 animate-pulse rounded"></div>
               </div>
             ) : (
               <>
-                <h1 className="text-5xl md:text-6xl font-serif mb-8 text-gray-900 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif mb-4 sm:mb-6 md:mb-8 text-gray-900 tracking-tight leading-tight">
                   {banner?.title}
                 </h1>
 
-                <p className="text-base md:text-lg text-gray-700 mb-2 leading-relaxed">
+                <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-2 leading-relaxed">
                   {banner?.description ||
                     "Thank you for signing in. Stay tuned for exclusive offers and"}
                 </p>
-                <p className="text-base md:text-lg text-gray-700 mb-1 leading-relaxed">
-                  {banner?.additionalInfo }
+                <p className="text-sm sm:text-base md:text-lg text-gray-700 mb-1 leading-relaxed">
+                  {banner?.additionalInfo}
                 </p>
               </>
             )}
@@ -85,7 +86,8 @@ export default function LoginSuccessModal() {
         </div>
 
         {/* Right Side - Image */}
-        <div className="w-full md:w-1/2 h-64 md:h-auto relative bg-gray-200">
+        {/* On mobile: fixed height; on md+: fills the flex container height */}
+        <div className="w-full md:w-1/2 h-52 sm:h-64 md:h-auto relative bg-gray-200 flex-shrink-0">
           {isLoading ? (
             <div className="w-full h-full bg-gray-200 animate-pulse"></div>
           ) : banner?.media ? (

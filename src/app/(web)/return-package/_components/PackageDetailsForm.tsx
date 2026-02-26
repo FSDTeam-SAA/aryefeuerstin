@@ -268,13 +268,39 @@ export function PackageDetailsForm({
   return (
     <form
       onSubmit={handleSubmit((data) => {
-        if (!agreed) {
-          // optional: alert বা toast দেখাতে পারো, কিন্তু button disable থাকলে এটা আসবে না
-          toast.warning("Please agree to the terms before submitting");
-          return;
-        }
-        onSubmitAndProceed({ ...data, stores, physicalReturnLabelFiles });
-      })}
+  if (!agreed) {
+    toast.warning("Please agree to the terms before submitting");
+    return;
+  }
+
+  // ✅ Validate returnStore for each store
+  for (let i = 0; i < stores.length; i++) {
+    if (!stores[i].returnStore) {
+      toast.error(
+        `Please select a return store for ${i === 0 ? "Store" : `Additional Store #${i + 1}`}`
+      );
+      // Collapse open করে দাও যাতে user দেখতে পায়
+      setOpenSections((prev) =>
+        prev.includes(`store-${i}`) ? prev : [...prev, `store-${i}`]
+      );
+      return;
+    }
+    if (
+      stores[i].returnStore === "OTHER" &&
+      !stores[i].otherStoreName?.trim()
+    ) {
+      toast.error(
+        `Please specify the store name for ${i === 0 ? "Store" : `Additional Store #${i + 1}`}`
+      );
+      setOpenSections((prev) =>
+        prev.includes(`store-${i}`) ? prev : [...prev, `store-${i}`]
+      );
+      return;
+    }
+  }
+
+  onSubmitAndProceed({ ...data, stores, physicalReturnLabelFiles });
+})}
       className="space-y-6"
     >
       <div className="mb-6">
@@ -331,6 +357,7 @@ export function PackageDetailsForm({
               <div className="p-3">
                 <Label>Return Store</Label>
                 <Select
+                  required
                   value={store.returnStore}
                   onValueChange={(value) => {
                     updateStoreData(storeIndex, "returnStore", value);
@@ -902,8 +929,7 @@ export function PackageDetailsForm({
             I agree that I have selected the correct pickup address/drop-off
             location, uploaded the necessary barcodes, and will write the number
             on the outside of each package that corresponds to the package
-            number where the barcode was uploaded. For more details, you can
-            watch our{" "}
+            number where the barcode was uploaded.
             {/* <a
               href="https://www.youtube.com/watch?v=your-video-id"
               target="_blank"
@@ -912,7 +938,6 @@ export function PackageDetailsForm({
             >
               how-to video here
             </a> */}
-            .
           </label>
         </div>
 

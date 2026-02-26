@@ -770,6 +770,7 @@ export function SummaryReview({
       {/* Additional Options */}
       <div className="border rounded-lg p-6 bg-[#F8FAFC]">
         <h3 className="text-lg font-bold mb-4">Additional Options</h3>
+
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <li>
             <b>Rush Service:</b>{" "}
@@ -807,7 +808,7 @@ export function SummaryReview({
                   </span>
                 ) : (
                   <span className="text-amber-700">
-                    (+${options.physicalReceipt.fee || 8}) - Last 4:{" "}
+                    (+${options.physicalReceipt.fee || 8}) - Last 4 digits:{" "}
                     {options.physicalReceipt.creditCardLast4 || "N/A"}
                   </span>
                 )}

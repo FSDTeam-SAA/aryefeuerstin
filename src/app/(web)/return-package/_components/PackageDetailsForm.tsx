@@ -4,7 +4,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,6 +127,9 @@ export function PackageDetailsForm({
   const session = useSession();
   const TOKEN = session?.data?.accessToken || "";
   const [agreed, setAgreed] = useState(false);
+
+
+  const storeRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const {
     data: userData,
@@ -273,28 +276,67 @@ export function PackageDetailsForm({
     return;
   }
 
-  // ✅ Validate returnStore for each store
+  // এখান থেকে শুরু
   for (let i = 0; i < stores.length; i++) {
     if (!stores[i].returnStore) {
       toast.error(
-        `Please select a return store for ${i === 0 ? "Store" : `Additional Store #${i + 1}`}`
+        `Please select a return store for ${
+          i === 0 ? "Store" : `Additional Store #${i + 1}`
+        }`
       );
-      // Collapse open করে দাও যাতে user দেখতে পায়
-      setOpenSections((prev) =>
-        prev.includes(`store-${i}`) ? prev : [...prev, `store-${i}`]
-      );
+
+      // স্ক্রল করা
+      const targetElement = storeRefs.current[i];
+      if (targetElement) {
+        // প্রথমে section খুলে দাও (যাতে element visible হয়)
+        setOpenSections((prev) =>
+          prev.includes(`store-${i}`) ? prev : [...prev, `store-${i}`]
+        );
+
+        // একটু পর স্ক্রল (Collapsible খোলার animation শেষ হওয়ার জন্য)
+        setTimeout(() => {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",     // মাঝখানে আনতে পারো, অথবা "start"
+          });
+
+          // অথবা যদি header আছে এবং ১০০–১২০px উপরে চাও
+          // setTimeout(() => {
+          //   window.scrollBy({ top: -110, behavior: "smooth" });
+          // }, 300);
+
+        }, 150); // 100–300ms → collapsible animation এর উপর নির্ভর করে
+      }
+
       return;
     }
+
+    // other store name check
     if (
       stores[i].returnStore === "OTHER" &&
       !stores[i].otherStoreName?.trim()
     ) {
       toast.error(
-        `Please specify the store name for ${i === 0 ? "Store" : `Additional Store #${i + 1}`}`
+        `Please specify the store name for ${
+          i === 0 ? "Store" : `Additional Store #${i + 1}`
+        }`
       );
+
       setOpenSections((prev) =>
         prev.includes(`store-${i}`) ? prev : [...prev, `store-${i}`]
       );
+
+      // একইভাবে scroll (যদি other input এ scroll করতে চাও তাহলে অন্য ref ব্যবহার করতে পারো)
+      const targetElement = storeRefs.current[i];
+      if (targetElement) {
+        setTimeout(() => {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 150);
+      }
+
       return;
     }
   }
@@ -354,7 +396,7 @@ export function PackageDetailsForm({
             </CollapsibleTrigger>
 
             <CollapsibleContent className="pt-4 space-y-6">
-              <div className="p-3">
+              <div ref={(el) => { storeRefs.current[storeIndex] = el; }} className="p-3">
                 <Label>Return Store</Label>
                 <Select
                   required

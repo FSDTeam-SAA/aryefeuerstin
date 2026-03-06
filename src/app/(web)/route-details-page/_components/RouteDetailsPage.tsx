@@ -30,6 +30,7 @@ interface PickupPoint {
   orderIndex: number;
   id: string;
   status?: string;
+  planTitle: string;
   rushService?: {
     enabled: boolean;
   };
@@ -432,6 +433,7 @@ export default function RouteDetailsPage() {
                         ? "bg-[#F59E0B]"
                         : "bg-[#EF4444]";
                   const isRush = pickup.rushService?.enabled === true;
+                  const plan = pickup.planTitle;
                   return (
                     <div key={pickup.orderIndex}>
                       <div className="p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-[#31B8FA] transition-colors">
@@ -453,21 +455,38 @@ export default function RouteDetailsPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             {/* Customer Name + Rush Badge একই লাইনে */}
-              <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {pickup.customer}
-                  </p>
-                </div>
+                            <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                  {pickup.customer}
+                                </p>
+                              </div>
 
-                {/* Rush Service badge – customer name এর পাশে */}
-                {isRush && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300">
-                    <span className="mr-1">⚡</span>Rush Service
-                  </span>
-                )}
-              </div>
+                              {/* Rush Service badge – customer name এর পাশে */}
+                              {isRush && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300">
+                                  <span className="mr-1">⚡</span>Rush Service
+                                </span>
+                              )}
+
+                              {plan && (
+                                <span
+                                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border
+    ${
+      plan === "STANDARD PACKAGE"
+        ? "bg-blue-100 text-blue-800 border-blue-300"
+        : plan === "PAY-PER-PICKUP"
+          ? "bg-green-100 text-green-800 border-green-300"
+          : plan === "PREMIUM PACKAGE"
+            ? "bg-purple-100 text-purple-800 border-purple-300"
+            : "bg-gray-100 text-gray-800 border-gray-300"
+    }`}
+                                >
+                                  {plan}
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-start gap-2 mb-2">
                               <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
                               <p className="text-xs text-gray-600">

@@ -13,7 +13,6 @@ import {
   CheckCircle,
   FileText,
   MessageSquare,
-  CreditCard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -527,70 +526,7 @@ export default function JobDetailsPage() {
                   )}
 
                   {/* Right Column: Pickup Instructions & Message & Credit Card */}
-                  <div className="space-y-5">
-                    {pickupInstructions && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <FileText className="h-4 w-4 text-gray-400" />
-                          <span className="text-xs font-bold uppercase text-gray-500">
-                            Pickup Instructions
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-700 bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-                          {pickupInstructions}
-                        </p>
-                      </div>
-                    )}
-
-                    {customerMessage && (
-                      <div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <MessageSquare className="h-4 w-4 text-gray-400" />
-                          <span className="text-xs font-bold uppercase text-gray-500">
-                            Customer Message
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-700 bg-blue-50 px-4 py-3 rounded-lg border border-blue-200">
-                          {customerMessage}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* এখানে নতুন যোগ করা */}
-                    {orderData?.options?.physicalReceipt?.enabled &&
-                      orderData.options.physicalReceipt.creditCardLast4 && (
-                        <div className="mt-5">
-                          <div className="flex items-center gap-3 text-sm">
-                            <CreditCard className="h-4 w-4 text-gray-500" />
-                            <span className="text-gray-600 font-medium">
-                              Card Last 4 Digits
-                            </span>
-                          </div>
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200">
-                            <span className="text-base tracking-wider">
-                              •••• •••• ••••
-                            </span>
-                            <span className="text-emerald-800">
-                              {
-                                orderData.options.physicalReceipt
-                                  .creditCardLast4
-                              }
-                            </span>
-                          </div>
-                          <p className="mt-1.5 text-xs text-gray-500 italic">
-                            Used for physical receipt verification
-                          </p>
-                        </div>
-                      )}
-
-                    {!pickupInstructions &&
-                      !customerMessage &&
-                      !orderData?.options?.physicalReceipt?.enabled && (
-                        <p className="text-sm text-gray-400 italic">
-                          No additional instructions or messages.
-                        </p>
-                      )}
-                  </div>
+                  
 
                   {!pickupInstructions && !customerMessage && (
                     <p className="text-sm text-gray-400 italic">

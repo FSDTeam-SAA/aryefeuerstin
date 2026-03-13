@@ -888,7 +888,7 @@ export function PackageDetailsForm({
                 />
 
                 <p className="text-xs text-red-600 font-medium">
-                  * Returns requiring physical receipt must be purchased with a
+                  * Retail store returns requiring physical receipt must be purchased with a
                   credit card
                 </p>
               </div>

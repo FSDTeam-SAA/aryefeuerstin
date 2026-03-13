@@ -1,6 +1,5 @@
-
 import { type AuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials"
+import CredentialsProvider from "next-auth/providers/credentials";
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -13,7 +12,7 @@ export const authOptions: AuthOptions = {
 
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          return null
+          return null;
         }
 
         try {
@@ -26,17 +25,17 @@ export const authOptions: AuthOptions = {
                 email: credentials.email,
                 password: credentials.password,
               }),
-            }
-          )
+            },
+          );
 
-          const result = await res.json()
+          const result = await res.json();
 
           //  login failed
           if (!res.ok || !result?.status || !result?.data?.user) {
-            return null
+            return null;
           }
 
-          const user = result.data.user
+          const user = result.data.user;
 
           // ✅ MUST return a flat object
           return {
@@ -47,10 +46,10 @@ export const authOptions: AuthOptions = {
             lastName: user.lastName,
             profileImage: user.profileImage,
             accessToken: result.data.accessToken,
-          }
+          };
         } catch (error) {
-          console.error("LOGIN ERROR:", error)
-          return null
+          console.error("LOGIN ERROR:", error);
+          return null;
         }
       },
     }),
@@ -59,15 +58,15 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.userId = user.id
-        token.email = user.email
-        token.role = user.role
-        token.firstName = user.firstName
-        token.lastName = user.lastName
-        token.profileImage = user.profileImage
-        token.accessToken = user.accessToken
+        token.userId = user.id;
+        token.email = user.email;
+        token.role = user.role;
+        token.firstName = user.firstName;
+        token.lastName = user.lastName;
+        token.profileImage = user.profileImage;
+        token.accessToken = user.accessToken;
       }
-      return token
+      return token;
     },
 
     async session({ session, token }) {
@@ -78,15 +77,16 @@ export const authOptions: AuthOptions = {
         firstName: token.firstName as string,
         lastName: token.lastName as string,
         profileImage: token.profileImage as string,
-      }
+      };
 
-      session.accessToken = token.accessToken as string
-      return session
+      session.accessToken = token.accessToken as string;
+      return session;
     },
   },
 
   session: {
     strategy: "jwt",
+    maxAge: 90 * 24 * 60 * 60, // 3 months
   },
 
   pages: {
@@ -94,4 +94,4 @@ export const authOptions: AuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-}
+};

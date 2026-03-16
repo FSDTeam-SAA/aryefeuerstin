@@ -229,92 +229,111 @@ export default function JobDetailsPage() {
     setActivePkg(targetPkg);
 
     // Ensure image is fully loaded before generating PDF
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    setTimeout(async () => {
+      try {
+        const element = pdfTemplateRef.current;
+        if (!element) {
+          toast.error("Template error", { id: toastId });
+          setIsGenerating(false);
+          return;
+        }
 
-    try {
-      const element = pdfTemplateRef.current;
-      if (!element) {
-        toast.error("Template error", { id: toastId });
-        setIsGenerating(false);
-        return;
-      }
+        // Wait for image to load
+        const img = element.querySelector("img");
+        if (img && !img.complete) {
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+          });
+        }
 
-      // Wait for image to load
-      const img = element.querySelector("img") as HTMLImageElement | null;
-      if (img && !img.complete) {
-        await new Promise((resolve) => {
-          img.onload = resolve;
-          img.onerror = resolve;
+        // Additional small delay to ensure rendering
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        const canvas = await html2canvas(element, {
+          scale: 5, // High resolution for sharp barcodes
+          useCORS: true,
+          allowTaint: false,
+          backgroundColor: "#ffffff",
+          logging: false,
+          imageTimeout: 20000, // Increased timeout
+          removeContainer: true,
         });
-      }
 
-      const canvas = await html2canvas(element, {
-        scale: 3.7795, // ≈96dpi → good for most thermal printers
-        useCORS: true,
-        allowTaint: false,
-        backgroundColor: "#ffffff",
-        logging: false,
-        windowWidth: element.offsetWidth,
-        windowHeight: element.offsetHeight,
-      });
+        const imgData = canvas.toDataURL("image/jpeg", 0.95); // JPEG for smaller size + great quality
 
-      const imgData = canvas.toDataURL("image/jpeg", 0.92);
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "mm",
+          format: [100, 150], // 4" x 6" label size (perfect for thermal printers)
+          compress: true, // Enable compression
+        });
 
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: [101.6, 152.4], // ← Real 4×6 inches in mm
-        compress: true,
-      });
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+        // Calculate scaling to fit perfectly
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(
+          pdfWidth / (imgWidth / 5),
+          pdfHeight / (imgHeight / 5),
+        );
+        const finalWidth = (imgWidth / 5) * ratio;
+        const finalHeight = (imgHeight / 5) * ratio;
 
-      pdf.addImage(
-        imgData,
-        "JPEG",
-        0,
-        0,
-        pdfWidth,
-        pdfHeight,
-        undefined,
-        "FAST",
-      );
+        pdf.addImage(
+          imgData,
+          "JPEG",
+          (pdfWidth - finalWidth) / 2,
+          (pdfHeight - finalHeight) / 2,
+          finalWidth,
+          finalHeight,
+          undefined,
+          "FAST", // Fast compression = smaller file
+        );
 
-      const blob = pdf.output("blob");
-      const url = URL.createObjectURL(blob);
+        // Generate blob
+        const blob = pdf.output("blob");
+        const url = URL.createObjectURL(blob);
 
-      const printWindow = window.open(url, "_blank");
+        // Mobile & PC: Try to open print dialog
+        const printWindow = window.open(url, "_blank");
 
-      if (printWindow) {
-        printWindow.onload = () => {
+        if (printWindow) {
+          printWindow.onload = () => {
+            setTimeout(() => {
+              printWindow.focus();
+              printWindow.print();
+            }, 800);
+          };
+
+          // Fallback for mobile
           setTimeout(() => {
-            printWindow.focus();
-            printWindow.print();
-          }, 700);
-        };
+            if (!printWindow.closed) {
+              printWindow.focus();
+              printWindow.print();
+            }
+          }, 2000);
 
-        setTimeout(() => {
-          if (!printWindow.closed) {
-            printWindow.focus();
-            printWindow.print();
-          }
-        }, 1800);
+          toast.success("Print ready! Use system print dialog.", {
+            id: toastId,
+          });
+        } else {
+          // If popup blocked → direct download
+          pdf.save(`Label_${targetPkg.id.replace(/\s+/g, "_")}.pdf`);
+          toast.success("PDF downloaded – open and print", { id: toastId });
+        }
 
-        toast.success("Print ready! Use system print dialog.", {
-          id: toastId,
-        });
-      } else {
-        pdf.save(`Label_${targetPkg.id.replace(/\s+/g, "_")}.pdf`);
-        toast.success("PDF downloaded – open and print", { id: toastId });
+        toast.success("Ready to print", { id: toastId });
+      } catch (err) {
+        console.error("PDF Generation Error:", err);
+        toast.error("Failed to generate label", { id: toastId });
+      } finally {
+        setIsGenerating(false);
+        setActivePkg(null);
       }
-    } catch (err) {
-      console.error("PDF Generation Error:", err);
-      toast.error("Failed to generate label", { id: toastId });
-    } finally {
-      setIsGenerating(false);
-      setActivePkg(null);
-    }
+    }, 1500); // Increased delay for image loading
   };
 
   const handleStatusUpdate = () => {
@@ -362,7 +381,7 @@ export default function JobDetailsPage() {
 
   return (
     <>
-      {/* HIDDEN PDF TEMPLATE - OPTIMIZED FOR 4×6 THERMAL PRINTERS */}
+      {/* HIDDEN PDF TEMPLATE - OPTIMIZED FOR THERMAL PRINTERS */}
       <div
         style={{
           position: "absolute",
@@ -374,13 +393,9 @@ export default function JobDetailsPage() {
         <div
           ref={pdfTemplateRef}
           className="bg-white"
-          style={{
-            width: "1219px", // 4" × ~305dpi
-            height: "1829px", // 6" × ~305dpi
-            padding: "70px 50px",
-          }}
+          style={{ width: "1000px", padding: "60px 40px" }}
         >
-          <div className="border-2 border-black flex flex-col items-center justify-between h-full py-12">
+          <div className="border-2 border-black flex flex-col items-center justify-between h-full min-h-[1500px] py-12">
             {/* Header */}
             <div className="text-center">
               <h1 className="text-7xl font-black uppercase tracking-wider text-gray-900">
@@ -401,8 +416,8 @@ export default function JobDetailsPage() {
                   src={activePkg.barcodeImage}
                   crossOrigin="anonymous"
                   alt="Barcode"
-                  width={2000}
-                  height={1200}
+                  width={1800}
+                  height={1000}
                   className="max-w-full max-h-full object-contain"
                   unoptimized
                   priority
@@ -458,13 +473,7 @@ export default function JobDetailsPage() {
                     <div className="flex items-start gap-3">
                       <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gray-400" />
                       <span className="text-sm leading-relaxed text-gray-600">
-                        {customer?.address
-                          ? `${customer.address.street}${
-                              customer.unit ? `, Unit ${customer.unit}` : ""
-                            }, ${customer.address.city}, ${
-                              customer.address.state
-                            }, ${customer.address.zipCode}`
-                          : "N/A"}
+                        {address}
                       </span>
                     </div>
                     <button
@@ -594,14 +603,14 @@ export default function JobDetailsPage() {
                   </div>
                 </Card>
               ) : (
-                <Card className="p-6 bg-gray-50">
-                  <div className="relative h-48 w-full flex justify-center">
+                <Card className="p-4 sm:p-6 bg-gray-50">
+                  <div className="flex justify-center">
                     <Image
                       src={returnLabelImage!}
                       alt="Return Label"
                       width={10000}
                       height={10000}
-                      className="h-full object-contain rounded-lg shadow-sm bg-white"
+                      className="w-full max-w-3xl h-auto object-contain rounded-lg shadow-sm bg-white"
                     />
                   </div>
                 </Card>
@@ -653,24 +662,26 @@ export default function JobDetailsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-6 border-t border-gray-50 pt-4 sm:border-none sm:pt-0">
+                  <div className="flex w-full items-center justify-center sm:w-auto sm:justify-end gap-4 border-t border-gray-50 pt-4 sm:border-none sm:pt-0">
                     <button
                       onClick={() => handlePrintAsPDF(pkg)}
                       disabled={isGenerating || !pkg.barcodeImage}
-                      className="group flex flex-col items-center gap-2 rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-sky-400 hover:shadow-sm active:scale-95 disabled:opacity-50"
+                      className="group flex w-full flex-col items-center gap-3 rounded-xl border border-gray-100 bg-white p-3 transition-all hover:border-sky-400 hover:shadow-sm active:scale-95 disabled:opacity-50 sm:w-auto"
                     >
                       {pkg.barcodeImage ? (
-                        <Image
-                          src={pkg.barcodeImage}
-                          crossOrigin="anonymous"
-                          width={100}
-                          height={100}
-                          alt={`Barcode ${pkg.id}`}
-                          className="h-16 w-auto object-contain"
-                          unoptimized
-                        />
+                        <div className="w-full max-w-[320px] rounded-lg bg-gray-50 p-2 sm:w-56 sm:bg-transparent sm:p-0">
+                          <Image
+                            src={pkg.barcodeImage}
+                            crossOrigin="anonymous"
+                            width={100}
+                            height={100}
+                            alt={`Barcode ${pkg.id}`}
+                            className="h-20 w-full object-contain sm:h-16"
+                            unoptimized
+                          />
+                        </div>
                       ) : (
-                        <div className="h-16 w-56 bg-gray-200 border-2 border-dashed rounded flex items-center justify-center">
+                        <div className="h-20 w-full max-w-[320px] bg-gray-200 border-2 border-dashed rounded flex items-center justify-center sm:h-16 sm:w-56">
                           <span className="text-xs text-gray-500">
                             No barcode
                           </span>

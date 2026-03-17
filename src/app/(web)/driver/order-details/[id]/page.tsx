@@ -180,14 +180,17 @@ export default function JobDetailsPage() {
   const customer = orderData?.customer;
   const fullName = `${customer?.fullName || ""}`.trim() || "N/A";
   const address =
-    customer?.pickupLocation?.address ??
-    (customer?.address
-      ? `${customer.address.street}${
-          customer.unit ? `, Unit ${customer.unit}` : ""
-        }, ${customer.address.city}, ${customer.address.state}, ${
-          customer.address.zipCode
-        }`
-      : "N/A");
+  customer?.pickupLocation?.address
+    ? `${customer.pickupLocation.address}${
+        customer.unit ? `,  ${customer.unit}` : ""
+      }`
+    : customer?.address
+    ? `${customer.address.street}${
+        customer.unit ? `, Unit ${customer.unit}` : ""
+      }, ${customer.address.city}, ${customer.address.state}, ${
+        customer.address.zipCode
+      }`
+    : "N/A";
   const orderStatus = orderData?.status ?? "PENDING";
 
   const pickupInstructions = customer?.pickupInstructions?.trim();

@@ -148,23 +148,27 @@ interface ReviewItem {
   status: string;
 }
 
-interface ApiResponse {
-  status: boolean;
-  message: string;
-  data: {
-    data: ReviewItem[];
-    pagination: {
-      currentPage: number;
-      totalPages: number;
-      totalData: number;
-      hasNextPage: boolean;
-      hasPrevPage: boolean;
-    };
+interface ReviewsPayload {
+  avgRating?: number;
+  ratingCount?: number;
+  data: ReviewItem[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalData: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
   };
 }
 
+interface ApiResponse {
+  status: boolean;
+  message: string;
+  data: ReviewsPayload;
+}
+
 // ================= FETCH FUNCTION =================
-const fetchReviews = async (): Promise<ReviewItem[]> => {
+const fetchReviews = async (): Promise<ReviewsPayload> => {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   if (!baseUrl) {
@@ -185,36 +189,27 @@ const fetchReviews = async (): Promise<ReviewItem[]> => {
     throw new Error(result.message || "Failed to load reviews");
   }
 
-  return result.data.data;
+  return result.data;
 };
 
 // ================= COMPONENT =================
 export default function TestimonialsSection() {
   const {
-    data: testimonials = [],
+    data: reviewsPayload,
     isLoading,
     isError,
-  } = useQuery<ReviewItem[]>({
+  } = useQuery<ReviewsPayload>({
     queryKey: ["reviews"],
     queryFn: fetchReviews,
   });
 
   // ================= STATS =================
-  const totalReviews = testimonials.length;
+  const testimonials = reviewsPayload?.data ?? [];
+  const avgRating = reviewsPayload?.avgRating ?? 0;
+  const ratingCount = reviewsPayload?.ratingCount ?? testimonials.length;
 
-  const averageRating =
-    totalReviews > 0
-      ? testimonials.reduce((sum, t) => sum + t.review.rating, 0) / totalReviews
-      : 0;
 
-  const fiveStarCount = testimonials.filter(
-    (t) => t.review.rating === 5
-  ).length;
 
-  const recommendPercentage =
-    totalReviews > 0
-      ? Math.round((fiveStarCount / totalReviews) * 100)
-      : 0;
 
   return (
     <section className="bg-[#E5F7FF] py-12 sm:py-16 lg:py-20 mt-20">
@@ -323,13 +318,13 @@ export default function TestimonialsSection() {
         <div className="bg-white rounded-lg px-6 py-5 max-w-6xl mx-auto border">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div>
-              <p className="text-2xl font-semibold">1000+</p>
+              <p className="text-2xl font-semibold">{ratingCount}+</p>
               <p className="text-sm text-gray-600">Happy Customers</p>
             </div>
 
             <div>
               <p className="text-2xl font-semibold flex justify-center gap-1">
-                {averageRating.toFixed(1)}
+                {Number.isFinite(avgRating) ? avgRating.toFixed(1) : "0.0"}
                 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
               </p>
               <p className="text-sm text-gray-600">Average Rating</p>
@@ -337,7 +332,7 @@ export default function TestimonialsSection() {
 
             <div>
               <p className="text-2xl font-semibold">
-                {recommendPercentage}%
+                {"100"}%
               </p>
               <p className="text-sm text-gray-600">Would Recommend</p>
             </div>

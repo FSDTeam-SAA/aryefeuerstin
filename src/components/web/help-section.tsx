@@ -133,7 +133,7 @@ export default function HelpSection() {
           <div className="lg:col-span-5 flex justify-center lg:justify-start">
             <div className="relative w-full max-w-[520px] h-[320px] md:h-[420px] lg:h-[520px]">
               <Image
-                src="/image/man2.png"
+                src="/image/ChatGPT Image Mar 18, 2026, 10_18_52 AM.png"
                 alt="Help illustration"
                 width={1000}
                 height={1000}

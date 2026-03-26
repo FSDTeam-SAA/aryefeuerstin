@@ -14,6 +14,9 @@ export default function OurMission() {
             Our Mission
           </h2>
 
+
+
+
           <p className="text-pretty text-base leading-relaxed text-[#616263] sm:text-[22px]">
             Our mission is to provide a smooth, reliable, and cost-effective return service that saves our customers time, eliminates stress, and ensures no one loses money on missed deadlines again. We pick up your packages, handle the return process, and make everything as effortless as possible.
           </p>

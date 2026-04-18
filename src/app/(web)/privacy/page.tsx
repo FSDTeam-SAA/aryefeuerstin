@@ -238,6 +238,9 @@ export default function PrivacyPage() {
             </ul>
           </section>
 
+
+          
+
           {/* 2. How We Use Your Information */}
           <section>
             <h2 className="mb-3 text-xl font-semibold text-[#131313] sm:text-2xl">2. How We Use Your Information</h2>
@@ -369,7 +372,7 @@ export default function PrivacyPage() {
               under 18. If such data is discovered, it will be promptly deleted.
             </p>
 
-            
+
           </section>
 
 

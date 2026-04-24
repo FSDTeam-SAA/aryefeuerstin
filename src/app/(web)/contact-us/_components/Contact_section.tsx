@@ -1,21 +1,20 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Mail, Phone, MessageCircle, Send, Loader2 } from "lucide-react"
-import { useMutation } from "@tanstack/react-query"
-import { toast } from "sonner"
-
+import type React from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Mail, Phone, MessageCircle, Send, Loader2 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface ContactData {
-  name: string
-  phone: string
-  email: string
-  message: string
-  consent: boolean
+  name: string;
+  phone: string;
+  email: string;
+  message: string;
+  consent: boolean;
 }
 
 export default function ContactSection() {
@@ -24,42 +23,49 @@ export default function ContactSection() {
     phoneNumber: "",
     email: "",
     message: "",
-  })
-  const [consent, setConsent] = useState(false)
+  });
+  const [consent, setConsent] = useState(false);
 
   // TanStack Query Mutation
   const { mutate, isPending } = useMutation({
     mutationFn: async (newData: ContactData) => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/contact`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newData),
-      })
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/contact`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newData),
+        },
+      );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Something went wrong while sending the message.")
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message ||
+            "Something went wrong while sending the message.",
+        );
       }
-      return response.json()
+      return response.json();
     },
     onSuccess: () => {
       toast.success("Message Sent Successfully", {
-        description: "Thank you for reaching out. We will get back to you soon!",
-      })
+        description:
+          "Thank you for reaching out. We will get back to you soon!",
+      });
       // Reset form on success
-      setFormData({ fullName: "", phoneNumber: "", email: "", message: "" })
-      setConsent(false)
+      setFormData({ fullName: "", phoneNumber: "", email: "", message: "" });
+      setConsent(false);
     },
     onError: (error: Error) => {
       toast.error("Submission Error", {
         description: error.message,
-      })
+      });
     },
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     // Trigger mutation with mapped data
     mutate({
       name: formData.fullName,
@@ -67,14 +73,13 @@ export default function ContactSection() {
       phone: formData.phoneNumber,
       message: formData.message,
       consent: consent,
-    })
-  }
+    });
+  };
 
   return (
     <section className="py-12 md:py-16 lg:py-20 px-4 md:px-6 lg:px-8 bg-background">
       <div className="container mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-start">
-
           {/* LEFT SIDE */}
           <div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 gap-y-10">
@@ -84,8 +89,12 @@ export default function ContactSection() {
                   <Mail className="w-5 h-5 text-[#131313]" />
                 </div>
                 <div>
-                  <h3 className="font-normal text-lg text-[#131313]">Email Address</h3>
-                  <p className="text-base text-[#616161] break-all">ezreturn123@gmail.com</p>
+                  <h3 className="font-normal text-lg text-[#131313]">
+                    Email Address
+                  </h3>
+                  <p className="text-base text-[#616161] break-all">
+                    ezreturn123@gmail.com
+                  </p>
                 </div>
               </div>
 
@@ -95,7 +104,9 @@ export default function ContactSection() {
                   <Phone className="w-5 h-5 text-[#131313]" />
                 </div>
                 <div>
-                  <h3 className="font-normal text-lg text-[#131313]">Phone Number</h3>
+                  <h3 className="font-normal text-lg text-[#131313]">
+                    Phone Number
+                  </h3>
                   <p className="text-base text-[#616161]">1 917-426-6655</p>
                 </div>
               </div>
@@ -106,7 +117,9 @@ export default function ContactSection() {
                   <MessageCircle className="w-5 h-5 text-[#131313]" />
                 </div>
                 <div>
-                  <h3 className="font-normal text-lg text-[#131313]">WhatsApp</h3>
+                  <h3 className="font-normal text-lg text-[#131313]">
+                    WhatsApp
+                  </h3>
                   <p className="text-base text-[#616161]">1 917-426-6655</p>
                 </div>
               </div>
@@ -115,7 +128,15 @@ export default function ContactSection() {
             {/* Description Box */}
             <div className="bg-[#F8F8F8] p-6 rounded-[8px] mt-[100px]">
               <p className="text-[#616161] text-base leading-relaxed">
-                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&apos;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+                EzReturn.pro is a reliable and efficient return delivery service
+                designed to make product returns simple and hassle-free. We help
+                businesses and customers manage returns with ease by providing
+                fast pickups, secure handling, and real-time updates throughout
+                the process. Whether you are returning a product or managing
+                multiple return requests, EzReturn.pro ensures a smooth and
+                transparent experience from start to finish. Our goal is to save
+                your time, reduce complexity, and provide a stress-free return
+                solution you can trust.
               </p>
             </div>
           </div>
@@ -127,7 +148,6 @@ export default function ContactSection() {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-
               {/* Name + Phone */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -137,7 +157,9 @@ export default function ContactSection() {
                   <Input
                     placeholder="Enter your name"
                     value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, fullName: e.target.value })
+                    }
                     className="bg-white h-[48px] rounded-[8px] text-[#131313] placeholder:text-[#929292] border-none"
                     required
                     disabled={isPending}
@@ -151,7 +173,9 @@ export default function ContactSection() {
                   <Input
                     placeholder="Enter phone number"
                     value={formData.phoneNumber}
-                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phoneNumber: e.target.value })
+                    }
                     className="bg-white h-[48px] rounded-[8px] text-[#131313] placeholder:text-[#929292] border-none"
                     required
                     disabled={isPending}
@@ -168,7 +192,9 @@ export default function ContactSection() {
                   type="email"
                   placeholder="Enter email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="bg-white h-[48px] rounded-[8px] text-[#131313] placeholder:text-[#929292] border-none"
                   required
                   disabled={isPending}
@@ -183,7 +209,9 @@ export default function ContactSection() {
                 <Textarea
                   placeholder="Tell us how we can help you"
                   value={formData.message}
-                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, message: e.target.value })
+                  }
                   className="bg-white rounded-[8px] text-[#131313] placeholder:text-[#929292] border-none resize-none"
                   rows={5}
                   disabled={isPending}
@@ -201,21 +229,31 @@ export default function ContactSection() {
                   className="mt-1 w-4 h-4 shrink-0 accent-[#31B8FA] cursor-pointer"
                   required
                 />
-                <label htmlFor="consent" className="text-sm text-[#616161] leading-relaxed cursor-pointer">
-                  By checking this box, you are agreeing to receive text messages from (Brand name) related to (types of messages). Message frequency varies. Message and data rates may apply. See{" "}
-                  <a href="/privacy-policy" className="text-[#31B8FA] underline hover:text-[#28a7e4]">
+                <label
+                  htmlFor="consent"
+                  className="text-sm text-[#616161] leading-relaxed cursor-pointer"
+                >
+                  By checking this box, you are agreeing to receive text
+                  messages from ( EzReturn ) related to (service updates).
+                  Message frequency varies. Message and data rates may apply.
+                  See{" "}
+                  <a
+                    href="/privacy"
+                    className="text-[#31B8FA] underline hover:text-[#28a7e4]"
+                  >
                     privacy policy
                   </a>{" "}
                   and{" "}
-                  <a href="/terms-and-conditions" className="text-[#31B8FA] underline hover:text-[#28a7e4]">
+                  <a
+                    href="/terms-condition"
+                    className="text-[#31B8FA] underline hover:text-[#28a7e4]"
+                  >
                     terms and conditions
                   </a>
-                  . Message HELP for assistance. Reply STOP to any message to opt out.
+                  . Message HELP for assistance. Reply STOP to any message to
+                  opt out.
                 </label>
               </div>
-
-
-              
 
               {/* Submit Button */}
               <Button
@@ -237,9 +275,8 @@ export default function ContactSection() {
               </Button>
             </form>
           </div>
-
         </div>
       </div>
     </section>
-  )
+  );
 }

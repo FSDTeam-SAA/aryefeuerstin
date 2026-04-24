@@ -1,4 +1,3 @@
-
 "use client"
 
 import type React from "react"
@@ -26,6 +25,7 @@ export default function ContactSection() {
     email: "",
     message: "",
   })
+  const [consent, setConsent] = useState(false)
 
   // TanStack Query Mutation
   const { mutate, isPending } = useMutation({
@@ -48,6 +48,7 @@ export default function ContactSection() {
       })
       // Reset form on success
       setFormData({ fullName: "", phoneNumber: "", email: "", message: "" })
+      setConsent(false)
     },
     onError: (error: Error) => {
       toast.error("Submission Error", {
@@ -65,7 +66,7 @@ export default function ContactSection() {
       email: formData.email,
       phone: formData.phoneNumber,
       message: formData.message,
-      consent: true,
+      consent: consent,
     })
   }
 
@@ -189,11 +190,38 @@ export default function ContactSection() {
                 />
               </div>
 
+              {/* Consent Checkbox */}
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="consent"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  disabled={isPending}
+                  className="mt-1 w-4 h-4 shrink-0 accent-[#31B8FA] cursor-pointer"
+                  required
+                />
+                <label htmlFor="consent" className="text-sm text-[#616161] leading-relaxed cursor-pointer">
+                  By checking this box, you are agreeing to receive text messages from (Brand name) related to (types of messages). Message frequency varies. Message and data rates may apply. See{" "}
+                  <a href="/privacy-policy" className="text-[#31B8FA] underline hover:text-[#28a7e4]">
+                    privacy policy
+                  </a>{" "}
+                  and{" "}
+                  <a href="/terms-and-conditions" className="text-[#31B8FA] underline hover:text-[#28a7e4]">
+                    terms and conditions
+                  </a>
+                  . Message HELP for assistance. Reply STOP to any message to opt out.
+                </label>
+              </div>
+
+
+              
+
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isPending}
-                className="w-full bg-[#31B8FA] hover:bg-[#28a7e4] text-xl text-white font-normal h-[50px] rounded-[8px] transition-all"
+                disabled={isPending || !consent}
+                className="w-full bg-[#31B8FA] hover:bg-[#28a7e4] text-xl text-white font-normal h-[50px] rounded-[8px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isPending ? (
                   <>

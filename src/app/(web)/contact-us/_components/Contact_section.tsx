@@ -258,7 +258,7 @@ export default function ContactSection() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                disabled={isPending || !consent}
+                // disabled={isPending || !consent}
                 className="w-full bg-[#31B8FA] hover:bg-[#28a7e4] text-xl text-white font-normal h-[50px] rounded-[8px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isPending ? (

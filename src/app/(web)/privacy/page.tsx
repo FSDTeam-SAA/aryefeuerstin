@@ -146,6 +146,8 @@ export default function PrivacyPage() {
                 on your mobile carrier plan.
               </li>
               <li>
+
+                
                 <strong>Opt-In :</strong> Opt-In will not be shared &quot;language
                 for your TCR application,based on industry standards&quot;.
               </li>

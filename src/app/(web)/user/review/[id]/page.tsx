@@ -1,24 +1,41 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
-import { CheckCircle2, MapPin, Package } from "lucide-react";
+import { CheckCircle2, MapPin, Package, Store } from "lucide-react"; // Store আইকন যোগ করা হয়েছে
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
 export default function DeliveryCompletePage() {
   const params = useParams();
   const id = params?.id;
-  const session=useSession();
-  const token=session.data?.accessToken||"";
+  const { data: session } = useSession();
+  const token = session?.accessToken || "";
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  // TanStack Mutation using Fetch
+  // Get Single Order Data
+  const { data: orderResponse, isLoading } = useQuery({
+    queryKey: ['singleOrder', id],
+    queryFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/return-order/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to fetch order details");
+      return res.json();
+    },
+    enabled: !!id && !!token,
+  });
+
+  const orderData = orderResponse?.data;
+
+  // Review Submission Mutation
   const { mutate, isPending } = useMutation({
     mutationFn: async (reviewData: { rating: number; comment: string }) => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/return-order/${id}/review`, {
@@ -30,7 +47,6 @@ export default function DeliveryCompletePage() {
         body: JSON.stringify(reviewData),
       });
 
-      // Fetch doesn't throw on 4xx/5xx, so we handle it manually
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || 'Something went wrong');
@@ -40,8 +56,6 @@ export default function DeliveryCompletePage() {
     },
     onSuccess: () => {
       toast.success("Review submitted successfully!");
-      setRating(0);
-      setComment("");
     },
     onError: (error: Error) => {
       toast.error(error.message);
@@ -55,6 +69,16 @@ export default function DeliveryCompletePage() {
     }
     mutate({ rating, comment });
   };
+
+  if (isLoading) return <div className="p-12 text-center text-gray-500">Loading order details...</div>;
+
+  // স্টোরগুলোর নাম কমা দিয়ে বের করার লজিক
+  const storeNames = orderData?.stores
+    ?.map((s: any) => (s.store === "OTHER" ? s.otherStoreName : s.store))
+    .join(", ") || "No Store Info";
+
+  // টোটাল প্যাকেজ সংখ্যা
+  const totalPackages = orderData?.stores?.reduce((acc: number, store: any) => acc + (store.numberOfPackages || 0), 0) || 0;
 
   return (
     <div className="p-4 md:p-12">
@@ -70,9 +94,11 @@ export default function DeliveryCompletePage() {
           <div className="space-y-6">
             <div>
               <p className="mb-1 text-[11px] font-medium uppercase tracking-widest text-gray-400">
-                Job-{id || "1001"}
+                Job-{id?.slice(-6) || "N/A"}
               </p>
-              <h2 className="text-lg font-medium text-[#424242]">Daniel Hart</h2>
+              <h2 className="text-lg font-medium text-[#424242]">
+                {orderData?.customer?.fullName || "Guest Customer"}
+              </h2>
             </div>
 
             <div className="space-y-4 border-y border-gray-100 py-6">
@@ -80,22 +106,24 @@ export default function DeliveryCompletePage() {
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Pickup :</p>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 shrink-0 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-600">12 Maple Street, Brookview, CA 92714</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    {orderData?.customer?.pickupLocation?.address || "N/A"}
+                  </span>
                 </div>
               </div>
 
               <div>
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Drop off :</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Drop off (Stores) :</p>
                 <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 shrink-0 text-gray-500" />
-                  <span className="text-sm font-medium text-gray-600">15 Maple Street, Brookview, CA 92714</span>
+                  <Store className="h-4 w-4 shrink-0 text-gray-500" /> {/* MapPin এর জায়গায় Store আইকন */}
+                  <span className="text-sm font-medium text-gray-600">{storeNames}</span>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
               <Package className="h-4 w-4 shrink-0 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">2 Packages</span>
+              <span className="text-sm font-medium text-gray-700">{totalPackages} Packages</span>
             </div>
           </div>
         </Card>

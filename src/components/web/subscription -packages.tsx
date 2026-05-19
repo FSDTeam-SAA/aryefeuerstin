@@ -72,6 +72,20 @@ const packageColors = [
 const getColorByIndex = (index: number) =>
   packageColors[index % packageColors.length];
 
+const getJoinButtonLabel = (plan: Plan) => {
+  const billingCycle = plan.billingCycle?.toLowerCase();
+
+  if (billingCycle === "monthly") {
+    return `Join Now - $${plan.price}/mo`;
+  }
+
+  if (billingCycle === "yearly") {
+    return `Join Now - $${plan.price}/yr`;
+  }
+
+  return `Join Now - $${plan.price}`;
+};
+
 // -------------------- API --------------------
 const fetchPlans = async (): Promise<ApiResponse> => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/plan`);
@@ -170,7 +184,6 @@ export default function SubscriptionPackages() {
               plans.map((pkg, index) => {
                 const colors = getColorByIndex(index);
                 const isLastPackage = index === plans.length - 1;
-                const isFirstPackage = index === 0;
 
                 return (
                   <div
@@ -226,12 +239,8 @@ export default function SubscriptionPackages() {
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                             Processing...
                           </>
-                        ) : pkg.price === 0 ? (
-                          "Request Now"
-                        ) : isFirstPackage ? (
-                          `Join Now - $${pkg.price}`
                         ) : (
-                          `Join Now - $${pkg.price}/${pkg.billingCycle === "monthly" ? "mo" : "yr"}`
+                          getJoinButtonLabel(pkg)
                         )}
                       </Button>
                     </div>

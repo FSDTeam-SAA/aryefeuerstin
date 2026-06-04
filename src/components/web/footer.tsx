@@ -8,7 +8,6 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         {/* Top Section */}
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-4 lg:gap-12 pb-10">
-
           {/* Brand */}
           <div className="text-center lg:text-left">
             <Link href="/" className="inline-block">
@@ -92,21 +91,41 @@ export default function Footer() {
           {/* Follow Us */}
           <div className="flex lg:justify-end justify-center">
             <div className="text-center lg:text-left">
-            <h3 className="text-base font-semibold text-[#131313] mb-4">
-              Follow Us
-            </h3>
-            <div className="flex justify-center lg:justify-start gap-3">
-              {[Facebook, Linkedin, Twitter, Instagram].map((Icon, idx) => (
+              <h3 className="text-base font-semibold text-[#131313] mb-4">
+                Follow Us
+              </h3>
+              <div className="flex justify-center lg:justify-start gap-3">
                 <a
-                  key={idx}
                   href="#"
                   className="w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-[#131313] transition-colors"
                 >
-                  <Icon className="w-5 h-5" />
+                  <Facebook className="w-5 h-5" />
                 </a>
-              ))}
+
+                <a
+                  href="#"
+                  className="w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-[#131313] transition-colors"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+
+                <a
+                  href="#"
+                  className="w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-[#131313] transition-colors"
+                >
+                  <Twitter className="w-5 h-5" />
+                </a>
+
+                <a
+                  href="https://www.instagram.com/ezreturnpickup?igsh=MWozeXZkMzFoZJV2cA=="
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full border-2 border-gray-400 flex items-center justify-center text-gray-700 hover:border-gray-900 hover:text-[#131313] transition-colors"
+                >
+                  <Instagram className="w-5 h-5" />
+                </a>
+              </div>
             </div>
-          </div>
           </div>
         </div>
 

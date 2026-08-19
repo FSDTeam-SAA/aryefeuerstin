@@ -17,7 +17,7 @@ interface Store {
 interface Order {
   _id: string
   customer: {
-    firstName: string
+    fullName: string
     lastName: string
     address: { street: string; city: string; zipCode: string }
   }
@@ -75,7 +75,7 @@ export default function DeliveryQueue() {
               </>
             ) : (
               deliveries.map((delivery) => {
-                const fullName = `${delivery.customer.firstName} ${delivery.customer.lastName}`
+                const fullName = `${delivery.customer.fullName} `
                 const fullAddress = `${delivery.customer.address.street}, ${delivery.customer.address.city}, ${delivery.customer.address.zipCode}`
                 const totalPackages = delivery.stores.reduce((sum, s) => sum + s.numberOfPackages, 0)
 
